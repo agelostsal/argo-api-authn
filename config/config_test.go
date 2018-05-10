@@ -41,7 +41,7 @@ func (suite *ConfigTestSuite) TestConfigSetUp() {
 	suite.Equal(cfg5, expCfg5)
 
 	suite.Equal("open /wrong/path: no such file or directory", err1.Error())
-	suite.Equal(nil, err2)
+	suite.Nil(err2)
 	suite.Equal("Something went wrong while marshaling the json data. Error: unexpected end of JSON input", err3.Error())
 	suite.Equal("config.Config object contains an empty value for field: ServicePort", err4.Error())
 	suite.Equal("config.Config object contains an empty value for field: MongoHost", err5.Error())

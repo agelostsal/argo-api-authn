@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/ARGOeu/argo-auth-service/utils"
+	"github.com/ARGOeu/argo-api-authn/utils"
 	log "github.com/Sirupsen/logrus"
 )
 
