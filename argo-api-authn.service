@@ -1,0 +1,12 @@
+[Unit]
+Description=ARGO Authentication Service
+Requires=mongod
+
+[Service]
+User=argo-auth
+Group=argo-auth
+WorkingDirectory=/var/www/argo-api-authn
+ExecStart=/bin/bash -c '/var/www/argo-api-authn/argo-api-authn'
+
+[Install]
+WantedBy=multi-user.target
