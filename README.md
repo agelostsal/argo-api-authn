@@ -1,2 +1,2 @@
 # argo-api-authn
-Authentication Server for ARGO apis
+Authentication Server for ARGO API(s)
