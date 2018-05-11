@@ -1,6 +1,6 @@
 # argo-api-authn
 
-Authentication Service for ARGO Apis
+Authentication Service for ARGO API(s)
 
 ## Description
 
