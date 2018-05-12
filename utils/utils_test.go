@@ -41,7 +41,7 @@ func (suite *UtilsTestSuite) SetUpUtilsTestSuite() {
 func (suite *UtilsTestSuite) TestCheckForNulls() {
 
 	// tests the normal case
-	suite.Equal(nil, CheckForNulls(suite.TestStructList["ts1"]))
+	suite.Nil(CheckForNulls(suite.TestStructList["ts1"]))
 
 	// tests the case of an object containing a field which is empty
 	suite.Equal(errors.New("utils.TestStruct object contains an empty value for field: Field1"), CheckForNulls(suite.TestStructList["ts2"]))
@@ -62,22 +62,22 @@ func (suite *UtilsTestSuite) TestGetFieldByName() {
 	val4, err4 := GetFieldValueByName(suite.TestStructList["ts2"], "field6")
 
 	suite.Equal("44", val1.(string))
-	suite.Equal(nil, val2)
-	suite.Equal(nil, val3)
-	suite.Equal(nil, val4)
+	suite.Nil(val2)
+	suite.Nil(val3)
+	suite.Nil(val4)
 
-	suite.Equal(nil, err1)
+	suite.Nil(err1)
 	suite.Equal("Field: Field10 has not been declared.", err2.Error())
 	suite.Equal("utils.TestStruct object contains an empty value for field: Field1", err3.Error())
 	suite.Equal("you are trying to access an unexported field", err4.Error())
 
 }
 
-func (suite *UtilsTestSuite) TestStructToMap(){
+func (suite *UtilsTestSuite) TestStructToMap() {
 
 	//tests the normal case with unexported field
 	tStr := "tStr"
-	expMap := map[string]interface{}{"Field1": "44", "Field2": 44, "Field3": []string{"t1", "t2"}, "Field4" : 12.33, "Field5": &tStr}
+	expMap := map[string]interface{}{"Field1": "44", "Field2": 44, "Field3": []string{"t1", "t2"}, "Field4": 12.33, "Field5": &tStr}
 	suite.Equal(expMap, StructToMap(suite.TestStructList["ts1"]))
 
 	//tests the case of nil input
@@ -85,7 +85,7 @@ func (suite *UtilsTestSuite) TestStructToMap(){
 
 }
 
-func (suite *UtilsTestSuite) TestIsCapitalized(){
+func (suite *UtilsTestSuite) TestIsCapitalized() {
 
 	suite.Equal(true, IsCapitalized("Str1"))
 	suite.Equal(false, IsCapitalized("str1"))
