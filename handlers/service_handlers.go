@@ -7,6 +7,8 @@ import (
 	"github.com/ARGOeu/argo-api-authn/stores"
 	"github.com/ARGOeu/argo-api-authn/utils"
 	"github.com/gorilla/context"
+
+	"github.com/gorilla/mux"
 	"net/http"
 )
 
@@ -41,4 +43,43 @@ func ServiceCreate(w http.ResponseWriter, r *http.Request) {
 
 	// if everything went ok, reflect the created object
 	utils.RespondOk(w, 201, service)
+}
+
+func ServiceListOne(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	var service services.Service
+
+	//context references
+	store := context.Get(r, "stores").(stores.Store)
+
+	// url vars
+	vars := mux.Vars(r)
+
+	// find the service
+	if service, err = services.FindServiceByName(vars["name"], store); err != nil {
+		utils.RespondError(w, err)
+		return
+	}
+
+	// if everything went ok, return the service
+	utils.RespondOk(w, 200, service)
+}
+
+func ServiceListAll(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	var servList services.ServiceList
+
+	//context references
+	store := context.Get(r, "stores").(stores.Store)
+
+	// find the service
+	if servList, err = services.FindAllServices(store); err != nil {
+		utils.RespondError(w, err)
+		return
+	}
+
+	// if everything went ok, return the service
+	utils.RespondOk(w, 200, servList)
 }

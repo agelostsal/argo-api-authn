@@ -71,7 +71,7 @@ func (suite *ServiceHandlersSuite) TestServiceCreateInvalidName() {
 	expRespJSON := `{
  "error": {
   "message": "services.Service object with name: s1 already exists",
-  "status_code": 409,
+  "code": 409,
   "status": "CONFLICT"
  }
 }`
@@ -110,7 +110,7 @@ func (suite *ServiceHandlersSuite) TestServiceCreateInvalidAuthTypes() {
 	expRespJSON := `{
  "error": {
   "message": "Authentication Type: unsup_type is not yet supported",
-  "status_code": 422,
+  "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
 }`
@@ -149,7 +149,7 @@ func (suite *ServiceHandlersSuite) TestServiceCreateInvalidAuthMethod() {
 	expRespJSON := `{
  "error": {
   "message": "Authentication Method: unsup_method is not yet supported",
-  "status_code": 422,
+  "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
 }`
@@ -188,7 +188,7 @@ func (suite *ServiceHandlersSuite) TestServiceCreateEmptyAuthTypes() {
 	expRespJSON := `{
  "error": {
   "message": "Authentication Type: empty is not yet supported",
-  "status_code": 422,
+  "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
 }`
@@ -227,7 +227,7 @@ func (suite *ServiceHandlersSuite) TestServiceCreateInvalidJSON() {
 	expResJSON := `{
  "error": {
   "message": "Poorly formatted JSON. invalid character '}' looking for beginning of object key string",
-  "status_code": 400,
+  "code": 400,
   "status": "BAD REQUEST"
  }
 }`
@@ -264,7 +264,7 @@ func (suite *ServiceHandlersSuite) TestServiceCreateMissingField() {
 	expResJSON := `{
  "error": {
   "message": "services.Service object contains an empty value for field: Name",
-  "status_code": 422,
+  "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
 }`
@@ -286,6 +286,209 @@ func (suite *ServiceHandlersSuite) TestServiceCreateMissingField() {
 	router.ServeHTTP(w, req)
 	suite.Equal(422, w.Code)
 	suite.Equal(expResJSON, w.Body.String())
+}
+
+// TestServiceListOne tests the normal case
+func (suite *ServiceHandlersSuite) TestServiceListOne() {
+
+	expResJSON := `{
+ "name": "s1",
+ "hosts": [
+  "host1",
+  "host2",
+  "host3"
+ ],
+ "auth_types": [
+  "x509",
+  "oidc"
+ ],
+ "auth_method": "api-key",
+ "retrieval_field": "token",
+ "created_on": "2018-05-05T18:04:05Z"
+}`
+
+	req, err := http.NewRequest("GET", "http://localhost:8080/services/s1", nil)
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/services/{name}", WrapConfig(ServiceListOne, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(200, w.Code)
+	suite.Equal(expResJSON, w.Body.String())
+
+}
+
+// TestServiceListOneNameCollision tests the case where two or more service exist with the same name
+func (suite *ServiceHandlersSuite) TestServiceListOneNameCollision() {
+
+	expResJSON := `{
+ "error": {
+  "message": "Database Error: Multiple services with the same name: same_name",
+  "code": 500,
+  "status": "INTERNAL SERVER ERROR"
+ }
+}`
+
+	req, err := http.NewRequest("GET", "http://localhost:8080/services/same_name", nil)
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/services/{name}", WrapConfig(ServiceListOne, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(500, w.Code)
+	suite.Equal(expResJSON, w.Body.String())
+
+}
+
+// TestServiceListOneNotFound tests the case where two or more service exist with the same name
+func (suite *ServiceHandlersSuite) TestServiceListOneNotFound() {
+
+	expResJSON := `{
+ "error": {
+  "message": "Service was not found",
+  "code": 404,
+  "status": "NOT FOUND"
+ }
+}`
+
+	req, err := http.NewRequest("GET", "http://localhost:8080/services/not_found", nil)
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/services/{name}", WrapConfig(ServiceListOne, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(404, w.Code)
+	suite.Equal(expResJSON, w.Body.String())
+
+}
+
+// TestServiceListAll lists all services
+func (suite *ServiceHandlersSuite) TestServiceListAll() {
+
+	expResJSON := `{
+ "services": [
+  {
+   "name": "s1",
+   "hosts": [
+    "host1",
+    "host2",
+    "host3"
+   ],
+   "auth_types": [
+    "x509",
+    "oidc"
+   ],
+   "auth_method": "api-key",
+   "retrieval_field": "token",
+   "created_on": "2018-05-05T18:04:05Z"
+  },
+  {
+   "name": "s2",
+   "hosts": [
+    "host3",
+    "host4"
+   ],
+   "auth_types": [
+    "x509"
+   ],
+   "auth_method": "api-key",
+   "retrieval_field": "user_token",
+   "created_on": "2018-05-05T18:04:05Z"
+  },
+  {
+   "name": "same_name",
+   "hosts": null,
+   "auth_types": null,
+   "auth_method": "",
+   "retrieval_field": "",
+   "created_on": ""
+  },
+  {
+   "name": "same_name",
+   "hosts": null,
+   "auth_types": null,
+   "auth_method": "",
+   "retrieval_field": "",
+   "created_on": ""
+  }
+ ]
+}`
+
+	req, err := http.NewRequest("GET", "http://localhost:8080/services", nil)
+
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/services", WrapConfig(ServiceListAll, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(200, w.Code)
+	suite.Equal(expResJSON, w.Body.String())
+
+}
+
+// TestsServiceListAllEmptyList
+func (suite *ServiceHandlersSuite) TestServiceListAllEmptyList() {
+
+	expResJSON := `{
+ "services": null
+}`
+
+	req, err := http.NewRequest("GET", "http://localhost:8080/services", nil)
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+	// empty the store
+	mockstore.Services = []stores.QService{}
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/services", WrapConfig(ServiceListAll, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(200, w.Code)
+	suite.Equal(expResJSON, w.Body.String())
+
 }
 
 func TestHandlersTestSuite(t *testing.T) {

@@ -15,6 +15,10 @@ type Service struct {
 	CreatedOn      string   `json:"created_on"`
 }
 
+type ServiceList struct {
+	Services []Service `json:"services"`
+}
+
 // CreateService creates a new service after validating the service
 func CreateService(service Service, store stores.Store, cfg config.Config) (Service, error) {
 
@@ -56,6 +60,59 @@ func CreateService(service Service, store stores.Store, cfg config.Config) (Serv
 	return service, err
 }
 
+// FindServiceByName queries the datastore to find a service associated with the provided argument name
+func FindServiceByName(name string, store stores.Store) (Service, error) {
+
+	var qServices []stores.QService
+	var service Service
+	var err error
+
+	if qServices, err = store.QueryServices(name); err != nil {
+		return Service{}, err
+	}
+
+	if len(qServices) == 0 {
+		err = utils.APIErrNotFound("Service")
+		return Service{}, err
+	}
+
+	if len(qServices) > 1 {
+		err = utils.APIErrDatabase("Multiple services with the same name: " + name)
+		return Service{}, err
+	}
+
+	if err := utils.CopyFields(qServices[0], &service); err != nil {
+		err = utils.APIGenericInternalError(err.Error())
+		return Service{}, err
+	}
+
+	return service, err
+}
+
+// FindAllServices returns all the services from the datastore
+func FindAllServices(store stores.Store) (ServiceList, error) {
+
+	var qServices []stores.QService
+	var services []Service
+	var err error
+
+	if qServices, err = store.QueryServices(""); err != nil {
+		return ServiceList{}, err
+	}
+
+	for _, qs := range qServices {
+		_service := &Service{}
+		if err := utils.CopyFields(qs, _service); err != nil {
+			err = utils.APIGenericInternalError(err.Error())
+			return ServiceList{}, err
+		}
+		services = append(services, *_service)
+	}
+
+	return ServiceList{services}, err
+
+}
+
 // hasValidAuthTypes checks whether or not the authentication types of a project are supported
 func (s *Service) hasValidAuthTypes(cfg config.Config) error {
 
@@ -93,6 +150,6 @@ func (s *Service) hasValidAuthMethod(cfg config.Config) error {
 		}
 	}
 
-	err = utils.APIErrUnsupportedContent("Authentication Method", s.AuthMethod )
+	err = utils.APIErrUnsupportedContent("Authentication Method", s.AuthMethod)
 	return err
 }

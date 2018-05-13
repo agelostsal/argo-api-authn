@@ -60,6 +60,59 @@ func (suite *ServiceTestSuite) TestCreateService() {
 
 }
 
+func (suite *ServiceTestSuite) TestFindServiceByName() {
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	// normal case
+	expS1 := Service{"s1", []string{"host1", "host2", "host3"}, []string{"x509", "oidc"}, "api-key", "token", "2018-05-05T18:04:05Z"}
+	ser1, err1 := FindServiceByName("s1", mockstore)
+
+	// not found case
+	var expS2 Service
+	ser2, err2 := FindServiceByName("not_found", mockstore)
+
+	// same name
+	var expS3 Service
+	ser3, err3 := FindServiceByName("same_name", mockstore)
+
+	suite.Equal(expS1, ser1)
+	suite.Equal(expS2, ser2)
+	suite.Equal(expS3, ser3)
+
+	suite.Nil(err1)
+	suite.Equal("Service was not found", err2.Error())
+	suite.Equal("Database Error: Multiple services with the same name: same_name", err3.Error())
+}
+
+func (suite *ServiceTestSuite) TestFindAllServices() {
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	// normal case outcome - all services
+	expQServicesAll := []Service{
+		{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"},
+		{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", RetrievalField: "user_token", CreatedOn: "2018-05-05T18:04:05Z"},
+		{Name: "same_name"},
+		{Name: "same_name"},
+	}
+	expServList := ServiceList{expQServicesAll}
+	serAll1, err1 := FindAllServices(mockstore)
+
+	// normal case outcome - empty list
+	var empServ ServiceList
+	mockstore.Services = []stores.QService{}
+	serAll2, err2 := FindAllServices(mockstore)
+
+	suite.Equal(expServList, serAll1)
+	suite.Equal(empServ, serAll2)
+
+	suite.Nil(err1)
+	suite.Nil(err2)
+}
+
 func TestServiceTestSuite(t *testing.T) {
 	suite.Run(t, new(ServiceTestSuite))
 }

@@ -19,7 +19,7 @@ type ErrResp struct {
 
 type APIError struct {
 	Message string `json:"message"`
-	Code    int    `json:"status_code"`
+	Code    int    `json:"code"`
 	Status  string `json:"status"`
 }
 

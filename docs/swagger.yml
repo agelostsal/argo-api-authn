@@ -3,13 +3,14 @@ swagger: '2.0'
 info:
   title: argo-api-authN
   description: "The purpose of the Authentication Service is to provide the ability to different services to use alternative authentication mechanisms without having to store additional user info or implement new functionalities.The AUTH service holds various information about a service’s users, hosts, API urls, etc, and leverages them to provide its function."
-  version: ""
+  version: "v1"
   contact:
     name: ARGO Developers
     url: http://argoeu.github.io/
     email: argo-dev@lists.grnet.gr
 
 host: localhost
+basePath: /v1
 schemes:
   - https
 produces:
@@ -42,11 +43,11 @@ paths:
              hosts:
                 type: array
                 items:
-                  $ref: '#/definitions/Host'
+                  type: string
              auth_types:
                 type: array
                 items:
-                  $ref: '#/definitions/AuthType'
+                  type: string
              auth_method:
               type: string
              retrieval_field:
@@ -72,6 +73,50 @@ paths:
         500:
           $ref: "#/responses/500"
 
+    get:
+      summary: Lists all services
+      description: Lists all services
+      parameters:
+          - $ref: '#/parameters/ApiKey'
+      tags:
+        - Services
+      responses:
+        200:
+          description: Returns a list of all services
+          schema:
+            $ref: '#/definitions/Services'
+        500:
+          $ref: "#/responses/500"
+
+  /services/{NAME}:
+    get:
+      summary: Retrieve information for a specific service
+      description: |
+        Retrieve information for a specific service
+      parameters:
+        - name: NAME
+          in: path
+          description: Name of the service
+          required: true
+          type: string
+        - $ref: '#/parameters/ApiKey'
+      tags:
+        - Services
+      responses:
+        200:
+          description: Returns the information of the requested service
+          schema:
+            $ref: '#/definitions/Service'
+        400:
+          $ref: "#/responses/400"
+        401:
+          $ref: "#/responses/401"
+        403:
+          $ref: "#/responses/403"
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: "#/responses/500"
 
 parameters:
   ApiKey:
@@ -128,22 +173,31 @@ definitions:
       hosts:
         type: array
         items:
-          $ref: '#/definitions/Host'
+          type: string
         description: hosts that run this service
       auth_types:
         type: array
         items:
-          $ref: '#/definitions/AuthType'
+          type: string
         description: supported authentication types
       auth_method:
         type: string
-        description: the authentication method that the sercice supports
+        description: the authentication method that the sercvice supports
       retrieval_field:
         type: string
         description: name of the response field which contains the value we are looking for
       created_on:
         type: string
         description: datetime of creation
+
+
+  Services:
+    type: object
+    properties:
+      services:
+        type: array
+        items:
+          $ref: '#/definitions/Service'
 
   Host:
     type: object

@@ -1,8 +1,8 @@
 package utils
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 )
 
 // API Related Errors
@@ -17,7 +17,7 @@ var APIErrUnauthorized = func(msg string) *APIError {
 }
 
 var APIErrNotFound = func(resource string) *APIError {
-msg := fmt.Sprintf("%v was not found", resource)
+	msg := fmt.Sprintf("%v was not found", resource)
 	return &APIError{msg, 404, "NOT FOUND"}
 }
 
@@ -30,7 +30,7 @@ var APIErrEmptyRequiredField = func(msg string) *APIError {
 	return &APIError{msg, 422, "UNPROCESSABLE ENTITY"}
 }
 
-var APIErrUnsupportedContent = func(place ,content  string) *APIError {
+var APIErrUnsupportedContent = func(place, content string) *APIError {
 	msg := fmt.Sprintf("%v: %v is not yet supported", place, content)
 	return &APIError{msg, 422, "UNPROCESSABLE ENTITY"}
 }
@@ -38,6 +38,10 @@ var APIErrUnsupportedContent = func(place ,content  string) *APIError {
 var APIErrDatabase = func(msg string) *APIError {
 	msg = fmt.Sprintf("Database Error: %v", msg)
 	return &APIError{msg, 500, "INTERNAL SERVER ERROR"}
+}
+
+var APIGenericInternalError = func(msg string) error {
+	return &APIError{"Internal Error: " + msg, 500, "INTERNAL SERVER ERROR"}
 }
 
 // Generic Errors

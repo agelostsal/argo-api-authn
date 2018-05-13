@@ -9,7 +9,7 @@ type APIErrorsTestSuite struct {
 	suite.Suite
 }
 
-func (suite *APIErrorsTestSuite) TestAllErrors(){
+func (suite *APIErrorsTestSuite) TestAllErrors() {
 
 	testMsg := "errMsg"
 	testPlc := "errPlace"
@@ -22,6 +22,7 @@ func (suite *APIErrorsTestSuite) TestAllErrors(){
 	errUnsupportedContent := &APIError{"errPlace: errMsg is not yet supported", 422, "UNPROCESSABLE ENTITY"}
 	errDatabase := &APIError{"Database Error: errMsg", 500, "INTERNAL SERVER ERROR"}
 	errGenericMissing := "string object contains an empty value for field: errMsg"
+	errGenericInternal := &APIError{"Internal Error: errMsg", 500, "INTERNAL SERVER ERROR"}
 
 	suite.Equal(errBadRequest, APIErrBadRequest(testMsg))
 	suite.Equal(errUnauthorized, APIErrUnauthorized(testMsg))
@@ -31,8 +32,9 @@ func (suite *APIErrorsTestSuite) TestAllErrors(){
 	suite.Equal(errUnsupportedContent, APIErrUnsupportedContent(testPlc, testMsg))
 	suite.Equal(errDatabase, APIErrDatabase(testMsg))
 	suite.Equal(errGenericMissing, GenericEmptyRequiredField(testMsg, "errMsg").Error())
+	suite.Equal(errGenericInternal, APIGenericInternalError(testMsg))
 }
 
-func TestAPIErrorsTestSuite(t *testing.T){
+func TestAPIErrorsTestSuite(t *testing.T) {
 	suite.Run(t, new(APIErrorsTestSuite))
 }
