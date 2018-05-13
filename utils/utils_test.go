@@ -14,12 +14,13 @@ type UtilsTestSuite struct {
 }
 
 type TestStruct struct {
-	Field1 string
-	Field2 int
-	Field3 []string
-	Field4 float64
-	Field5 *string
+	Field1 string   `required:"true"`
+	Field2 int      `required:"true"`
+	Field3 []string `required:"true"`
+	Field4 float64  `required:"true"`
+	Field5 *string  `required:"true"`
 	field6 string
+	Field7 string // will not cause an error even if it isn't filled
 }
 
 func (suite *UtilsTestSuite) SetUpUtilsTestSuite() {
@@ -29,8 +30,8 @@ func (suite *UtilsTestSuite) SetUpUtilsTestSuite() {
 
 	tStr := "tStr"
 
-	ts1 := TestStruct{"44", 44, []string{"t1", "t2"}, 12.33, &tStr, "unexported"}
-	ts2 := TestStruct{"", 44, []string{"t1", "t2"}, 12.33, &tStr, "unexported"}
+	ts1 := TestStruct{"44", 44, []string{"t1", "t2"}, 12.33, &tStr, "unexported", ""}
+	ts2 := TestStruct{"", 44, []string{"t1", "t2"}, 12.33, &tStr, "unexported", ""}
 
 	// fill the map
 	suite.TestStructList["ts1"] = ts1
@@ -41,10 +42,10 @@ func (suite *UtilsTestSuite) SetUpUtilsTestSuite() {
 func (suite *UtilsTestSuite) TestCheckForNulls() {
 
 	// tests the normal case
-	suite.Nil(CheckForNulls(suite.TestStructList["ts1"]))
+	suite.Nil(ValidateRequired(suite.TestStructList["ts1"]))
 
 	// tests the case of an object containing a field which is empty
-	suite.Equal(errors.New("utils.TestStruct object contains an empty value for field: Field1"), CheckForNulls(suite.TestStructList["ts2"]))
+	suite.Equal(errors.New("utils.TestStruct object contains an empty value for field: Field1"), ValidateRequired(suite.TestStructList["ts2"]))
 }
 
 func (suite *UtilsTestSuite) TestGetFieldByName() {
@@ -77,7 +78,7 @@ func (suite *UtilsTestSuite) TestStructToMap() {
 
 	//tests the normal case with unexported field
 	tStr := "tStr"
-	expMap := map[string]interface{}{"Field1": "44", "Field2": 44, "Field3": []string{"t1", "t2"}, "Field4": 12.33, "Field5": &tStr}
+	expMap := map[string]interface{}{"Field1": "44", "Field2": 44, "Field3": []string{"t1", "t2"}, "Field4": 12.33, "Field5": &tStr, "Field7": ""}
 	suite.Equal(expMap, StructToMap(suite.TestStructList["ts1"]))
 
 	//tests the case of nil input
@@ -90,6 +91,29 @@ func (suite *UtilsTestSuite) TestIsCapitalized() {
 	suite.Equal(true, IsCapitalized("Str1"))
 	suite.Equal(false, IsCapitalized("str1"))
 	suite.Equal(false, IsCapitalized(""))
+}
+
+func (suite *UtilsTestSuite) TestCopyFields() {
+
+	// normal case with unexported field
+	ts1 := TestStruct{}
+	tStr := "tStr"
+	expTs1 := TestStruct{"44", 44, []string{"t1", "t2"}, 12.33, &tStr, "", ""}
+	err1 := CopyFields(suite.TestStructList["ts1"], &ts1)
+
+	// error case with non pointer struct argument
+	ts2 := TestStruct{}
+	expTs2 := TestStruct{}
+
+	err2 := CopyFields(suite.TestStructList["ts1"], ts2)
+
+	suite.Equal(expTs1, ts1)
+	suite.Equal(expTs2, ts2)
+
+	suite.Equal("CopyFields needs a pointer to a struct as a second argument", err2.Error())
+	suite.Nil(err1)
+
+
 }
 
 func TestUtilsTestSuite(t *testing.T) {

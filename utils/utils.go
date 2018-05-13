@@ -7,8 +7,8 @@ import (
 	"strings"
 )
 
-// CheckForNulls accepts an instance of any type and checks whether or not all fields are filled
-func CheckForNulls(instance interface{}) error {
+// ValidateRequired accepts an instance of any type and checks whether or not all fields are filled
+func ValidateRequired(instance interface{}) error {
 
 	v := reflect.ValueOf(instance)
 	var fn string
@@ -17,6 +17,10 @@ func CheckForNulls(instance interface{}) error {
 		fn = v.Type().Field(i).Name
 		// Check if the field's name is capitalized to make sure its exported otherwise .Interface() will panic
 		if !IsCapitalized(fn) {
+			continue
+		}
+		// check if the field has the required tag
+		if v.Type().Field(i).Tag.Get("required") != "true" {
 			continue
 		}
 		fieldValue := v.Field(i).Interface()
@@ -90,4 +94,28 @@ func IsCapitalized(str string) bool {
 	}
 
 	return string([]rune(str)[0]) == strings.ToUpper(string([]rune(str)[0])) // check for a capitalized name (in utf-8)
+}
+
+// CopyFields finds same named field between two structs and copies the values from one to an other
+func CopyFields(from interface{}, to interface{}) error {
+
+	iv := reflect.Value{} // zero reflect value
+	fromV := reflect.ValueOf(from)
+	toV := reflect.ValueOf(to)
+
+	// it requires a pointer to a struct so its fields are addressable in order to be set through the Set() method
+	if toV.Kind() != reflect.Ptr {
+		return errors.New("CopyFields needs a pointer to a struct as a second argument")
+	}
+
+	for i := 0; i < fromV.NumField(); i++ {
+		fn := fromV.Type().Field(i).Name
+		if !IsCapitalized(fn) {
+			continue
+		}
+		if toV.Elem().FieldByName(fn) != iv { // if the field with that name doesn't exist in the struct it will return a zero reflect value
+			toV.Elem().FieldByName(fn).Set(fromV.FieldByName(fn))
+		}
+	}
+	return nil
 }

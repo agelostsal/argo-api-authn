@@ -11,15 +11,15 @@ import (
 )
 
 type Config struct {
-	ServicePort            int      `json:"service_port"`
-	MongoHost              string   `json:"mongo_host"`
-	MongoDB                string   `json:"mongo_db"`
-	CertificateAuthorities string   `json:"certificate_authorities"`
-	Certificate            string   `json:"certificate"`
-	CertificateKey         string   `json:"certificate_key"`
-	ServiceToken           string   `json:"service_token"`
-	SupportedAuthTypes     []string `json:"supported_auth_types"`
-	SupportedAuthMethods   []string `json:"supported_auth_methods"`
+	ServicePort            int      `json:"service_port" required:"true"`
+	MongoHost              string   `json:"mongo_host" required:"true"`
+	MongoDB                string   `json:"mongo_db" required:"true"`
+	CertificateAuthorities string   `json:"certificate_authorities" required:"true"`
+	Certificate            string   `json:"certificate" required:"true"`
+	CertificateKey         string   `json:"certificate_key" required:"true"`
+	ServiceToken           string   `json:"service_token" required:"true"`
+	SupportedAuthTypes     []string `json:"supported_auth_types" required:"true"`
+	SupportedAuthMethods   []string `json:"supported_auth_methods" required:"true"`
 }
 
 // ConfigSetUp unmarshals a json file specified by the input parameter into the config object
@@ -38,7 +38,7 @@ func (cfg *Config) ConfigSetUp(path string) error {
 
 	log.Info(fmt.Sprintf("%+v", cfg))
 
-	if err = utils.CheckForNulls(*cfg); err != nil {
+	if err = utils.ValidateRequired(*cfg); err != nil {
 		return err
 	}
 	return nil
