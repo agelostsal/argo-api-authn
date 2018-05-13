@@ -1,9 +1,8 @@
 package stores
 
 import (
-	"time"
 
-	"github.com/ARGOeu/argo-api-authn/argo-consts"
+
 	"github.com/ARGOeu/argo-api-authn/utils"
 	log "github.com/Sirupsen/logrus"
 	"gopkg.in/mgo.v2"
@@ -18,6 +17,7 @@ type MongoStore struct {
 
 // Initialize initializes the mongo stores struct
 func (mongo *MongoStore) SetUp() {
+
 	session, err := mgo.Dial(mongo.Server)
 	if err != nil {
 		log.Fatal("STORE", "\t", err.Error())
@@ -49,7 +49,7 @@ func (mongo *MongoStore) QueryServices(name string) ([]QService, error) {
 
 	if err != nil {
 		log.Fatal("STORE", "\t", err.Error())
-		err = &utils.APIError{Status: "INTERNAL SERVER ERROR", Code: 500, Message: err.Error()}
+		err = utils.APIErrDatabase(err.Error())
 		return []QService{}, err
 	}
 
@@ -66,7 +66,7 @@ func (mongo *MongoStore) QueryAuthMethod(service string, host string, typeName s
 
 	if err != nil {
 		log.Fatal("STORE", "\t", err.Error())
-		err = &utils.APIError{Status: "INTERNAL SERVER ERROR", Code: 500, Message: err.Error()}
+		err = utils.APIErrDatabase(err.Error())
 		return qAuthType, err
 	}
 
@@ -83,7 +83,7 @@ func (mongo *MongoStore) QueryBindingsByDN(dn string, host string) ([]QBinding, 
 
 	if err != nil {
 		log.Fatal("STORE", "\t", err.Error())
-		err = &utils.APIError{Status: "INTERNAL SERVER ERROR", Code: 500, Message: err.Error()}
+		err = utils.APIErrDatabase(err.Error())
 		return []QBinding{}, err
 	}
 
@@ -104,10 +104,29 @@ func (mongo *MongoStore) QueryBindings(service string, host string) ([]QBinding,
 	}
 
 	if err = c.Find(query).All(&qbindings); err != nil {
-		err = &utils.APIError{Status: "INTERNAL SERVER ERROR", Code: 500, Message: err.Error()}
+		err = utils.APIErrDatabase(err.Error())
 		return qbindings, err
 	}
 	return qbindings, err
+}
+
+//InsertService inserts a new service into the datastore
+func (mongo *MongoStore) InsertService(name string, hosts []string, authTypes []string, authMethod string, retrievalField string, createdOn string) (QService, error) {
+
+	var qService QService
+	var err error
+
+	qService = QService{Name: name, Hosts: hosts, AuthTypes: authTypes, AuthMethod: authMethod, RetrievalField: retrievalField, CreatedOn: createdOn}
+	db := mongo.Session.DB(mongo.Database)
+	c := db.C("services")
+
+	if err := c.Insert(qService); err != nil {
+		log.Fatal("STORE", "\t", err.Error())
+		err = utils.APIErrDatabase(err.Error())
+		return QService{}, nil
+	}
+
+	return qService, err
 }
 
 //InsertBinding inserts a new binding into the datastore
@@ -116,13 +135,13 @@ func (mongo *MongoStore) InsertBinding(name string, service string, host string,
 	var qBinding QBinding
 	var err error
 
-	qBinding = QBinding{Name: name, Service: service, Host: host, DN: dn, OIDCToken: oidcToken, UniqueKey: uniqueKey, CreatedOn: time.Now().Format(argo_consts.ZULU_FORM)}
+	qBinding = QBinding{Name: name, Service: service, Host: host, DN: dn, OIDCToken: oidcToken, UniqueKey: uniqueKey, CreatedOn: utils.ZuluTimeNow()}
 	db := mongo.Session.DB(mongo.Database)
 	c := db.C("bindings")
 
 	if err := c.Insert(qBinding); err != nil {
 		log.Fatal("STORE", "\t", err.Error())
-		err = &utils.APIError{Status: "INTERNAL SERVER ERROR", Code: 500, Message: err.Error()}
+		err = utils.APIErrDatabase(err.Error())
 		return QBinding{}, nil
 	}
 
@@ -139,7 +158,7 @@ func (mongo *MongoStore) UpdateBinding(original QBinding, updated QBinding) (QBi
 
 	if err := c.Update(original, updated); err != nil {
 		log.Fatal("STORE", "\t", err.Error())
-		err = &utils.APIError{Status: "INTERNAL SERVER ERROR", Code: 500, Message: err.Error()}
+		err = utils.APIErrDatabase(err.Error())
 		return QBinding{}, err
 	}
 

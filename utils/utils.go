@@ -2,23 +2,23 @@ package utils
 
 import (
 	"errors"
-	"fmt"
 	"reflect"
 	"strings"
+	"time"
 )
 
 // ValidateRequired accepts an instance of any type and checks whether or not all fields are filled
 func ValidateRequired(instance interface{}) error {
 
 	v := reflect.ValueOf(instance)
-	var fn string
 
 	for i := 0; i < v.NumField(); i++ {
-		fn = v.Type().Field(i).Name
-		// Check if the field's name is capitalized to make sure its exported otherwise .Interface() will panic
-		if !IsCapitalized(fn) {
+
+		// Check if the field's exported otherwise .Interface() will panic
+		if v.Type().Field(i).PkgPath != "" {
 			continue
 		}
+
 		// check if the field has the required tag
 		if v.Type().Field(i).Tag.Get("required") != "true" {
 			continue
@@ -26,7 +26,7 @@ func ValidateRequired(instance interface{}) error {
 		fieldValue := v.Field(i).Interface()
 		zeroFieldValue := reflect.Zero(reflect.TypeOf(v.Field(i).Interface())).Interface()
 		if reflect.DeepEqual(fieldValue, zeroFieldValue) {
-			return errors.New(fmt.Sprintf("%T object contains an empty value for field: %v", instance, v.Type().Field(i).Name))
+			return GenericEmptyRequiredField(instance, v.Type().Field(i).Name)
 		}
 	}
 	return nil
@@ -53,7 +53,7 @@ func GetFieldValueByName(instance interface{}, fieldName string) (interface{}, e
 	zeroFieldValue := reflect.Zero(reflect.TypeOf(v.Interface())).Interface()
 
 	if reflect.DeepEqual(fieldValue, zeroFieldValue) {
-		return nil, errors.New(fmt.Sprintf("%T object contains an empty value for field: %v", instance, fieldName))
+		return nil, GenericEmptyRequiredField(instance, fieldName)
 	}
 
 	// if everything is ok, return the value of the field
@@ -67,20 +67,17 @@ func StructToMap(instance interface{}) map[string]interface{} {
 		return nil
 	}
 
-	var fn string      //field name
-	var fv interface{} //field value
-
+	var fl reflect.StructField
 	contents := make(map[string]interface{})
 
 	v := reflect.ValueOf(instance)
 	for i := 0; i < v.NumField(); i++ {
-		fn = v.Type().Field(i).Name
-		// Check if the field's name is capitalized to make sure its exported otherwise .Interface() will panic
-		if !IsCapitalized(fn) {
+		fl = v.Type().Field(i)
+		// Check if the field's exported otherwise .Interface() will panic
+		if fl.PkgPath != "" {
 			continue
 		}
-		fv = v.Field(i).Interface()
-		contents[fn] = fv
+		contents[fl.Name] = v.Field(i).Interface()
 	}
 
 	return contents
@@ -102,6 +99,7 @@ func CopyFields(from interface{}, to interface{}) error {
 	iv := reflect.Value{} // zero reflect value
 	fromV := reflect.ValueOf(from)
 	toV := reflect.ValueOf(to)
+	fl := reflect.StructField{}
 
 	// it requires a pointer to a struct so its fields are addressable in order to be set through the Set() method
 	if toV.Kind() != reflect.Ptr {
@@ -109,13 +107,18 @@ func CopyFields(from interface{}, to interface{}) error {
 	}
 
 	for i := 0; i < fromV.NumField(); i++ {
-		fn := fromV.Type().Field(i).Name
-		if !IsCapitalized(fn) {
+		fl = fromV.Type().Field(i)
+		if fl.PkgPath != "" {
 			continue
 		}
-		if toV.Elem().FieldByName(fn) != iv { // if the field with that name doesn't exist in the struct it will return a zero reflect value
-			toV.Elem().FieldByName(fn).Set(fromV.FieldByName(fn))
+		if toV.Elem().FieldByName(fl.Name) != iv { // if the field with that name doesn't exist in the struct it will return a zero reflect value
+			toV.Elem().FieldByName(fl.Name).Set(fromV.FieldByName(fl.Name))
 		}
 	}
 	return nil
+}
+
+// ZuluTimeNow returns the current UTC time in zulu format
+func ZuluTimeNow() string {
+	return time.Now().UTC().Format(ZULU_FORM)
 }

@@ -1,0 +1,176 @@
+# ARGO Authentication Service expressed in swagger
+swagger: '2.0'
+info:
+  title: argo-api-authN
+  description: "The purpose of the Authentication Service is to provide the ability to different services to use alternative authentication mechanisms without having to store additional user info or implement new functionalities.The AUTH service holds various information about a service’s users, hosts, API urls, etc, and leverages them to provide its function."
+  version: ""
+  contact:
+    name: ARGO Developers
+    url: http://argoeu.github.io/
+    email: argo-dev@lists.grnet.gr
+
+host: localhost
+schemes:
+  - https
+produces:
+  - application/json
+tags:
+  - name: Bindings
+    description: Bindings under a given service
+  - name: Authentication Methods
+    description: Authentication Method under a given project
+  - name: Services
+    description: Services available in the service
+paths:
+
+  /services:
+    post:
+      summary: Create a new service
+      description: |
+        Create a new service
+      parameters:
+        - $ref: '#/parameters/ApiKey'
+        - name: Service information
+          in: body
+          description: Required service information
+          required: true
+          schema:
+           type: object
+           properties:
+             name:
+               type: string
+             hosts:
+                type: array
+                items:
+                  $ref: '#/definitions/Host'
+             auth_types:
+                type: array
+                items:
+                  $ref: '#/definitions/AuthType'
+             auth_method:
+              type: string
+             retrieval_field:
+              type: string
+
+      tags:
+        - Services
+      responses:
+        201:
+          description: Returns the newly created service
+          schema:
+            $ref: '#/definitions/Service'
+        400:
+          $ref: "#/responses/400"
+        401:
+          $ref: "#/responses/401"
+        403:
+          $ref: "#/responses/403"
+        409:
+          $ref: "#/responses/409"
+        422:
+          $ref: '#/responses/422'
+        500:
+          $ref: "#/responses/500"
+
+
+parameters:
+  ApiKey:
+    name: key
+    in: query
+    description: user key token for authentication
+    required: true
+    type: string
+    default: SecretKey123
+
+responses:
+  400:
+    description: Invalid argument used
+    schema:
+      $ref: '#/definitions/ErrorMsg'
+  401:
+    description: Unauthorized user based on key
+    schema:
+      $ref: '#/definitions/ErrorMsg'
+  403:
+    description: Access Forbidden for the user on the resource
+    schema:
+      $ref: '#/definitions/ErrorMsg'
+  404:
+    description: Item not found
+    schema:
+      $ref: '#/definitions/ErrorMsg'
+  408:
+    description: Server timed out waiting for the request
+    schema:
+      $ref: '#/definitions/ErrorMsg'
+  409:
+    description: Item already exists!
+    schema:
+      $ref: '#/definitions/ErrorMsg'
+  422:
+    description: Unprocessable Entity
+    schema:
+      $ref: '#/definitions/ErrorMsg'
+  500:
+    description: Internal Error
+    schema:
+      $ref: '#/definitions/ErrorMsg'
+
+
+definitions:
+
+  Service:
+    type: object
+    properties:
+      name:
+        type: string
+        description: Name of the topic
+      hosts:
+        type: array
+        items:
+          $ref: '#/definitions/Host'
+        description: hosts that run this service
+      auth_types:
+        type: array
+        items:
+          $ref: '#/definitions/AuthType'
+        description: supported authentication types
+      auth_method:
+        type: string
+        description: the authentication method that the sercice supports
+      retrieval_field:
+        type: string
+        description: name of the response field which contains the value we are looking for
+      created_on:
+        type: string
+        description: datetime of creation
+
+  Host:
+    type: object
+    properties:
+      name:
+        type: string
+        description: hostname
+
+  AuthType:
+    type: object
+    properties:
+      name:
+        type: string
+        description: type name
+
+  ErrorMsg:
+    type: object
+    properties:
+      error:
+        type: object
+        properties:
+          code:
+            type: string
+            description: code of the error
+          message:
+            type: string
+            description: general message of the error
+          status:
+            type: string
+            description: status of the error

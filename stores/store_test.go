@@ -14,8 +14,8 @@ type StoreTestSuite struct {
 // It should be used on each test case so CRUD operations don't need to be reverted
 func (suite *StoreTestSuite) SetUpStoreTestSuite() {
 
-	mockstore := &Mockstore{}
-	mockstore.Setup("localhost", "test_db")
+	mockstore := &Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
 	suite.Mockstore = *mockstore
 }
 
@@ -24,16 +24,16 @@ func (suite *StoreTestSuite) TestSetUp() {
 
 	suite.SetUpStoreTestSuite()
 
-	mockstore := &Mockstore{}
-	mockstore.Setup("localhost", "test_db")
+	mockstore := &Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
 
 	var qServices []QService
 	var qBindings []QBinding
 	var authTypes []interface{}
 
 	// Populate qServices
-	service1 := QService{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509, oidc"}, AuthMethod: "api-key", RetrievalField: "token"}
-	service2 := QService{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", RetrievalField: "user_token"}
+	service1 := QService{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509, oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}
+	service2 := QService{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", RetrievalField: "user_token", CreatedOn: "2018-05-05T18:04:05Z"}
 	qServices = append(qServices, service1, service2)
 
 	// Populate Bindings
@@ -68,15 +68,15 @@ func (suite *StoreTestSuite) TestQueryServices() {
 	suite.SetUpStoreTestSuite()
 
 	// normal case outcome - 1 service
-	expQServices1 := []QService{{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509, oidc"}, AuthMethod: "api-key", RetrievalField: "token"}}
+	expQServices1 := []QService{{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509, oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}}
 	qServices1, err1 := suite.Mockstore.QueryServices("s1")
-	expQServices2 := []QService{{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", RetrievalField: "user_token"}}
+	expQServices2 := []QService{{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", RetrievalField: "user_token", CreatedOn: "2018-05-05T18:04:05Z"}}
 	qServices2, err2 := suite.Mockstore.QueryServices("s2")
 
 	// normal case outcome - all services
 	expQServicesAll := []QService{
-		{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509, oidc"}, AuthMethod: "api-key", RetrievalField: "token"},
-		{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", RetrievalField: "user_token"}}
+		{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509, oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"},
+		{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", RetrievalField: "user_token", CreatedOn: "2018-05-05T18:04:05Z"}}
 	qServicesAll, errAll := suite.Mockstore.QueryServices("")
 
 	// was not found
@@ -173,6 +173,19 @@ func (suite *StoreTestSuite) TestQueryBindings() {
 	// tests the no result case - with parameters
 	suite.Equal(expBindings3, qBindings3)
 	suite.Nil(err3)
+}
+
+func (suite *StoreTestSuite) TestInsertService() {
+
+	suite.SetUpStoreTestSuite()
+
+	_, err1 := suite.Mockstore.InsertService("sIns", []string{"host1", "host2", "host3"}, []string{"x509, oidc"}, "api-key", "token", "2018-05-05T18:04:05Z")
+
+	expQServices1 := []QService{{Name: "sIns", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509, oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}}
+	qServices1, err1 := suite.Mockstore.QueryServices("sIns")
+
+	suite.Equal(expQServices1[0], qServices1[0])
+	suite.Nil(err1)
 }
 
 func (suite *StoreTestSuite) TestInsertBinding() {

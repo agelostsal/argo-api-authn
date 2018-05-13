@@ -113,7 +113,6 @@ func (suite *UtilsTestSuite) TestCopyFields() {
 	suite.Equal("CopyFields needs a pointer to a struct as a second argument", err2.Error())
 	suite.Nil(err1)
 
-
 }
 
 func TestUtilsTestSuite(t *testing.T) {

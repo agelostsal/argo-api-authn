@@ -6,6 +6,7 @@ type QService struct {
 	AuthTypes      []string `json:"auth_types" bson:"auth_types"`
 	AuthMethod     string   `json:"auth_method" bson:"auth_method"`
 	RetrievalField string   `json:"retrieval_field" bson:"retrieval_field"`
+	CreatedOn      string   `json:"created_on,omitempty" bson:"created_on,omitempty"`
 }
 
 type QBinding struct {

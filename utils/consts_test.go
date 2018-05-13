@@ -1,4 +1,4 @@
-package argo_consts
+package utils
 
 import (
 	"testing"
