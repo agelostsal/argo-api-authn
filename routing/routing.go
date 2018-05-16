@@ -50,6 +50,7 @@ func NewRouting(routes []APIRoute, store stores.Store, config *config.Config) *A
 		handler = handlers.WrapConfig(handler, store, config)
 
 		ar.Router.Methods(route.Method).
+			PathPrefix("/v1").
 			Path(route.Path).
 			Handler(context.ClearHandler(handler))
 	}
@@ -60,6 +61,7 @@ func NewRouting(routes []APIRoute, store stores.Store, config *config.Config) *A
 }
 
 var ApiRoutes = []APIRoute{
+	{"services:create", "POST", "/services", handlers.ServiceCreate},
 	//{"auth:dn", "GET", "/auth/{service}/{host}/x509", handlers.AuthViaCert},
 	//{"bindings:create", "POST", "/bindings", handlers.BindingCreate},
 	//{"bindings:ListAll", "GET", "/bindings", handlers.BindingListAll},

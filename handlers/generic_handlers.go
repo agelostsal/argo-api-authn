@@ -15,6 +15,7 @@ func WrapConfig(hfn http.HandlerFunc, store stores.Store, config *config.Config)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		context.Set(r, "stores", store)
+		context.Set(r, "config", *config)
 		context.Set(r, "service_token", config.ServiceToken)
 		hfn.ServeHTTP(w, r)
 
@@ -28,7 +29,7 @@ func WrapAuth(hfn http.HandlerFunc, store stores.Store) http.HandlerFunc {
 		urlQueryVars := r.URL.Query()
 		serviceToken := context.Get(r, "service_token").(string)
 		if urlQueryVars.Get("key") != serviceToken {
-			err := &utils.APIError{Message: "Wrong Credentials", Code: 401, Status: "UNAUTHORIZED"}
+			err := utils.APIErrUnauthorized("Wrong Credentials")
 			utils.RespondError(w, err)
 			return
 		}

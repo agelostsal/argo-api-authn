@@ -1,9 +1,7 @@
 package stores
 
 import (
-	"github.com/ARGOeu/argo-api-authn/argo-consts"
 	"github.com/ARGOeu/argo-api-authn/utils"
-	"time"
 )
 
 type Mockstore struct {
@@ -16,15 +14,14 @@ type Mockstore struct {
 }
 
 // SetUp is used to initialize the mock store
-func (mock *Mockstore) Setup(server string, database string) {
+func (mock *Mockstore) SetUp() {
 
-	mock.Server = server
-	mock.Database = database
 	mock.Session = true
 
 	// Populate services
-	service1 := QService{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509, oidc"}, AuthMethod: "api-key", RetrievalField: "token"}
-	service2 := QService{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", RetrievalField: "user_token"}
+	service1 := QService{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509, oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}
+	service2 := QService{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", RetrievalField: "user_token", CreatedOn: "2018-05-05T18:04:05Z"}
+
 	mock.Services = append(mock.Services, service1, service2)
 
 	// Populate Bindings
@@ -104,9 +101,18 @@ func (mock *Mockstore) QueryBindings(service string, host string) ([]QBinding, e
 	return qBindings, nil
 }
 
+func (mock *Mockstore) InsertService(name string, hosts []string, authTypes []string, authMethod string, retrievalField string, createdOn string) (QService, error) {
+
+	qService := QService{Name: name, Hosts: hosts, AuthTypes: authTypes, AuthMethod: authMethod, RetrievalField: retrievalField, CreatedOn: createdOn}
+
+	mock.Services = append(mock.Services, qService)
+
+	return qService, nil
+}
+
 func (mock *Mockstore) InsertBinding(name string, service string, host string, dn string, oidcToken string, uniqueKey string) (QBinding, error) {
 
-	qBinding := QBinding{Name: name, Service: service, Host: host, DN: dn, OIDCToken: oidcToken, UniqueKey: uniqueKey, CreatedOn: time.Now().Format(argo_consts.ZULU_FORM)}
+	qBinding := QBinding{Name: name, Service: service, Host: host, DN: dn, OIDCToken: oidcToken, UniqueKey: uniqueKey, CreatedOn: utils.ZuluTimeNow()}
 
 	mock.Bindings = append(mock.Bindings, qBinding)
 
