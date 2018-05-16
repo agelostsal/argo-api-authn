@@ -32,9 +32,11 @@ func (suite *StoreTestSuite) TestSetUp() {
 	var authTypes []interface{}
 
 	// Populate qServices
-	service1 := QService{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509, oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}
+	service1 := QService{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}
 	service2 := QService{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", RetrievalField: "user_token", CreatedOn: "2018-05-05T18:04:05Z"}
-	qServices = append(qServices, service1, service2)
+	serviceSame1 := QService{Name: "same_name"}
+	serviceSame2 := QService{Name: "same_name"}
+	qServices = append(qServices, service1, service2, serviceSame1, serviceSame2)
 
 	// Populate Bindings
 	binding1 := QBinding{Name: "b1", Service: "s1", Host: "host1", DN: "test_dn_1", OIDCToken: "", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
@@ -68,15 +70,18 @@ func (suite *StoreTestSuite) TestQueryServices() {
 	suite.SetUpStoreTestSuite()
 
 	// normal case outcome - 1 service
-	expQServices1 := []QService{{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509, oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}}
+	expQServices1 := []QService{{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}}
 	qServices1, err1 := suite.Mockstore.QueryServices("s1")
 	expQServices2 := []QService{{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", RetrievalField: "user_token", CreatedOn: "2018-05-05T18:04:05Z"}}
 	qServices2, err2 := suite.Mockstore.QueryServices("s2")
 
 	// normal case outcome - all services
 	expQServicesAll := []QService{
-		{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509, oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"},
-		{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", RetrievalField: "user_token", CreatedOn: "2018-05-05T18:04:05Z"}}
+		{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"},
+		{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", RetrievalField: "user_token", CreatedOn: "2018-05-05T18:04:05Z"},
+		{Name: "same_name"},
+		{Name: "same_name"},
+	}
 	qServicesAll, errAll := suite.Mockstore.QueryServices("")
 
 	// was not found

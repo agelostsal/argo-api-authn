@@ -1,8 +1,6 @@
 package stores
 
 import (
-
-
 	"github.com/ARGOeu/argo-api-authn/utils"
 	log "github.com/Sirupsen/logrus"
 	"gopkg.in/mgo.v2"

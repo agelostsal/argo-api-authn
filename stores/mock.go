@@ -19,10 +19,11 @@ func (mock *Mockstore) SetUp() {
 	mock.Session = true
 
 	// Populate services
-	service1 := QService{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509, oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}
+	service1 := QService{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}
 	service2 := QService{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", RetrievalField: "user_token", CreatedOn: "2018-05-05T18:04:05Z"}
-
-	mock.Services = append(mock.Services, service1, service2)
+	serviceSame1 := QService{Name: "same_name"}
+	serviceSame2 := QService{Name: "same_name"}
+	mock.Services = append(mock.Services, service1, service2, serviceSame1, serviceSame2)
 
 	// Populate Bindings
 	binding1 := QBinding{Name: "b1", Service: "s1", Host: "host1", DN: "test_dn_1", OIDCToken: "", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}

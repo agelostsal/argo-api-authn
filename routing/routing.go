@@ -56,12 +56,15 @@ func NewRouting(routes []APIRoute, store stores.Store, config *config.Config) *A
 	}
 
 	log.Info("API", "\t", "API Router initialized! Ready to start listening...")
+
 	// Return reference to API object
 	return &ar
 }
 
 var ApiRoutes = []APIRoute{
 	{"services:create", "POST", "/services", handlers.ServiceCreate},
+	{"services:ListOne", "GET", "/services/{name}", handlers.ServiceListOne},
+	{"services:ListAll", "GET", "/services", handlers.ServiceListAll},
 	//{"auth:dn", "GET", "/auth/{service}/{host}/x509", handlers.AuthViaCert},
 	//{"bindings:create", "POST", "/bindings", handlers.BindingCreate},
 	//{"bindings:ListAll", "GET", "/bindings", handlers.BindingListAll},
