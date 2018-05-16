@@ -5,12 +5,12 @@ import (
 )
 
 type Mockstore struct {
-	Session   bool
-	Server    string
-	Database  string
-	Services  []QService
-	Bindings  []QBinding
-	AuthTypes []interface{}
+	Session     bool
+	Server      string
+	Database    string
+	Services    []QService
+	Bindings    []QBinding
+	AuthMethods []map[string]interface{}
 }
 
 // SetUp is used to initialize the mock store
@@ -31,9 +31,11 @@ func (mock *Mockstore) SetUp() {
 	binding3 := QBinding{Name: "b3", Service: "s2", Host: "host2", DN: "test_dn_3", OIDCToken: "", UniqueKey: "unique_key_3", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
 	mock.Bindings = append(mock.Bindings, binding1, binding2, binding3)
 
-	// Populate AuthTypes
-	apiKeyAuth1 := QApiKeyAuth{Type: "api-key", Service: "s1", Host: "host1", Path: "test_path_1", Port: 9000, AccessKey: "key1"}
-	mock.AuthTypes = append(mock.AuthTypes, apiKeyAuth1)
+	// Populate AuthMethods
+	mock.AuthMethods = []map[string]interface{}{{"service": "s1", "host": "host1", "port": 9000.0, "path": "test_path_1", "access_key": "key1", "type": "api-key"},
+		{"host": "host2", "port": 9000.0, "path": "test_path_1", "type": "api-key", "service": "s1"},
+		{"access_key": "key1", "type": "api-key", "service": "s2", "host": "host3", "port": 9000.0},
+		{"path": "test_path_1", "access_key": "key1", "type": "api-key", "service": "s2", "host": "host4"}}
 }
 
 func (mock *Mockstore) Close() {
@@ -57,18 +59,23 @@ func (mock *Mockstore) QueryServices(name string) ([]QService, error) {
 	return qServices, nil
 }
 
-func (mock *Mockstore) QueryAuthMethod(service string, host string, typeName string) (map[string]interface{}, error) {
+func (mock *Mockstore) QueryAuthMethods(service string, host string, typeName string) ([]map[string]interface{}, error) {
 
-	var qAuthM = make(map[string]interface{})
+	var qAuthMs []map[string]interface{}
+	var authM map[string]interface{}
 
-	for _, authM := range mock.AuthTypes {
-		qAuthM = utils.StructToMap(authM)
-		if qAuthM["Service"] == service && qAuthM["Host"] == host && qAuthM["Type"] == typeName {
-			return qAuthM, nil
+	if service == "" && host == "" && typeName == "" {
+		return mock.AuthMethods, nil
+	}
+
+	for _, authM = range mock.AuthMethods {
+		if authM["service"] == service && authM["host"] == host && authM["type"] == typeName {
+			qAuthMs = append(qAuthMs, authM)
+			break
 		}
 	}
 
-	return make(map[string]interface{}), nil
+	return qAuthMs, nil
 }
 
 func (mock *Mockstore) QueryBindingsByDN(dn string, host string) ([]QBinding, error) {

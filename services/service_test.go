@@ -113,6 +113,21 @@ func (suite *ServiceTestSuite) TestFindAllServices() {
 	suite.Nil(err2)
 }
 
+func (suite *ServiceTestSuite) TestServiceHasHost() {
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	ser := Service{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}
+
+	suite.Equal(true, ser.HasHost("host1"))
+	suite.Equal(false, ser.HasHost("host_unknown"))
+
+}
+
 func TestServiceTestSuite(t *testing.T) {
 	suite.Run(t, new(ServiceTestSuite))
 }

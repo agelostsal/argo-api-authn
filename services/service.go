@@ -113,6 +113,20 @@ func FindAllServices(store stores.Store) (ServiceList, error) {
 
 }
 
+// hsHost returns whether or not a host is associated with a service
+func (s *Service) HasHost(host string) bool {
+
+	flag := false
+	for _, h := range s.Hosts {
+		if h == host {
+			flag = true
+			break
+		}
+	}
+
+	return flag
+}
+
 // hasValidAuthTypes checks whether or not the authentication types of a project are supported
 func (s *Service) hasValidAuthTypes(cfg config.Config) error {
 
