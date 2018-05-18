@@ -19,7 +19,7 @@ tags:
   - name: Bindings
     description: Bindings under a given service
   - name: Authentication Methods
-    description: Authentication Method under a given servic
+    description: Authentication Method under a given service
   - name: Services
     description: Services available in the service
 paths:
@@ -171,6 +171,54 @@ paths:
           $ref: "#/responses/401"
         403:
           $ref: "#/responses/403"
+        500:
+          $ref: "#/responses/500"
+
+    post:
+      summary: Create a new auth method
+      description: |
+        Create a new auth method
+      parameters:
+        - $ref: '#/parameters/ApiKey'
+        - name: auth method information
+          in: body
+          description: Required auth method information
+          required: true
+          schema:
+           type: object
+           properties:
+            type:
+              type: string
+            service:
+              type: string
+            host:
+              type: string
+            path:
+              type: string
+            port:
+              type: integer
+            access_key:
+              type: string
+
+      tags:
+        - Authentication Methods
+      responses:
+        201:
+          description: Returns the newly created auth method
+          schema:
+            $ref: '#/definitions/APIKeyAuthMethod'
+        400:
+          $ref: "#/responses/400"
+        401:
+          $ref: "#/responses/401"
+        403:
+          $ref: "#/responses/403"
+        404:
+          $ref: "#/responses/404"
+        409:
+          $ref: "#/responses/409"
+        422:
+          $ref: '#/responses/422'
         500:
           $ref: "#/responses/500"
 

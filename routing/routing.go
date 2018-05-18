@@ -67,6 +67,8 @@ var ApiRoutes = []APIRoute{
 	{"services:ListAll", "GET", "/services", handlers.ServiceListAll},
 	{"authMethod:ListOne", "GET", "/services/{service}/hosts/{host}/authM", handlers.AuthMethodListOne},
 	{"authMethod:ListAll", "GET", "/authM", handlers.AuthMethodListAll},
+	{"authMethod:Create", "POST", "/authM", handlers.AuthMethodCreate},
+
 	//{"auth:dn", "GET", "/auth/{service}/{host}/x509", handlers.AuthViaCert},
 	//{"bindings:create", "POST", "/bindings", handlers.BindingCreate},
 	//{"bindings:ListAll", "GET", "/bindings", handlers.BindingListAll},

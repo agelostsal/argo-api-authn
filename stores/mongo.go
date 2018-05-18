@@ -135,6 +135,23 @@ func (mongo *MongoStore) InsertService(name string, hosts []string, authTypes []
 	return qService, err
 }
 
+// InsertAuthMethod inserts a new auth method to the database
+func (mongo *MongoStore) InsertAuthMethod(authM map[string]interface{}) error {
+
+	var err error
+
+	db := mongo.Session.DB(mongo.Database)
+	c := db.C("auth_methods")
+
+	if err := c.Insert(authM); err != nil {
+		log.Error("STORE", "\t", err.Error())
+		err = utils.APIErrDatabase(err.Error())
+		return err
+	}
+
+	return err
+}
+
 //InsertBinding inserts a new binding into the datastore
 func (mongo *MongoStore) InsertBinding(name string, service string, host string, dn string, oidcToken string, uniqueKey string) (QBinding, error) {
 

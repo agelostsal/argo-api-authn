@@ -30,6 +30,11 @@ var APIErrEmptyRequiredField = func(msg string) *APIError {
 	return &APIError{msg, 422, "UNPROCESSABLE ENTITY"}
 }
 
+var APIErrInvalidFieldContent = func(field string, reason string) *APIError {
+	msg := fmt.Sprintf("Field: %v contains invalid data. %v", field, reason)
+	return &APIError{msg, 422, "UNPROCESSABLE ENTITY"}
+}
+
 var APIErrUnsupportedContent = func(place, content string) *APIError {
 	msg := fmt.Sprintf("%v: %v is not yet supported", place, content)
 	return &APIError{msg, 422, "UNPROCESSABLE ENTITY"}
@@ -45,6 +50,7 @@ var APIGenericInternalError = func(msg string) error {
 }
 
 // Generic Errors
+
 var GenericEmptyRequiredField = func(instance interface{}, fieldName string) error {
 	return errors.New(fmt.Sprintf("%T object contains an empty value for field: %v", instance, fieldName))
 }
