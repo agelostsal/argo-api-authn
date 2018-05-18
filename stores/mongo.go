@@ -54,21 +54,29 @@ func (mongo *MongoStore) QueryServices(name string) ([]QService, error) {
 	return qServices, err
 }
 
-func (mongo *MongoStore) QueryAuthMethod(service string, host string, typeName string) (map[string]interface{}, error) {
+func (mongo *MongoStore) QueryAuthMethods(service string, host string, typeName string) ([]map[string]interface{}, error) {
 
-	var qAuthType map[string]interface{}
+	var qAuthMethods []map[string]interface{}
 	var err error
 
-	c := mongo.Session.DB(mongo.Database).C("auth_types")
-	err = c.Find(bson.M{"type": typeName, "service": service, "host": host}).One(&qAuthType)
+	query := bson.M{}
 
-	if err != nil {
-		log.Fatal("STORE", "\t", err.Error())
-		err = utils.APIErrDatabase(err.Error())
-		return qAuthType, err
+	if service != "" && host != "" && typeName != "" {
+		query = bson.M{"type": typeName, "service": service, "host": host}
 	}
 
-	return qAuthType, err
+	c := mongo.Session.DB(mongo.Database).C("auth_methods")
+	err = c.Find(query).All(&qAuthMethods)
+
+	if err != nil {
+		log.Error("STORE", "\t", err.Error())
+		err = utils.APIErrDatabase(err.Error())
+		return qAuthMethods, err
+	}
+
+	log.Info(qAuthMethods)
+
+	return qAuthMethods, err
 }
 
 func (mongo *MongoStore) QueryBindingsByDN(dn string, host string) ([]QBinding, error) {
