@@ -93,7 +93,7 @@ func (suite *ServiceTestSuite) TestFindServiceTypeByUUID() {
 
 	// normal case
 	expS1 := ServiceType{"s1", []string{"host1", "host2", "host3"}, []string{"x509", "oidc"}, "api-key", "uuid1", "token", "2018-05-05T18:04:05Z"}
-	ser1, err1 := FindServiceTypeByUUID	("uuid1", mockstore)
+	ser1, err1 := FindServiceTypeByUUID("uuid1", mockstore)
 
 	// not found case
 	var expS2 ServiceType
@@ -123,7 +123,7 @@ func (suite *ServiceTestSuite) TestFindAllServiceTypes() {
 	// normal case outcome - all services
 	expQServicesAll := []ServiceType{
 		{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", UUID: "uuid1", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"},
-		{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", UUID: "uuid2", 	RetrievalField: "user_token", CreatedOn: "2018-05-05T18:04:05Z"},
+		{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", UUID: "uuid2", RetrievalField: "user_token", CreatedOn: "2018-05-05T18:04:05Z"},
 		{Name: "same_name"},
 		{Name: "same_name"},
 	}

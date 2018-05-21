@@ -22,6 +22,7 @@ tags:
     description: Authentication Method under a given service type
   - name: Service Types
     description: Service Types available in the service
+
 paths:
 
   /service-types:
@@ -221,6 +222,55 @@ paths:
         500:
           $ref: "#/responses/500"
 
+  /bindings:
+    post:
+      summary: Create a new binding
+      description: |
+        Create a new binding
+      parameters:
+        - $ref: '#/parameters/ApiKey'
+        - name: binding information
+          in: body
+          description: Required binding information
+          required: true
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              service_uuid:
+                type: string
+              host:
+                type: string
+              dn:
+                type: string
+              oidc_token:
+                type: string
+              unique_key:
+                type: string
+      tags:
+        - Bindings
+      responses:
+        201:
+          description: Returns the newly created binding
+          schema:
+            $ref: '#/definitions/Bindings'
+        400:
+          $ref: "#/responses/400"
+        401:
+          $ref: "#/responses/401"
+        403:
+          $ref: "#/responses/403"
+        404:
+          $ref: "#/responses/404"
+        409:
+          $ref: "#/responses/409"
+        422:
+          $ref: '#/responses/422'
+        500:
+          $ref: "#/responses/500"
+
+
 parameters:
   ApiKey:
     name: key
@@ -266,6 +316,30 @@ responses:
 
 
 definitions:
+
+  Bindings:
+    type: object
+    properties:
+      name:
+        type: string
+      service_uuid:
+        type: string
+        description: the service type that the binding will belong to
+      host:
+        type: string
+        description: a host assosciated with the declared service type
+      dn:
+        type: string
+        description: the dn of the certificate
+      oidc_token:
+        type: string
+      unique_key:
+        type: string
+        description: contains the resource to be used to authenticate against the assosciated service type
+      created_on:
+        type: string
+      last_auth:
+        type: string
 
   ServiceType:
     type: object
@@ -319,7 +393,7 @@ definitions:
         description: host of the service type
       service_uuid:
         type: string
-        description: service type that the auth method is used
+        description: uuid that is assosciated with the service the auth method is used for
       port:
         type: integer
         description: port of the service type host

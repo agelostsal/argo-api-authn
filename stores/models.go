@@ -11,14 +11,14 @@ type QServiceType struct {
 }
 
 type QBinding struct {
-	Name      string `json:"name" bson:"name"`
-	Service   string `json:"service" bson:"service"`
-	Host      string `json:"host" bson:"host"`
-	DN        string `json:"dn,omitempty" bson:"dn,omitempty"`
-	OIDCToken string `json:"oidc_token,omitempty" bson:"oidc_token,omitempty"`
-	UniqueKey string `json:"unique_key,omitempty" bson:"unique_key,omitempty"`
-	CreatedOn string `json:"created_on,omitempty" bson:"created_on,omitempty"`
-	LastAuth  string `json:"last_auth,omitempty" bson:"last_auth,omitempty"`
+	Name        string `json:"name" bson:"name"`
+	ServiceUUID string `json:"service_uuid" bson:"service_uuid"`
+	Host        string `json:"host" bson:"host"`
+	DN          string `json:"dn,omitempty" bson:"dn,omitempty"`
+	OIDCToken   string `json:"oidc_token,omitempty"`
+	UniqueKey   string `json:"unique_key,omitempty"`
+	CreatedOn   string `json:"created_on,omitempty" bson:"created_on,omitempty"`
+	LastAuth    string `json:"last_auth,omitempty" bson:"last_auth,omitempty"`
 }
 
 type QApiKeyAuth struct {
