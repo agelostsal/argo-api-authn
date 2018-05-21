@@ -8,19 +8,19 @@ import (
 
 	"encoding/json"
 	"github.com/ARGOeu/argo-api-authn/config"
-	"github.com/ARGOeu/argo-api-authn/services"
 	"github.com/ARGOeu/argo-api-authn/stores"
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
 	"net/http/httptest"
+	"github.com/ARGOeu/argo-api-authn/servicetypes"
 )
 
-type ServiceHandlersSuite struct {
+type ServiceTypeHandlersSuite struct {
 	suite.Suite
 }
 
-// TestServiceCreate tests the normal case of a service creation
-func (suite *ServiceHandlersSuite) TestServiceCreate() {
+// TestServiceTypeCreate tests the normal case of a service type creation
+func (suite *ServiceTypeHandlersSuite) TestServiceTypeCreate() {
 
 	postJSON := `{
 	"name": "service1",
@@ -30,7 +30,7 @@ func (suite *ServiceHandlersSuite) TestServiceCreate() {
 	"retrieval_field": "token"
 }`
 
-	req, err := http.NewRequest("POST", "http://localhost:8080/services", bytes.NewBuffer([]byte(postJSON)))
+	req, err := http.NewRequest("POST", "http://localhost:8080/service-types", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
 		log.Error(err.Error())
 	}
@@ -43,10 +43,10 @@ func (suite *ServiceHandlersSuite) TestServiceCreate() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/services", WrapConfig(ServiceCreate, mockstore, cfg))
+	router.HandleFunc("/service-types", WrapConfig(ServiceTypeCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(201, w.Code)
-	createdSer := services.Service{}
+	createdSer := servicetypes.ServiceType{}
 	_ = json.Unmarshal([]byte(w.Body.String()), &createdSer)
 
 	suite.Equal("service1", createdSer.Name)
@@ -57,8 +57,8 @@ func (suite *ServiceHandlersSuite) TestServiceCreate() {
 
 }
 
-// TestServiceCreateInvalidName tests the case where the project's name already exists
-func (suite *ServiceHandlersSuite) TestServiceCreateInvalidName() {
+// TestServiceTypeCreateInvalidName tests the case where the service type's name already exists
+func (suite *ServiceTypeHandlersSuite) TestServiceTypeCreateInvalidName() {
 
 	postJSON := `{
 	"name": "s1",
@@ -70,13 +70,13 @@ func (suite *ServiceHandlersSuite) TestServiceCreateInvalidName() {
 
 	expRespJSON := `{
  "error": {
-  "message": "services.Service object with name: s1 already exists",
+  "message": "servicetypes.ServiceType object with name: s1 already exists",
   "code": 409,
   "status": "CONFLICT"
  }
 }`
 
-	req, err := http.NewRequest("POST", "http://localhost:8080/services", bytes.NewBuffer([]byte(postJSON)))
+	req, err := http.NewRequest("POST", "http://localhost:8080/service-types", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
 		log.Error(err.Error())
 	}
@@ -89,15 +89,15 @@ func (suite *ServiceHandlersSuite) TestServiceCreateInvalidName() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/services", WrapConfig(ServiceCreate, mockstore, cfg))
+	router.HandleFunc("/service-types", WrapConfig(ServiceTypeCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(409, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
 
 }
 
-// TestServiceCreateInvalidAuthTypes tests the case where the project's auth types are not yet supported
-func (suite *ServiceHandlersSuite) TestServiceCreateInvalidAuthTypes() {
+// TestServiceTypeCreateInvalidAuthTypes tests the case where the service type's auth types are not yet supported
+func (suite *ServiceTypeHandlersSuite) TestServiceTypeCreateInvalidAuthTypes() {
 
 	postJSON := `{
 	"name": "s1",
@@ -115,7 +115,7 @@ func (suite *ServiceHandlersSuite) TestServiceCreateInvalidAuthTypes() {
  }
 }`
 
-	req, err := http.NewRequest("POST", "http://localhost:8080/services", bytes.NewBuffer([]byte(postJSON)))
+	req, err := http.NewRequest("POST", "http://localhost:8080/service-types", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
 		log.Error(err.Error())
 	}
@@ -128,15 +128,15 @@ func (suite *ServiceHandlersSuite) TestServiceCreateInvalidAuthTypes() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/services", WrapConfig(ServiceCreate, mockstore, cfg))
+	router.HandleFunc("/service-types", WrapConfig(ServiceTypeCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(422, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
 
 }
 
-// TestServiceCreateInvalidAuthMethod tests the case where the project's auth method are not yet supported
-func (suite *ServiceHandlersSuite) TestServiceCreateInvalidAuthMethod() {
+// TestServiceTypeCreateInvalidAuthMethod tests the case where the service type's auth method are not yet supported
+func (suite *ServiceTypeHandlersSuite) TestServiceTypeCreateInvalidAuthMethod() {
 
 	postJSON := `{
 	"name": "s1",
@@ -154,7 +154,7 @@ func (suite *ServiceHandlersSuite) TestServiceCreateInvalidAuthMethod() {
  }
 }`
 
-	req, err := http.NewRequest("POST", "http://localhost:8080/services", bytes.NewBuffer([]byte(postJSON)))
+	req, err := http.NewRequest("POST", "http://localhost:8080/service-types", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
 		log.Error(err.Error())
 	}
@@ -167,15 +167,15 @@ func (suite *ServiceHandlersSuite) TestServiceCreateInvalidAuthMethod() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/services", WrapConfig(ServiceCreate, mockstore, cfg))
+	router.HandleFunc("/service-types", WrapConfig(ServiceTypeCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(422, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
 
 }
 
-// TestServiceCreateEmptyAuthTypes tests the case where the project's auth types are empty
-func (suite *ServiceHandlersSuite) TestServiceCreateEmptyAuthTypes() {
+// TestServiceTypeCreateEmptyAuthTypes tests the case where the service type's auth types are empty
+func (suite *ServiceTypeHandlersSuite) TestServiceTypeCreateEmptyAuthTypes() {
 
 	postJSON := `{
 	"name": "s1",
@@ -193,7 +193,7 @@ func (suite *ServiceHandlersSuite) TestServiceCreateEmptyAuthTypes() {
  }
 }`
 
-	req, err := http.NewRequest("POST", "http://localhost:8080/services", bytes.NewBuffer([]byte(postJSON)))
+	req, err := http.NewRequest("POST", "http://localhost:8080/service-types", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
 		log.Error(err.Error())
 	}
@@ -206,15 +206,15 @@ func (suite *ServiceHandlersSuite) TestServiceCreateEmptyAuthTypes() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/services", WrapConfig(ServiceCreate, mockstore, cfg))
+	router.HandleFunc("/service-types", WrapConfig(ServiceTypeCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(422, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
 
 }
 
-// TestServiceCreateInvalidJSON tests the case of the request containing an invalid json body
-func (suite *ServiceHandlersSuite) TestServiceCreateInvalidJSON() {
+// TestServiceTypeCreateInvalidJSON tests the case of the request containing an invalid json body
+func (suite *ServiceTypeHandlersSuite) TestServiceTypeCreateInvalidJSON() {
 
 	postJSON := `{
 	"name": "service1",
@@ -232,7 +232,7 @@ func (suite *ServiceHandlersSuite) TestServiceCreateInvalidJSON() {
  }
 }`
 
-	req, err := http.NewRequest("POST", "http://localhost:8080/services", bytes.NewBuffer([]byte(postJSON)))
+	req, err := http.NewRequest("POST", "http://localhost:8080/service-types", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
 		log.Error(err.Error())
 	}
@@ -245,14 +245,14 @@ func (suite *ServiceHandlersSuite) TestServiceCreateInvalidJSON() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/services", WrapConfig(ServiceCreate, mockstore, cfg))
+	router.HandleFunc("/service-types", WrapConfig(ServiceTypeCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(400, w.Code)
 	suite.Equal(expResJSON, w.Body.String())
 }
 
-// TestServiceCreateMissingField tests the case of the request containing an incomplete json body
-func (suite *ServiceHandlersSuite) TestServiceCreateMissingField() {
+// TestServiceTypeCreateMissingField tests the case of the request containing an incomplete json body
+func (suite *ServiceTypeHandlersSuite) TestServiceTypeCreateMissingField() {
 
 	postJSON := `{
 	"hosts": ["127.0.0.1"],
@@ -263,13 +263,13 @@ func (suite *ServiceHandlersSuite) TestServiceCreateMissingField() {
 
 	expResJSON := `{
  "error": {
-  "message": "services.Service object contains an empty value for field: Name",
+  "message": "servicetypes.ServiceType object contains an empty value for field: Name",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
 }`
 
-	req, err := http.NewRequest("POST", "http://localhost:8080/services", bytes.NewBuffer([]byte(postJSON)))
+	req, err := http.NewRequest("POST", "http://localhost:8080/service-types", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
 		log.Error(err.Error())
 	}
@@ -282,14 +282,14 @@ func (suite *ServiceHandlersSuite) TestServiceCreateMissingField() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/services", WrapConfig(ServiceCreate, mockstore, cfg))
+	router.HandleFunc("/service-types", WrapConfig(ServiceTypeCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(422, w.Code)
 	suite.Equal(expResJSON, w.Body.String())
 }
 
-// TestServiceListOne tests the normal case
-func (suite *ServiceHandlersSuite) TestServiceListOne() {
+// TestServiceTypeListOne tests the normal case
+func (suite *ServiceTypeHandlersSuite) TestServiceTypeListOne() {
 
 	expResJSON := `{
  "name": "s1",
@@ -307,7 +307,7 @@ func (suite *ServiceHandlersSuite) TestServiceListOne() {
  "created_on": "2018-05-05T18:04:05Z"
 }`
 
-	req, err := http.NewRequest("GET", "http://localhost:8080/services/s1", nil)
+	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/s1", nil)
 	if err != nil {
 		log.Error(err.Error())
 	}
@@ -320,25 +320,25 @@ func (suite *ServiceHandlersSuite) TestServiceListOne() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/services/{name}", WrapConfig(ServiceListOne, mockstore, cfg))
+	router.HandleFunc("/service-types/{service-type}", WrapConfig(ServiceTypesListOne, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(200, w.Code)
 	suite.Equal(expResJSON, w.Body.String())
 
 }
 
-// TestServiceListOneNameCollision tests the case where two or more service exist with the same name
-func (suite *ServiceHandlersSuite) TestServiceListOneNameCollision() {
+// TestServiceTypeListOneNameCollision tests the case where two or more service types exist with the same name
+func (suite *ServiceTypeHandlersSuite) TestServiceTypeListOneNameCollision() {
 
 	expResJSON := `{
  "error": {
-  "message": "Database Error: Multiple services with the same name: same_name",
+  "message": "Database Error: Multiple service-types with the same name: same_name",
   "code": 500,
   "status": "INTERNAL SERVER ERROR"
  }
 }`
 
-	req, err := http.NewRequest("GET", "http://localhost:8080/services/same_name", nil)
+	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/same_name", nil)
 	if err != nil {
 		log.Error(err.Error())
 	}
@@ -351,25 +351,25 @@ func (suite *ServiceHandlersSuite) TestServiceListOneNameCollision() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/services/{name}", WrapConfig(ServiceListOne, mockstore, cfg))
+	router.HandleFunc("/service-types/{service-type}", WrapConfig(ServiceTypesListOne, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(500, w.Code)
 	suite.Equal(expResJSON, w.Body.String())
 
 }
 
-// TestServiceListOneNotFound tests the case where two or more service exist with the same name
-func (suite *ServiceHandlersSuite) TestServiceListOneNotFound() {
+// TestServiceTypeListOneNotFound tests the case where two or more service types exist with the same name
+func (suite *ServiceTypeHandlersSuite) TestServiceTypeListOneNotFound() {
 
 	expResJSON := `{
  "error": {
-  "message": "Service was not found",
+  "message": "ServiceType was not found",
   "code": 404,
   "status": "NOT FOUND"
  }
 }`
 
-	req, err := http.NewRequest("GET", "http://localhost:8080/services/not_found", nil)
+	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/not_found", nil)
 	if err != nil {
 		log.Error(err.Error())
 	}
@@ -382,18 +382,18 @@ func (suite *ServiceHandlersSuite) TestServiceListOneNotFound() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/services/{name}", WrapConfig(ServiceListOne, mockstore, cfg))
+	router.HandleFunc("/service-types/{service-type}", WrapConfig(ServiceTypesListOne, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(404, w.Code)
 	suite.Equal(expResJSON, w.Body.String())
 
 }
 
-// TestServiceListAll lists all services
-func (suite *ServiceHandlersSuite) TestServiceListAll() {
+// TestServiceTypeListAll tests the normal functionality of listing all services types
+func (suite *ServiceTypeHandlersSuite) TestServiceTypeListAll() {
 
 	expResJSON := `{
- "services": [
+ "service_types": [
   {
    "name": "s1",
    "hosts": [
@@ -441,7 +441,7 @@ func (suite *ServiceHandlersSuite) TestServiceListAll() {
  ]
 }`
 
-	req, err := http.NewRequest("GET", "http://localhost:8080/services", nil)
+	req, err := http.NewRequest("GET", "http://localhost:8080/service-types", nil)
 
 	if err != nil {
 		log.Error(err.Error())
@@ -455,21 +455,21 @@ func (suite *ServiceHandlersSuite) TestServiceListAll() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/services", WrapConfig(ServiceListAll, mockstore, cfg))
+	router.HandleFunc("/service-types", WrapConfig(ServiceTypeListAll, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(200, w.Code)
 	suite.Equal(expResJSON, w.Body.String())
 
 }
 
-// TestsServiceListAllEmptyList
-func (suite *ServiceHandlersSuite) TestServiceListAllEmptyList() {
+// TestsServiceListAllEmptyList tests the case of an empty service types list
+func (suite *ServiceTypeHandlersSuite) TestServiceTypeListAllEmptyList() {
 
 	expResJSON := `{
- "services": null
+ "service_types": null
 }`
 
-	req, err := http.NewRequest("GET", "http://localhost:8080/services", nil)
+	req, err := http.NewRequest("GET", "http://localhost:8080/service-types", nil)
 	if err != nil {
 		log.Error(err.Error())
 	}
@@ -477,14 +477,14 @@ func (suite *ServiceHandlersSuite) TestServiceListAllEmptyList() {
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
 	mockstore.SetUp()
 	// empty the store
-	mockstore.Services = []stores.QService{}
+	mockstore.Services = []stores.QServiceType{}
 
 	cfg := &config.Config{}
 	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/services", WrapConfig(ServiceListAll, mockstore, cfg))
+	router.HandleFunc("/service-types", WrapConfig(ServiceTypeListAll, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(200, w.Code)
 	suite.Equal(expResJSON, w.Body.String())
@@ -492,5 +492,5 @@ func (suite *ServiceHandlersSuite) TestServiceListAllEmptyList() {
 }
 
 func TestHandlersTestSuite(t *testing.T) {
-	suite.Run(t, new(ServiceHandlersSuite))
+	suite.Run(t, new(ServiceTypeHandlersSuite))
 }

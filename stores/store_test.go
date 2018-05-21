@@ -27,14 +27,14 @@ func (suite *StoreTestSuite) TestSetUp() {
 	mockstore := &Mockstore{Server: "localhost", Database: "test_db"}
 	mockstore.SetUp()
 
-	var qServices []QService
+	var qServices []QServiceType
 	var qBindings []QBinding
 
 	// Populate qServices
-	service1 := QService{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}
-	service2 := QService{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", RetrievalField: "user_token", CreatedOn: "2018-05-05T18:04:05Z"}
-	serviceSame1 := QService{Name: "same_name"}
-	serviceSame2 := QService{Name: "same_name"}
+	service1 := QServiceType{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}
+	service2 := QServiceType{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", RetrievalField: "user_token", CreatedOn: "2018-05-05T18:04:05Z"}
+	serviceSame1 := QServiceType{Name: "same_name"}
+	serviceSame2 := QServiceType{Name: "same_name"}
 	qServices = append(qServices, service1, service2, serviceSame1, serviceSame2)
 
 	// Populate Bindings
@@ -66,28 +66,28 @@ func (suite *StoreTestSuite) TestClose() {
 	suite.Equal(false, suite.Mockstore.Session)
 }
 
-func (suite *StoreTestSuite) TestQueryServices() {
+func (suite *StoreTestSuite) TestQueryServiceTypes() {
 
 	suite.SetUpStoreTestSuite()
 
 	// normal case outcome - 1 service
-	expQServices1 := []QService{{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}}
-	qServices1, err1 := suite.Mockstore.QueryServices("s1")
-	expQServices2 := []QService{{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", RetrievalField: "user_token", CreatedOn: "2018-05-05T18:04:05Z"}}
-	qServices2, err2 := suite.Mockstore.QueryServices("s2")
+	expQServices1 := []QServiceType{{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}}
+	qServices1, err1 := suite.Mockstore.QueryServiceTypes("s1")
+	expQServices2 := []QServiceType{{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", RetrievalField: "user_token", CreatedOn: "2018-05-05T18:04:05Z"}}
+	qServices2, err2 := suite.Mockstore.QueryServiceTypes("s2")
 
 	// normal case outcome - all services
-	expQServicesAll := []QService{
+	expQServicesAll := []QServiceType{
 		{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"},
 		{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", RetrievalField: "user_token", CreatedOn: "2018-05-05T18:04:05Z"},
 		{Name: "same_name"},
 		{Name: "same_name"},
 	}
-	qServicesAll, errAll := suite.Mockstore.QueryServices("")
+	qServicesAll, errAll := suite.Mockstore.QueryServiceTypes("")
 
 	// was not found
-	var expQService3 []QService
-	qServices3, err3 := suite.Mockstore.QueryServices("wrong_name")
+	var expQService3 []QServiceType
+	qServices3, err3 := suite.Mockstore.QueryServiceTypes("wrong_name")
 
 	// tests the normal case - 1 service
 	suite.Equal(expQServices1, qServices1)
@@ -189,14 +189,14 @@ func (suite *StoreTestSuite) TestQueryBindings() {
 	suite.Nil(err3)
 }
 
-func (suite *StoreTestSuite) TestInsertService() {
+func (suite *StoreTestSuite) TestInsertServiceType() {
 
 	suite.SetUpStoreTestSuite()
 
-	_, err1 := suite.Mockstore.InsertService("sIns", []string{"host1", "host2", "host3"}, []string{"x509", "oidc"}, "api-key", "token", "2018-05-05T18:04:05Z")
+	_, err1 := suite.Mockstore.InsertServiceType("sIns", []string{"host1", "host2", "host3"}, []string{"x509", "oidc"}, "api-key", "token", "2018-05-05T18:04:05Z")
 
-	expQServices1 := []QService{{Name: "sIns", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}}
-	qServices1, err1 := suite.Mockstore.QueryServices("sIns")
+	expQServices1 := []QServiceType{{Name: "sIns", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}}
+	qServices1, err1 := suite.Mockstore.QueryServiceTypes("sIns")
 
 	suite.Equal(expQServices1[0], qServices1[0])
 	suite.Nil(err1)

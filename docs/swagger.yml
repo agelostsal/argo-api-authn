@@ -2,7 +2,7 @@
 swagger: '2.0'
 info:
   title: argo-api-authN
-  description: "The purpose of the Authentication Service is to provide the ability to different services to use alternative authentication mechanisms without having to store additional user info or implement new functionalities.The AUTH service holds various information about a service’s users, hosts, API urls, etc, and leverages them to provide its function."
+  description: "The purpose of the Authentication Service is to provide the ability to different services to use alternative authentication mechanisms without having to store additional user info or implement new functionalities.The AUTH service typetypeholds various information about a service’s users, hosts, API urls, etc, and leverages them to provide its function."
   version: "v1"
   contact:
     name: ARGO Developers
@@ -20,8 +20,8 @@ tags:
     description: Bindings under a given service
   - name: Authentication Methods
     description: Authentication Method under a given service
-  - name: Services
-    description: Services available in the service
+  - name: Service Types
+    description: Service Types available in the service
 paths:
 
   /services:
@@ -33,7 +33,7 @@ paths:
         - $ref: '#/parameters/ApiKey'
         - name: Service information
           in: body
-          description: Required service information
+          description: Required service typetypeinformation
           required: true
           schema:
            type: object
@@ -54,7 +54,7 @@ paths:
               type: string
 
       tags:
-        - Services
+        - Service Types
       responses:
         201:
           description: Returns the newly created service
@@ -79,12 +79,12 @@ paths:
       parameters:
           - $ref: '#/parameters/ApiKey'
       tags:
-        - Services
+        - Service Types
       responses:
         200:
           description: Returns a list of all services
           schema:
-            $ref: '#/definitions/Services'
+            $ref: '#/definitions/Service Types'
         500:
           $ref: "#/responses/500"
 
@@ -101,7 +101,7 @@ paths:
           type: string
         - $ref: '#/parameters/ApiKey'
       tags:
-        - Services
+        - Service Types
       responses:
         200:
           description: Returns the information of the requested service
@@ -120,7 +120,7 @@ paths:
 
   /services/{Service}/hosts/{Host}/authM:
     get:
-      summary: Retrieve authentication method information for a specific service and host
+      summary: Retrieve authentication method information for a specific service typetypeand host
       description: |
         Retrieve information for a specific service
       parameters:
@@ -268,7 +268,7 @@ responses:
 
 definitions:
 
-  Service:
+  ServiceType:
     type: object
     properties:
       name:
@@ -311,28 +311,28 @@ definitions:
         description: key needed too access the service
       path:
         type: string
-        description: service exposed path to query users
+        description: service type exposed path to query users
       host:
         type: string
         description: host of the service
       service:
         type: string
-        description: service that the auth method is used
+        description: service type that the auth method is used
       port:
         type: integer
-        description: port of the service host
+        description: port of the service type host
       type:
         type: string
         description: api-key, x-api-token (type of auth method)
 
 
-  Services:
+  Service Types:
     type: object
     properties:
-      services:
+      service_types:
         type: array
         items:
-          $ref: '#/definitions/Service'
+          $ref: '#/definitions/ServiceType'
 
   Host:
     type: object

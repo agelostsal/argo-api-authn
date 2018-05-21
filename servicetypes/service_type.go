@@ -1,4 +1,4 @@
-package services
+package servicetypes
 
 import (
 	"github.com/ARGOeu/argo-api-authn/config"
@@ -6,7 +6,7 @@ import (
 	"github.com/ARGOeu/argo-api-authn/utils"
 )
 
-type Service struct {
+type ServiceType struct {
 	Name           string   `json:"name" required:"true"`
 	Hosts          []string `json:"hosts" required:"true"`
 	AuthTypes      []string `json:"auth_types" required:"true"`
@@ -16,92 +16,92 @@ type Service struct {
 }
 
 type ServiceList struct {
-	Services []Service `json:"services"`
+	ServiceTypes []ServiceType `json:"service_types"`
 }
 
-// CreateService creates a new service after validating the service
-func CreateService(service Service, store stores.Store, cfg config.Config) (Service, error) {
+// CreateServiceType creates a new service type after validating the service
+func CreateServiceType(service ServiceType, store stores.Store, cfg config.Config) (ServiceType, error) {
 
-	var qServices []stores.QService
-	var qService stores.QService
+	var qServices []stores.QServiceType
+	var qService stores.QServiceType
 	var err error
 
 	// check if the authentication methods are supported
 	if err = service.hasValidAuthMethod(cfg); err != nil {
-		return Service{}, err
+		return ServiceType{}, err
 	}
 
 	// check if the authentication type is supported
 	if err = service.hasValidAuthTypes(cfg); err != nil {
-		return Service{}, err
+		return ServiceType{}, err
 	}
 
-	// check that the name of the service is unique
-	if qServices, err = store.QueryServices(service.Name); err != nil {
-		return Service{}, err
+	// check that the name of the service type is unique
+	if qServices, err = store.QueryServiceTypes(service.Name); err != nil {
+		return ServiceType{}, err
 	}
 
 	if len(qServices) > 0 {
 		err = utils.APIErrConflict(service, "name", service.Name)
-		return Service{}, err
+		return ServiceType{}, err
 	}
 
-	// insert the service
-	if qService, err = store.InsertService(service.Name, service.Hosts, service.AuthTypes, service.AuthMethod, service.RetrievalField, utils.ZuluTimeNow()); err != nil {
-		return Service{}, err
+	// insert the service type
+	if qService, err = store.InsertServiceType(service.Name, service.Hosts, service.AuthTypes, service.AuthMethod, service.RetrievalField, utils.ZuluTimeNow()); err != nil {
+		return ServiceType{}, err
 	}
 
-	// convert the qService to a Service
+	// convert the qService to a ServiceType
 	if err = utils.CopyFields(qService, &service); err != nil {
 		err = utils.APIErrDatabase(err.Error())
-		return Service{}, err
+		return ServiceType{}, err
 	}
 
 	return service, err
 }
 
-// FindServiceByName queries the datastore to find a service associated with the provided argument name
-func FindServiceByName(name string, store stores.Store) (Service, error) {
+// FindServiceTypeByName queries the datastore to find a service type associated with the provided argument name
+func FindServiceTypeByName(name string, store stores.Store) (ServiceType, error) {
 
-	var qServices []stores.QService
-	var service Service
+	var qServices []stores.QServiceType
+	var service ServiceType
 	var err error
 
-	if qServices, err = store.QueryServices(name); err != nil {
-		return Service{}, err
+	if qServices, err = store.QueryServiceTypes(name); err != nil {
+		return ServiceType{}, err
 	}
 
 	if len(qServices) == 0 {
-		err = utils.APIErrNotFound("Service")
-		return Service{}, err
+		err = utils.APIErrNotFound("ServiceType")
+		return ServiceType{}, err
 	}
 
 	if len(qServices) > 1 {
-		err = utils.APIErrDatabase("Multiple services with the same name: " + name)
-		return Service{}, err
+		err = utils.APIErrDatabase("Multiple service-types with the same name: " + name)
+		return ServiceType{}, err
 	}
 
 	if err := utils.CopyFields(qServices[0], &service); err != nil {
 		err = utils.APIGenericInternalError(err.Error())
-		return Service{}, err
+		return ServiceType{}, err
 	}
 
 	return service, err
 }
 
-// FindAllServices returns all the services from the datastore
-func FindAllServices(store stores.Store) (ServiceList, error) {
+// FindAllServiceTypes returns all the service types from the datastore
+func FindAllServiceTypes(store stores.Store) (ServiceList, error) {
 
-	var qServices []stores.QService
-	var services []Service
+	var qServices []stores.QServiceType
+	var services []ServiceType
 	var err error
 
-	if qServices, err = store.QueryServices(""); err != nil {
+	if qServices, err = store.QueryServiceTypes(""); err != nil {
 		return ServiceList{}, err
 	}
 
 	for _, qs := range qServices {
-		_service := &Service{}
+		_service := &ServiceType{}
 		if err := utils.CopyFields(qs, _service); err != nil {
 			err = utils.APIGenericInternalError(err.Error())
 			return ServiceList{}, err
@@ -113,8 +113,8 @@ func FindAllServices(store stores.Store) (ServiceList, error) {
 
 }
 
-// hsHost returns whether or not a host is associated with a service
-func (s *Service) HasHost(host string) bool {
+// hsHost returns whether or not a host is associated with a service type
+func (s *ServiceType) HasHost(host string) bool {
 
 	flag := false
 	for _, h := range s.Hosts {
@@ -127,8 +127,8 @@ func (s *Service) HasHost(host string) bool {
 	return flag
 }
 
-// hasValidAuthTypes checks whether or not the authentication types of a project are supported
-func (s *Service) hasValidAuthTypes(cfg config.Config) error {
+// hasValidAuthTypes checks whether or not the authentication types of a service type are supported
+func (s *ServiceType) hasValidAuthTypes(cfg config.Config) error {
 
 	var err error
 	var flag bool
@@ -154,8 +154,8 @@ func (s *Service) hasValidAuthTypes(cfg config.Config) error {
 	return err
 }
 
-// hasValidAuthMethod checks whether or not the authentication method of a project is supported
-func (s *Service) hasValidAuthMethod(cfg config.Config) error {
+// hasValidAuthMethod checks whether or not the authentication method of a service type is supported
+func (s *ServiceType) hasValidAuthMethod(cfg config.Config) error {
 
 	var err error
 	for _, am := range cfg.SupportedAuthMethods {

@@ -1,17 +1,17 @@
 # Service API Calls
 
-## [POST] Manage Services - Create New Service
+## [POST] Manage Service Types - Create New Service Type
 
-This request creates a new service.
+This request creates a new service type.
 
 #### Request
 
-`POST /v1/services`
+`POST /v1/service-types`
 
 ### Example request
 ```
 curl -X POST -H "Content-Type: application/json"
-  "https://{URL}/v1/services?key={key_in_the_config}"
+  "https://{URL}/v1/service-types?key={key_in_the_config}"
 ```
 
 
@@ -29,7 +29,7 @@ curl -X POST -H "Content-Type: application/json"
  
  ### Response
  
- If the request is successful, the response contains the newly created service.
+ If the request is successful, the response contains the newly created service type.
  
  Success Response
  
@@ -50,15 +50,15 @@ curl -X POST -H "Content-Type: application/json"
 
   Please refer to section [Errors](api_errors.md) to see all possible Errors
   
-  ## [GET] Manage Services - ListAllServices
+  ## [GET] Manage Service Types - ListAllServiceTypes
   
   ### Request
   
-  `GET/v1/services`
+  `GET/v1/service-types`
   
    ### Response
    
-   If the request is successful, the response contains the newly created service.
+   If the request is successful, the response contains all the service types.
    
    Success Response
    
@@ -66,7 +66,7 @@ curl -X POST -H "Content-Type: application/json"
    
    ```json
 {
-    "services": [
+    "service_types": [
         {
             "name": "s1",
             "hosts": [
@@ -98,13 +98,13 @@ curl -X POST -H "Content-Type: application/json"
 }
 ```
 
-  ## [GET] Manage Services - ListOneService
+  ## [GET] Manage Service Types - ListOneServiceType
   
   ### Request
   
-  `GET/v1/services/{NAME}`
+  `GET/v1/service-types/{NAME}`
   
-   If the request is successful, the response contains information for the requested service.
+   If the request is successful, the response contains information for the requested service type.
    
    Success Response
    
