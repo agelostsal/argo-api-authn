@@ -4,6 +4,7 @@ import (
 	"github.com/ARGOeu/argo-api-authn/config"
 	"github.com/ARGOeu/argo-api-authn/stores"
 	"github.com/ARGOeu/argo-api-authn/utils"
+	uuid2 "github.com/satori/go.uuid"
 )
 
 type ServiceType struct {
@@ -11,6 +12,7 @@ type ServiceType struct {
 	Hosts          []string `json:"hosts" required:"true"`
 	AuthTypes      []string `json:"auth_types" required:"true"`
 	AuthMethod     string   `json:"auth_method" required:"true"`
+	UUID           string   `json:"uuid"`
 	RetrievalField string   `json:"retrieval_field" required:"true"`
 	CreatedOn      string   `json:"created_on"`
 }
@@ -46,8 +48,11 @@ func CreateServiceType(service ServiceType, store stores.Store, cfg config.Confi
 		return ServiceType{}, err
 	}
 
+	// generate UUID
+	uuid := uuid2.NewV4().String()
+
 	// insert the service type
-	if qService, err = store.InsertServiceType(service.Name, service.Hosts, service.AuthTypes, service.AuthMethod, service.RetrievalField, utils.ZuluTimeNow()); err != nil {
+	if qService, err = store.InsertServiceType(service.Name, service.Hosts, service.AuthTypes, service.AuthMethod, uuid, service.RetrievalField, utils.ZuluTimeNow()); err != nil {
 		return ServiceType{}, err
 	}
 

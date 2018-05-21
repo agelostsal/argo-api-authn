@@ -8,11 +8,11 @@ import (
 
 	"encoding/json"
 	"github.com/ARGOeu/argo-api-authn/config"
+	"github.com/ARGOeu/argo-api-authn/servicetypes"
 	"github.com/ARGOeu/argo-api-authn/stores"
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
 	"net/http/httptest"
-	"github.com/ARGOeu/argo-api-authn/servicetypes"
 )
 
 type ServiceTypeHandlersSuite struct {
@@ -303,6 +303,7 @@ func (suite *ServiceTypeHandlersSuite) TestServiceTypeListOne() {
   "oidc"
  ],
  "auth_method": "api-key",
+ "uuid": "uuid1",
  "retrieval_field": "token",
  "created_on": "2018-05-05T18:04:05Z"
 }`
@@ -406,6 +407,7 @@ func (suite *ServiceTypeHandlersSuite) TestServiceTypeListAll() {
     "oidc"
    ],
    "auth_method": "api-key",
+   "uuid": "uuid1",
    "retrieval_field": "token",
    "created_on": "2018-05-05T18:04:05Z"
   },
@@ -419,6 +421,7 @@ func (suite *ServiceTypeHandlersSuite) TestServiceTypeListAll() {
     "x509"
    ],
    "auth_method": "api-key",
+   "uuid": "uuid2",
    "retrieval_field": "user_token",
    "created_on": "2018-05-05T18:04:05Z"
   },
@@ -427,6 +430,7 @@ func (suite *ServiceTypeHandlersSuite) TestServiceTypeListAll() {
    "hosts": null,
    "auth_types": null,
    "auth_method": "",
+   "uuid": "",
    "retrieval_field": "",
    "created_on": ""
   },
@@ -435,6 +439,7 @@ func (suite *ServiceTypeHandlersSuite) TestServiceTypeListAll() {
    "hosts": null,
    "auth_types": null,
    "auth_method": "",
+   "uuid": "",
    "retrieval_field": "",
    "created_on": ""
   }

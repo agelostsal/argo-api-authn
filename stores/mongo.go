@@ -117,12 +117,12 @@ func (mongo *MongoStore) QueryBindings(service string, host string) ([]QBinding,
 }
 
 //InsertServiceType inserts a new service into the datastore
-func (mongo *MongoStore) InsertServiceType(name string, hosts []string, authTypes []string, authMethod string, retrievalField string, createdOn string) (QServiceType, error) {
+func (mongo *MongoStore) InsertServiceType(name string, hosts []string, authTypes []string, authMethod string, uuid string, retrievalField string, createdOn string) (QServiceType, error) {
 
 	var qService QServiceType
 	var err error
 
-	qService = QServiceType{Name: name, Hosts: hosts, AuthTypes: authTypes, AuthMethod: authMethod, RetrievalField: retrievalField, CreatedOn: createdOn}
+	qService = QServiceType{Name: name, Hosts: hosts, AuthTypes: authTypes, AuthMethod: authMethod, UUID: uuid, RetrievalField: retrievalField, CreatedOn: createdOn}
 	db := mongo.Session.DB(mongo.Database)
 	c := db.C("service_types")
 

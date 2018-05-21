@@ -31,8 +31,8 @@ func (suite *StoreTestSuite) TestSetUp() {
 	var qBindings []QBinding
 
 	// Populate qServices
-	service1 := QServiceType{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}
-	service2 := QServiceType{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", RetrievalField: "user_token", CreatedOn: "2018-05-05T18:04:05Z"}
+	service1 := QServiceType{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", UUID: "uuid1", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}
+	service2 := QServiceType{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", UUID: "uuid2", RetrievalField: "user_token", CreatedOn: "2018-05-05T18:04:05Z"}
 	serviceSame1 := QServiceType{Name: "same_name"}
 	serviceSame2 := QServiceType{Name: "same_name"}
 	qServices = append(qServices, service1, service2, serviceSame1, serviceSame2)
@@ -71,15 +71,15 @@ func (suite *StoreTestSuite) TestQueryServiceTypes() {
 	suite.SetUpStoreTestSuite()
 
 	// normal case outcome - 1 service
-	expQServices1 := []QServiceType{{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}}
+	expQServices1 := []QServiceType{{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", UUID: "uuid1", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}}
 	qServices1, err1 := suite.Mockstore.QueryServiceTypes("s1")
-	expQServices2 := []QServiceType{{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", RetrievalField: "user_token", CreatedOn: "2018-05-05T18:04:05Z"}}
+	expQServices2 := []QServiceType{{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", UUID: "uuid2", RetrievalField: "user_token", CreatedOn: "2018-05-05T18:04:05Z"}}
 	qServices2, err2 := suite.Mockstore.QueryServiceTypes("s2")
 
 	// normal case outcome - all services
 	expQServicesAll := []QServiceType{
-		{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"},
-		{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", RetrievalField: "user_token", CreatedOn: "2018-05-05T18:04:05Z"},
+		{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", UUID: "uuid1", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"},
+		{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", UUID: "uuid2", RetrievalField: "user_token", CreatedOn: "2018-05-05T18:04:05Z"},
 		{Name: "same_name"},
 		{Name: "same_name"},
 	}
@@ -193,9 +193,9 @@ func (suite *StoreTestSuite) TestInsertServiceType() {
 
 	suite.SetUpStoreTestSuite()
 
-	_, err1 := suite.Mockstore.InsertServiceType("sIns", []string{"host1", "host2", "host3"}, []string{"x509", "oidc"}, "api-key", "token", "2018-05-05T18:04:05Z")
+	_, err1 := suite.Mockstore.InsertServiceType("sIns", []string{"host1", "host2", "host3"}, []string{"x509", "oidc"}, "api-key", "uuid_ins", "token", "2018-05-05T18:04:05Z")
 
-	expQServices1 := []QServiceType{{Name: "sIns", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}}
+	expQServices1 := []QServiceType{{Name: "sIns", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", UUID: "uuid_ins", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}}
 	qServices1, err1 := suite.Mockstore.QueryServiceTypes("sIns")
 
 	suite.Equal(expQServices1[0], qServices1[0])

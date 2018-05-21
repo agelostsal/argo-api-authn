@@ -7,9 +7,9 @@ import (
 	"github.com/ARGOeu/argo-api-authn/utils"
 	"github.com/gorilla/context"
 
+	"github.com/ARGOeu/argo-api-authn/servicetypes"
 	"github.com/gorilla/mux"
 	"net/http"
-	"github.com/ARGOeu/argo-api-authn/servicetypes"
 )
 
 func ServiceTypeCreate(w http.ResponseWriter, r *http.Request) {
