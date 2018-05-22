@@ -17,23 +17,23 @@ produces:
   - application/json
 tags:
   - name: Bindings
-    description: Bindings under a given service
+    description: Bindings under a given service type
   - name: Authentication Methods
-    description: Authentication Method under a given service
+    description: Authentication Method under a given service type
   - name: Service Types
     description: Service Types available in the service
 paths:
 
-  /services:
+  /service-types:
     post:
-      summary: Create a new service
+      summary: Create a new service type
       description: |
-        Create a new service
+        Create a new service type
       parameters:
         - $ref: '#/parameters/ApiKey'
-        - name: Service information
+        - name: Service Type information
           in: body
-          description: Required service typetypeinformation
+          description: Required service type information
           required: true
           schema:
            type: object
@@ -52,14 +52,13 @@ paths:
               type: string
              retrieval_field:
               type: string
-
       tags:
         - Service Types
       responses:
         201:
-          description: Returns the newly created service
+          description: Returns the newly created service type
           schema:
-            $ref: '#/definitions/Service'
+            $ref: '#/definitions/ServiceType'
         400:
           $ref: "#/responses/400"
         401:
@@ -74,29 +73,29 @@ paths:
           $ref: "#/responses/500"
 
     get:
-      summary: Lists all services
-      description: Lists all services
+      summary: Lists all service types
+      description: Lists all service types
       parameters:
           - $ref: '#/parameters/ApiKey'
       tags:
         - Service Types
       responses:
         200:
-          description: Returns a list of all services
+          description: Returns a list of all service types
           schema:
-            $ref: '#/definitions/Service Types'
+            $ref: '#/definitions/ServiceTypes'
         500:
           $ref: "#/responses/500"
 
-  /services/{Service}:
+  /service-types/{Name}:
     get:
-      summary: Retrieve information for a specific service
+      summary: Retrieve information for a specific service type
       description: |
-        Retrieve information for a specific service
+        Retrieve information for a specific service type
       parameters:
-        - name: Service
+        - name: Name
           in: path
-          description: Name of the service
+          description: Name of the service type
           required: true
           type: string
         - $ref: '#/parameters/ApiKey'
@@ -104,9 +103,9 @@ paths:
         - Service Types
       responses:
         200:
-          description: Returns the information of the requested service
+          description: Returns the information of the requested service type
           schema:
-            $ref: '#/definitions/Service'
+            $ref: '#/definitions/ServiceType'
         400:
           $ref: "#/responses/400"
         401:
@@ -118,15 +117,15 @@ paths:
         500:
           $ref: "#/responses/500"
 
-  /services/{Service}/hosts/{Host}/authM:
+  /service-types/{Name}/hosts/{Host}/authM:
     get:
-      summary: Retrieve authentication method information for a specific service typetypeand host
+      summary: Retrieve authentication method information for a specific service type and host
       description: |
-        Retrieve information for a specific service
+        Retrieve information for a specific service type
       parameters:
-        - name: Service
+        - name: Name
           in: path
-          description: Name of the service
+          description: Name of the service type
           required: true
           type: string
         - name: Host
@@ -157,7 +156,7 @@ paths:
     get:
       summary: Retrieve information for all authentication methods
       description: |
-        Retrieve information for a specific service
+        Retrieve information for a specific service type
       parameters:
         - $ref: '#/parameters/ApiKey'
       tags:
@@ -278,7 +277,7 @@ definitions:
         type: array
         items:
           type: string
-        description: hosts that run this service
+        description: hosts that run this service type
       auth_types:
         type: array
         items:
@@ -287,6 +286,9 @@ definitions:
       auth_method:
         type: string
         description: the authentication method that the sercvice supports
+      uuid:
+        type: string
+        description: uuid assosiciatd with the service type
       retrieval_field:
         type: string
         description: name of the response field which contains the value we are looking for
@@ -308,13 +310,13 @@ definitions:
     properties:
       access_key:
         type: string
-        description: key needed too access the service
+        description: key needed too access the service type
       path:
         type: string
         description: service type exposed path to query users
       host:
         type: string
-        description: host of the service
+        description: host of the service type
       service:
         type: string
         description: service type that the auth method is used
@@ -325,8 +327,7 @@ definitions:
         type: string
         description: api-key, x-api-token (type of auth method)
 
-
-  Service Types:
+  ServiceTypes:
     type: object
     properties:
       service_types:

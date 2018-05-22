@@ -11,7 +11,7 @@ type ServiceTestSuite struct {
 	suite.Suite
 }
 
-func (suite *ServiceTestSuite) TestCreateService() {
+func (suite *ServiceTestSuite) TestCreateServiceType() {
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
 	mockstore.SetUp()
@@ -22,24 +22,24 @@ func (suite *ServiceTestSuite) TestCreateService() {
 	var emptyService ServiceType
 
 	// test the normal case
-	s1 := ServiceType{"sCr", []string{"host1", "host2"}, []string{"x509", "oidc"}, "api-key", "token", ""}
+	s1 := ServiceType{"sCr", []string{"host1", "host2"}, []string{"x509", "oidc"}, "api-key", "uuid1", "token", ""}
 	_, err := CreateServiceType(s1, mockstore, *cfg)
 	res1, _ := mockstore.QueryServiceTypes("sCr")
 
 	// test the case where the name already exists
-	s2 := ServiceType{"s1", []string{"host1", "host2"}, []string{"x509", "oidc"}, "api-key", "token", ""}
+	s2 := ServiceType{"s1", []string{"host1", "host2"}, []string{"x509", "oidc"}, "api-key", "some_uuid", "token", ""}
 	res2, err2 := CreateServiceType(s2, mockstore, *cfg)
 
 	// test the case of unsupported auth type
-	s3 := ServiceType{"sCr", []string{"host1", "host2"}, []string{"unsup_type", "oidc"}, "api-key", "token", ""}
+	s3 := ServiceType{"sCr", []string{"host1", "host2"}, []string{"unsup_type", "oidc"}, "api-key", "some_uuid", "token", ""}
 	res3, err3 := CreateServiceType(s3, mockstore, *cfg)
 
 	// test the case of empty auth type list
-	s4 := ServiceType{"sCr", []string{"host1", "host2"}, []string{}, "api-key", "token", ""}
+	s4 := ServiceType{"sCr", []string{"host1", "host2"}, []string{}, "api-key", "some_uuid", "token", ""}
 	res4, err4 := CreateServiceType(s4, mockstore, *cfg)
 
 	// test the case of unsupported auth method
-	s5 := ServiceType{"sCr", []string{"host1", "host2"}, []string{"x509", "oidc"}, "unsup_method", "token", ""}
+	s5 := ServiceType{"sCr", []string{"host1", "host2"}, []string{"x509", "oidc"}, "unsup_method", "some_uuid", "token", ""}
 	res5, err5 := CreateServiceType(s5, mockstore, *cfg)
 
 	suite.Equal(s1.Name, res1[0].Name)
@@ -60,13 +60,13 @@ func (suite *ServiceTestSuite) TestCreateService() {
 
 }
 
-func (suite *ServiceTestSuite) TestFindServiceByName() {
+func (suite *ServiceTestSuite) TestFindServiceTypeByName() {
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
 	mockstore.SetUp()
 
 	// normal case
-	expS1 := ServiceType{"s1", []string{"host1", "host2", "host3"}, []string{"x509", "oidc"}, "api-key", "token", "2018-05-05T18:04:05Z"}
+	expS1 := ServiceType{"s1", []string{"host1", "host2", "host3"}, []string{"x509", "oidc"}, "api-key", "uuid1", "token", "2018-05-05T18:04:05Z"}
 	ser1, err1 := FindServiceTypeByName("s1", mockstore)
 
 	// not found case
@@ -86,15 +86,15 @@ func (suite *ServiceTestSuite) TestFindServiceByName() {
 	suite.Equal("Database Error: Multiple service-types with the same name: same_name", err3.Error())
 }
 
-func (suite *ServiceTestSuite) TestFindAllServices() {
+func (suite *ServiceTestSuite) TestFindAllServiceTypes() {
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
 	mockstore.SetUp()
 
 	// normal case outcome - all services
 	expQServicesAll := []ServiceType{
-		{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"},
-		{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", RetrievalField: "user_token", CreatedOn: "2018-05-05T18:04:05Z"},
+		{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", UUID: "uuid1", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"},
+		{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", UUID: "uuid2", RetrievalField: "user_token", CreatedOn: "2018-05-05T18:04:05Z"},
 		{Name: "same_name"},
 		{Name: "same_name"},
 	}
@@ -113,7 +113,7 @@ func (suite *ServiceTestSuite) TestFindAllServices() {
 	suite.Nil(err2)
 }
 
-func (suite *ServiceTestSuite) TestServiceHasHost() {
+func (suite *ServiceTestSuite) TestServiceTypeHasHost() {
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
 	mockstore.SetUp()
@@ -121,7 +121,7 @@ func (suite *ServiceTestSuite) TestServiceHasHost() {
 	cfg := &config.Config{}
 	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
 
-	ser := ServiceType{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}
+	ser := ServiceType{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, UUID: "uuid1", AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}
 
 	suite.Equal(true, ser.HasHost("host1"))
 	suite.Equal(false, ser.HasHost("host_unknown"))

@@ -41,6 +41,7 @@ curl -X POST -H "Content-Type: application/json"
   	"hosts": ["host1", "host2"],
   	"auth_types": ["x509", "oidc"],
   	"auth_method": "api-key",
+  	"uuid": "da22b2d4-ba6c-43ca-b28d-400cd0a5d83e",
   	"retrieval_field": "token",
   	"created_on": "2018-05-05T18:04:05Z" 
   }
@@ -77,6 +78,7 @@ curl -X POST -H "Content-Type: application/json"
                 "x509"
             ],
             "auth_method": "api-key",
+            "uuid": "da22b2d4-ba6c-43ca-b28d-400cd0a5d83e",
             "retrieval_field": "token",
             "created_on": ""
         },
@@ -91,6 +93,7 @@ curl -X POST -H "Content-Type: application/json"
                 "oidc"
             ],
             "auth_method": "api-key",
+            "uuid": "da22b2d4-ba6c-43ca-b28d-400sd0a5d83e",
             "retrieval_field": "token",
             "created_on": "2018-05-13T21:52:58Z"
         }
@@ -116,6 +119,7 @@ curl -X POST -H "Content-Type: application/json"
     	"hosts": ["host1", "host2"],
     	"auth_types": ["x509", "oidc"],
     	"auth_method": "api-key",
+    	"uuid": "da22b2d4-ba6c-43ca-b28d-400cd0a5d83e",
     	"retrieval_field": "token",
     	"created_on": "2018-05-05T18:04:05Z" 
     }

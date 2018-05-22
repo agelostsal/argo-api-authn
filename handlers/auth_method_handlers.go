@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"github.com/ARGOeu/argo-api-authn/auth-methods"
 	"github.com/ARGOeu/argo-api-authn/config"
+	"github.com/ARGOeu/argo-api-authn/servicetypes"
 	"github.com/ARGOeu/argo-api-authn/stores"
 	"github.com/ARGOeu/argo-api-authn/utils"
 	"github.com/Sirupsen/logrus"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"net/http"
-	"github.com/ARGOeu/argo-api-authn/servicetypes"
 )
 
 func AuthMethodCreate(w http.ResponseWriter, r *http.Request) {
