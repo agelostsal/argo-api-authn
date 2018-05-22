@@ -94,6 +94,35 @@ func FindServiceTypeByName(name string, store stores.Store) (ServiceType, error)
 	return service, err
 }
 
+// FindServiceTypeByUUID queries the datastore to find a service type associated with the provided argument uuid
+func FindServiceTypeByUUID(uuid string, store stores.Store) (ServiceType, error) {
+
+	var qServices []stores.QServiceType
+	var service ServiceType
+	var err error
+
+	if qServices, err = store.QueryServiceTypesByUUID(uuid); err != nil {
+		return ServiceType{}, err
+	}
+
+	if len(qServices) == 0 {
+		err = utils.APIErrNotFound("ServiceType")
+		return ServiceType{}, err
+	}
+
+	if len(qServices) > 1 {
+		err = utils.APIErrDatabase("Multiple service-types with the same uuid: " + uuid)
+		return ServiceType{}, err
+	}
+
+	if err := utils.CopyFields(qServices[0], &service); err != nil {
+		err = utils.APIGenericInternalError(err.Error())
+		return ServiceType{}, err
+	}
+
+	return service, err
+}
+
 // FindAllServiceTypes returns all the service types from the datastore
 func FindAllServiceTypes(store stores.Store) (ServiceList, error) {
 

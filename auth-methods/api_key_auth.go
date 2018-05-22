@@ -7,14 +7,14 @@ import (
 	"strings"
 )
 
-func FindApiKeyAuthMethod(service string, host string, store stores.Store) (map[string]interface{}, error) {
+func FindApiKeyAuthMethod(serviceUUID string, host string, store stores.Store) (map[string]interface{}, error) {
 
 	var err error
 	var apiKeyAuthMap map[string]interface{}
 	var apiKeyAuthMaps []map[string]interface{}
 	var ok bool
 
-	if apiKeyAuthMaps, err = store.QueryAuthMethods(service, host, "api-key"); err != nil {
+	if apiKeyAuthMaps, err = store.QueryAuthMethods(serviceUUID, host, "api-key"); err != nil {
 		return apiKeyAuthMap, err
 	}
 

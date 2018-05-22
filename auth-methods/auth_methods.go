@@ -13,7 +13,7 @@ type AuthMethodsList struct {
 
 type AuthMethodCreator func(authM map[string]interface{}, store stores.Store) (map[string]interface{}, error)
 
-type AuthMethodFinder func(service string, host string, store stores.Store) (map[string]interface{}, error)
+type AuthMethodFinder func(serviceUUID string, host string, store stores.Store) (map[string]interface{}, error)
 
 var AuthMethodFinders = map[string]AuthMethodFinder{
 	"api-key": FindApiKeyAuthMethod,

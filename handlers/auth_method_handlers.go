@@ -17,7 +17,7 @@ func AuthMethodCreate(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	var authM map[string]interface{}
-	var service servicetypes.ServiceType
+	var serviceType servicetypes.ServiceType
 	var ok bool
 	var flag bool
 	var typeM string
@@ -57,13 +57,13 @@ func AuthMethodCreate(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if !flag {
-		err = utils.APIErrInvalidFieldContent("type", typeM+" is not yet supported by the service")
+		err = utils.APIErrInvalidFieldContent("type", typeM+" is not yet supported by the serviceType")
 		utils.RespondError(w, err)
 		return
 	}
 
-	if _, ok = authM["service"]; ok == false {
-		err = utils.APIErrEmptyRequiredField("ServiceType was not found in the request body")
+	if _, ok = authM["service_uuid"]; ok == false {
+		err = utils.APIErrEmptyRequiredField("ServiceType UUID was not found in the request body")
 		utils.RespondError(w, err)
 		return
 	}
@@ -86,32 +86,32 @@ func AuthMethodCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// check if the service exists
-	if service, err = servicetypes.FindServiceTypeByName(authM["service"].(string), store); err != nil {
+	// check if the serviceType exists
+	if serviceType, err = servicetypes.FindServiceTypeByUUID(authM["service_uuid"].(string), store); err != nil {
 		utils.RespondError(w, err)
 		return
 	}
 
 	// check if the host exists
-	if !service.HasHost(authM["host"].(string)) {
+	if !serviceType.HasHost(authM["host"].(string)) {
 		err = utils.APIErrNotFound("Host")
 		utils.RespondError(w, err)
 		return
 	}
 
-	// check if the service supports this kind of auth method
-	if service.AuthMethod != typeM {
+	// check if the serviceType supports this kind of auth method
+	if serviceType.AuthMethod != typeM {
 		err = utils.APIErrUnsupportedContent("type", typeM)
 		utils.RespondError(w, err)
 		return
 	}
 
-	// checks if the service on the given host has already an auth method declared
+	// checks if the serviceType on the given host has already an auth method declared
 	// use the appropriate finder for the type of auth method
 	authMFinder := auth_methods.AuthMethodFinders[typeM]
 
-	if _, err := authMFinder(service.Name, authM["host"].(string), store); err == nil {
-		err = utils.APIErrConflict(auth_methods.AuthMethod{}, "service", service.Name)
+	if _, err := authMFinder(authM["service_uuid"].(string), authM["host"].(string), store); err == nil {
+		err = utils.APIErrConflict(auth_methods.AuthMethod{}, "serviceType", authM["service_uuid"].(string))
 		utils.RespondError(w, err)
 		return
 	}
@@ -154,7 +154,7 @@ func AuthMethodListOne(w http.ResponseWriter, r *http.Request) {
 	// depending on the service's declared auth method, grab the respective finder
 	authMFinder := auth_methods.AuthMethodFinders[service.AuthMethod]
 
-	if authM, err = authMFinder(vars["service"], vars["host"], store); err != nil {
+	if authM, err = authMFinder(service.UUID, vars["host"], store); err != nil {
 		utils.RespondError(w, err)
 		return
 	}

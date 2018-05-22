@@ -23,7 +23,7 @@ curl -X POST -H "Content-Type: application/json"
             "host": "127.0.0.1",
             "path": "/path/{{identifier}}?key={{access_key}}",
             "port": 9000,
-            "service": "s1",
+            "service_uuid1": "da22b2d4-ba6c-43ca-b28d-400sd0a5d83e",
             "type": "api-key"
         }
  ```
@@ -42,7 +42,7 @@ curl -X POST -H "Content-Type: application/json"
             "host": "127.0.0.1",
             "path": "/path/{{identifier}}?key={{access_key}}",
             "port": 9000,
-            "service": "s1",
+            "service_uuid": "da22b2d4-ba6c-43ca-b28d-400sd0a5d83e",
             "type": "api-key"
         }
    ```
@@ -67,11 +67,11 @@ curl -X POST -H "Content-Type: application/json"
    
 ```json
 {
-    "access_key": "b328c3861f061f87cbd34cf34f36ba2ae20883a5",
+    "access_key": "key1",
     "host": "127.0.0.1",
     "path": "/v1/users:byUUID/{{identifier}}?key={{access_key}}",
     "port": 8081,
-    "service": "ams",
+    "service_uuid": "da22b2d4-ba6c-43ca-b28d-400sd0a5d83e",
     "type": "api-key"
 }
 ```
@@ -103,7 +103,7 @@ curl -X POST -H "Content-Type: application/json"
       "host": "host2",
       "path": "path",
       "port": 9000,
-      "service": "s1",
+      "service_uuid": "da22b2d4-ba6c-43ca-b28d-400sd0a5d83e",
       "type": "api-key"
     },
     {
@@ -111,7 +111,7 @@ curl -X POST -H "Content-Type: application/json"
       "host": "host1",
       "path": "path",
       "port": 9000,
-      "service": "s2",
+      "service_uuid": "da22b2d4-ba6c-43ca-b28d-400sd0a5d83a",
       "type": "api-key"
     }
   ]

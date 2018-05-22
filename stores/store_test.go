@@ -45,15 +45,15 @@ func (suite *StoreTestSuite) TestSetUp() {
 	qBindings = append(qBindings, binding1, binding2, binding3)
 
 	// Populate AuthMethods
-	authMethods := []map[string]interface{}{{"service": "s1", "host": "host1", "port": 9000.0, "path": "test_path_1", "access_key": "key1", "type": "api-key"},
-		{"host": "host2", "port": 9000.0, "path": "test_path_1", "type": "api-key", "service": "s1"},
-		{"access_key": "key1", "type": "api-key", "service": "s2", "host": "host3", "port": 9000.0},
-		{"path": "test_path_1", "access_key": "key1", "type": "api-key", "service": "s2", "host": "host4"}}
+	authMethods := []map[string]interface{}{{"service_uuid": "uuid1", "host": "host1", "port": 9000.0, "path": "test_path_1", "access_key": "key1", "type": "api-key"},
+		{"host": "host2", "port": 9000.0, "path": "test_path_1", "type": "api-key", "service_uuid": "uuid1"},
+		{"access_key": "key1", "type": "api-key", "service_uuid": "uuid2", "host": "host3", "port": 9000.0},
+		{"path": "test_path_1", "access_key": "key1", "type": "api-key", "service_uuid": "uuid2", "host": "host4"}}
 
 	suite.Equal(mockstore.Session, true)
 	suite.Equal(mockstore.Database, "test_db")
 	suite.Equal(mockstore.Server, "localhost")
-	suite.Equal(mockstore.Services, qServices)
+	suite.Equal(mockstore.ServiceTypes, qServices)
 	suite.Equal(mockstore.Bindings, qBindings)
 	suite.Equal(mockstore.AuthMethods, authMethods)
 }
@@ -89,13 +89,13 @@ func (suite *StoreTestSuite) TestQueryServiceTypes() {
 	var expQService3 []QServiceType
 	qServices3, err3 := suite.Mockstore.QueryServiceTypes("wrong_name")
 
-	// tests the normal case - 1 service
+	// tests the normal case - 1 service type
 	suite.Equal(expQServices1, qServices1)
 	suite.Nil(err1)
 	suite.Equal(expQServices2, qServices2)
 	suite.Nil(err2)
 
-	// tests the normal case - all services
+	// tests the normal case - all service types
 	suite.Equal(expQServicesAll, qServicesAll)
 	suite.Nil(errAll)
 
@@ -104,22 +104,42 @@ func (suite *StoreTestSuite) TestQueryServiceTypes() {
 	suite.Nil(err3)
 }
 
+func (suite *StoreTestSuite) TestQueryServiceTypesByUUID() {
+
+	suite.SetUpStoreTestSuite()
+
+	// normal case outcome
+	expQServices1 := []QServiceType{{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", UUID: "uuid1", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}}
+	qServices1, err1 := suite.Mockstore.QueryServiceTypesByUUID("uuid1")
+
+	// was not found
+	var expQServices2 []QServiceType
+	qServices2, err2 := suite.Mockstore.QueryServiceTypesByUUID("wrong_uuid")
+
+	suite.Equal(expQServices1, qServices1)
+	suite.Equal(expQServices2, qServices2)
+
+	suite.Nil(err1)
+	suite.Nil(err2)
+
+}
+
 func (suite *StoreTestSuite) TestQueryAuthMethods() {
 
 	suite.SetUpStoreTestSuite()
 
 	// normal case outcome
-	expAuthMethod1 := []map[string]interface{}{{"type": "api-key", "service": "s1", "host": "host1", "path": "test_path_1", "port": 9000.0, "access_key": "key1"}}
-	authMethod1, err1 := suite.Mockstore.QueryAuthMethods("s1", "host1", "api-key")
+	expAuthMethod1 := []map[string]interface{}{{"type": "api-key", "service_uuid": "uuid1", "host": "host1", "path": "test_path_1", "port": 9000.0, "access_key": "key1"}}
+	authMethod1, err1 := suite.Mockstore.QueryAuthMethods("uuid1", "host1", "api-key")
 
 	// was not found
 	authMethod2, err2 := suite.Mockstore.QueryAuthMethods("wrong_service", "wrong_host", "wrong_type")
 
 	// normal case - all
-	expAuthMethods := []map[string]interface{}{{"service": "s1", "host": "host1", "port": 9000.0, "path": "test_path_1", "access_key": "key1", "type": "api-key"},
-		{"host": "host2", "port": 9000.0, "path": "test_path_1", "type": "api-key", "service": "s1"},
-		{"access_key": "key1", "type": "api-key", "service": "s2", "host": "host3", "port": 9000.0},
-		{"path": "test_path_1", "access_key": "key1", "type": "api-key", "service": "s2", "host": "host4"}}
+	expAuthMethods := []map[string]interface{}{{"service_uuid": "uuid1", "host": "host1", "port": 9000.0, "path": "test_path_1", "access_key": "key1", "type": "api-key"},
+		{"host": "host2", "port": 9000.0, "path": "test_path_1", "type": "api-key", "service_uuid": "uuid1"},
+		{"access_key": "key1", "type": "api-key", "service_uuid": "uuid2", "host": "host3", "port": 9000.0},
+		{"path": "test_path_1", "access_key": "key1", "type": "api-key", "service_uuid": "uuid2", "host": "host4"}}
 	authMethods, err3 := suite.Mockstore.QueryAuthMethods("", "", "")
 
 	// tests the normal case
@@ -206,7 +226,7 @@ func (suite *StoreTestSuite) TestInsertAuthMethod() {
 
 	suite.SetUpStoreTestSuite()
 
-	am := map[string]interface{}{"type": "api-key", "service": "s_temp", "host": "h_temp", "port": 9000.0, "path": "test_path_1", "access_key": "key1"}
+	am := map[string]interface{}{"type": "api-key", "service_uuid": "s_temp", "host": "h_temp", "port": 9000.0, "path": "test_path_1", "access_key": "key1"}
 	err := suite.Mockstore.InsertAuthMethod(am)
 	amq, _ := suite.Mockstore.QueryAuthMethods("s_temp", "h_temp", "api-key")
 
