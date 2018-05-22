@@ -31,12 +31,12 @@ func (mongo *MongoStore) Close() {
 	mongo.Session.Close()
 }
 
-func (mongo *MongoStore) QueryServices(name string) ([]QService, error) {
+func (mongo *MongoStore) QueryServiceTypes(name string) ([]QServiceType, error) {
 
-	var qServices []QService
+	var qServices []QServiceType
 	var err error
 
-	c := mongo.Session.DB(mongo.Database).C("services")
+	c := mongo.Session.DB(mongo.Database).C("service_types")
 	query := bson.M{}
 
 	if name != "" {
@@ -48,7 +48,7 @@ func (mongo *MongoStore) QueryServices(name string) ([]QService, error) {
 	if err != nil {
 		log.Fatal("STORE", "\t", err.Error())
 		err = utils.APIErrDatabase(err.Error())
-		return []QService{}, err
+		return []QServiceType{}, err
 	}
 
 	return qServices, err
@@ -116,20 +116,20 @@ func (mongo *MongoStore) QueryBindings(service string, host string) ([]QBinding,
 	return qbindings, err
 }
 
-//InsertService inserts a new service into the datastore
-func (mongo *MongoStore) InsertService(name string, hosts []string, authTypes []string, authMethod string, retrievalField string, createdOn string) (QService, error) {
+//InsertServiceType inserts a new service into the datastore
+func (mongo *MongoStore) InsertServiceType(name string, hosts []string, authTypes []string, authMethod string, retrievalField string, createdOn string) (QServiceType, error) {
 
-	var qService QService
+	var qService QServiceType
 	var err error
 
-	qService = QService{Name: name, Hosts: hosts, AuthTypes: authTypes, AuthMethod: authMethod, RetrievalField: retrievalField, CreatedOn: createdOn}
+	qService = QServiceType{Name: name, Hosts: hosts, AuthTypes: authTypes, AuthMethod: authMethod, RetrievalField: retrievalField, CreatedOn: createdOn}
 	db := mongo.Session.DB(mongo.Database)
-	c := db.C("services")
+	c := db.C("service_types")
 
 	if err := c.Insert(qService); err != nil {
 		log.Fatal("STORE", "\t", err.Error())
 		err = utils.APIErrDatabase(err.Error())
-		return QService{}, nil
+		return QServiceType{}, nil
 	}
 
 	return qService, err

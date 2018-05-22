@@ -16,7 +16,7 @@ type AuthMethodHandlersTestSuite struct {
 	suite.Suite
 }
 
-// TestAuthMethodListOne tests the normal case and returns the information of the auth method under the given service and host
+// TestAuthMethodListOne tests the normal case and returns the information of the auth method under the given service type and host
 func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListOne() {
 
 	expRespJSON := `{
@@ -28,7 +28,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListOne() {
  "type": "api-key"
 }`
 
-	req, err := http.NewRequest("GET", "http://localhost:8080/services/s1/hosts/host1/authM", nil)
+	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/s1/hosts/host1/authM", nil)
 	if err != nil {
 		log.Error(err.Error())
 	}
@@ -41,7 +41,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListOne() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/services/{service}/hosts/{host}/authM", WrapConfig(AuthMethodListOne, mockstore, cfg))
+	router.HandleFunc("/service-types/{service}/hosts/{host}/authM", WrapConfig(AuthMethodListOne, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(200, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -58,7 +58,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListOneUndeclaredAccessK
  }
 }`
 
-	req, err := http.NewRequest("GET", "http://localhost:8080/services/s1/hosts/host2/authM", nil)
+	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/s1/hosts/host2/authM", nil)
 	if err != nil {
 		log.Error(err.Error())
 	}
@@ -71,7 +71,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListOneUndeclaredAccessK
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/services/{service}/hosts/{host}/authM", WrapConfig(AuthMethodListOne, mockstore, cfg))
+	router.HandleFunc("/service-types/{service}/hosts/{host}/authM", WrapConfig(AuthMethodListOne, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(500, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -89,7 +89,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListOneUndeclaredPath() 
  }
 }`
 
-	req, err := http.NewRequest("GET", "http://localhost:8080/services/s2/hosts/host3/authM", nil)
+	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/s2/hosts/host3/authM", nil)
 	if err != nil {
 		log.Error(err.Error())
 	}
@@ -102,7 +102,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListOneUndeclaredPath() 
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/services/{service}/hosts/{host}/authM", WrapConfig(AuthMethodListOne, mockstore, cfg))
+	router.HandleFunc("/service-types/{service}/hosts/{host}/authM", WrapConfig(AuthMethodListOne, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(500, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -120,7 +120,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListOneUndeclaredPort() 
  }
 }`
 
-	req, err := http.NewRequest("GET", "http://localhost:8080/services/s2/hosts/host4/authM", nil)
+	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/s2/hosts/host4/authM", nil)
 	if err != nil {
 		log.Error(err.Error())
 	}
@@ -133,25 +133,25 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListOneUndeclaredPort() 
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/services/{service}/hosts/{host}/authM", WrapConfig(AuthMethodListOne, mockstore, cfg))
+	router.HandleFunc("/service-types/{service}/hosts/{host}/authM", WrapConfig(AuthMethodListOne, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(500, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
 
 }
 
-// TestAuthMethodListOneUnknownService tests the case where the given service doesn't exist
-func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListOneUnknownService() {
+// TestAuthMethodListOneUnknownServiceType tests the case where the given service type doesn't exist
+func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListOneUnknownServiceType() {
 
 	expRespJSON := `{
  "error": {
-  "message": "Service was not found",
+  "message": "ServiceType was not found",
   "code": 404,
   "status": "NOT FOUND"
  }
 }`
 
-	req, err := http.NewRequest("GET", "http://localhost:8080/services/unknown_service/hosts/host4/authM", nil)
+	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/unknown_service/hosts/host4/authM", nil)
 	if err != nil {
 		log.Error(err.Error())
 	}
@@ -164,14 +164,14 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListOneUnknownService() 
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/services/{service}/hosts/{host}/authM", WrapConfig(AuthMethodListOne, mockstore, cfg))
+	router.HandleFunc("/service-types/{service}/hosts/{host}/authM", WrapConfig(AuthMethodListOne, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(404, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
 
 }
 
-// TestAuthMethodListOneUnknownHost tests the case where the given host is associated with the given service
+// TestAuthMethodListOneUnknownHost tests the case where the given host is associated with the given service type
 func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListOneUnknownHost() {
 
 	expRespJSON := `{
@@ -182,7 +182,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListOneUnknownHost() {
  }
 }`
 
-	req, err := http.NewRequest("GET", "http://localhost:8080/services/s1/hosts/host_unknown/authM", nil)
+	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/s1/hosts/host_unknown/authM", nil)
 	if err != nil {
 		log.Error(err.Error())
 	}
@@ -195,14 +195,14 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListOneUnknownHost() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/services/{service}/hosts/{host}/authM", WrapConfig(AuthMethodListOne, mockstore, cfg))
+	router.HandleFunc("/service-types/{service}/hosts/{host}/authM", WrapConfig(AuthMethodListOne, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(404, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
 
 }
 
-// TestAuthMethodListAll tests the normal case and returns all auth methods in the service
+// TestAuthMethodListAll tests the normal case and returns all auth methods in the service type
 func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListAll() {
 
 	expRespJSON := `{
@@ -456,7 +456,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateMissingServiceFiel
 }`
 	expRespJSON := `{
  "error": {
-  "message": "Service was not found in the request body",
+  "message": "ServiceType was not found in the request body",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
@@ -642,7 +642,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateUnknownService() {
 }`
 	expRespJSON := `{
  "error": {
-  "message": "Service was not found",
+  "message": "ServiceType was not found",
   "code": 404,
   "status": "NOT FOUND"
  }

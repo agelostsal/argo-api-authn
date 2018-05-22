@@ -4,20 +4,20 @@ import (
 	"encoding/json"
 	"github.com/ARGOeu/argo-api-authn/auth-methods"
 	"github.com/ARGOeu/argo-api-authn/config"
-	"github.com/ARGOeu/argo-api-authn/services"
 	"github.com/ARGOeu/argo-api-authn/stores"
 	"github.com/ARGOeu/argo-api-authn/utils"
 	"github.com/Sirupsen/logrus"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"net/http"
+	"github.com/ARGOeu/argo-api-authn/servicetypes"
 )
 
 func AuthMethodCreate(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	var authM map[string]interface{}
-	var service services.Service
+	var service servicetypes.ServiceType
 	var ok bool
 	var flag bool
 	var typeM string
@@ -63,7 +63,7 @@ func AuthMethodCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if _, ok = authM["service"]; ok == false {
-		err = utils.APIErrEmptyRequiredField("Service was not found in the request body")
+		err = utils.APIErrEmptyRequiredField("ServiceType was not found in the request body")
 		utils.RespondError(w, err)
 		return
 	}
@@ -87,7 +87,7 @@ func AuthMethodCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check if the service exists
-	if service, err = services.FindServiceByName(authM["service"].(string), store); err != nil {
+	if service, err = servicetypes.FindServiceTypeByName(authM["service"].(string), store); err != nil {
 		utils.RespondError(w, err)
 		return
 	}
@@ -130,7 +130,7 @@ func AuthMethodListOne(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	var authM map[string]interface{}
-	var service services.Service
+	var service servicetypes.ServiceType
 
 	//context references
 	store := context.Get(r, "stores").(stores.Store)
@@ -139,7 +139,7 @@ func AuthMethodListOne(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	// check if the service exists
-	if service, err = services.FindServiceByName(vars["service"], store); err != nil {
+	if service, err = servicetypes.FindServiceTypeByName(vars["service"], store); err != nil {
 		utils.RespondError(w, err)
 		return
 	}

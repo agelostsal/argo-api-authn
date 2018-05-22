@@ -3,19 +3,19 @@ package handlers
 import (
 	"encoding/json"
 	"github.com/ARGOeu/argo-api-authn/config"
-	"github.com/ARGOeu/argo-api-authn/services"
 	"github.com/ARGOeu/argo-api-authn/stores"
 	"github.com/ARGOeu/argo-api-authn/utils"
 	"github.com/gorilla/context"
 
 	"github.com/gorilla/mux"
 	"net/http"
+	"github.com/ARGOeu/argo-api-authn/servicetypes"
 )
 
-func ServiceCreate(w http.ResponseWriter, r *http.Request) {
+func ServiceTypeCreate(w http.ResponseWriter, r *http.Request) {
 
 	var err error
-	var service services.Service
+	var service servicetypes.ServiceType
 
 	//context references
 	store := context.Get(r, "stores").(stores.Store)
@@ -36,7 +36,7 @@ func ServiceCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// create the service
-	if service, err = services.CreateService(service, store, cfg); err != nil {
+	if service, err = servicetypes.CreateServiceType(service, store, cfg); err != nil {
 		utils.RespondError(w, err)
 		return
 	}
@@ -45,10 +45,10 @@ func ServiceCreate(w http.ResponseWriter, r *http.Request) {
 	utils.RespondOk(w, 201, service)
 }
 
-func ServiceListOne(w http.ResponseWriter, r *http.Request) {
+func ServiceTypesListOne(w http.ResponseWriter, r *http.Request) {
 
 	var err error
-	var service services.Service
+	var service servicetypes.ServiceType
 
 	//context references
 	store := context.Get(r, "stores").(stores.Store)
@@ -57,7 +57,7 @@ func ServiceListOne(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	// find the service
-	if service, err = services.FindServiceByName(vars["name"], store); err != nil {
+	if service, err = servicetypes.FindServiceTypeByName(vars["service-type"], store); err != nil {
 		utils.RespondError(w, err)
 		return
 	}
@@ -66,16 +66,16 @@ func ServiceListOne(w http.ResponseWriter, r *http.Request) {
 	utils.RespondOk(w, 200, service)
 }
 
-func ServiceListAll(w http.ResponseWriter, r *http.Request) {
+func ServiceTypeListAll(w http.ResponseWriter, r *http.Request) {
 
 	var err error
-	var servList services.ServiceList
+	var servList servicetypes.ServiceList
 
 	//context references
 	store := context.Get(r, "stores").(stores.Store)
 
 	// find the service
-	if servList, err = services.FindAllServices(store); err != nil {
+	if servList, err = servicetypes.FindAllServiceTypes(store); err != nil {
 		utils.RespondError(w, err)
 		return
 	}

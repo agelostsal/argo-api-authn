@@ -8,7 +8,7 @@ type Mockstore struct {
 	Session     bool
 	Server      string
 	Database    string
-	Services    []QService
+	Services    []QServiceType
 	Bindings    []QBinding
 	AuthMethods []map[string]interface{}
 }
@@ -19,10 +19,10 @@ func (mock *Mockstore) SetUp() {
 	mock.Session = true
 
 	// Populate services
-	service1 := QService{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}
-	service2 := QService{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", RetrievalField: "user_token", CreatedOn: "2018-05-05T18:04:05Z"}
-	serviceSame1 := QService{Name: "same_name"}
-	serviceSame2 := QService{Name: "same_name"}
+	service1 := QServiceType{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}
+	service2 := QServiceType{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", RetrievalField: "user_token", CreatedOn: "2018-05-05T18:04:05Z"}
+	serviceSame1 := QServiceType{Name: "same_name"}
+	serviceSame2 := QServiceType{Name: "same_name"}
 	mock.Services = append(mock.Services, service1, service2, serviceSame1, serviceSame2)
 
 	// Populate Bindings
@@ -42,9 +42,9 @@ func (mock *Mockstore) Close() {
 	mock.Session = false
 }
 
-func (mock *Mockstore) QueryServices(name string) ([]QService, error) {
+func (mock *Mockstore) QueryServiceTypes(name string) ([]QServiceType, error) {
 
-	var qServices []QService
+	var qServices []QServiceType
 
 	if name != "" {
 		for _, service := range mock.Services {
@@ -109,9 +109,9 @@ func (mock *Mockstore) QueryBindings(service string, host string) ([]QBinding, e
 	return qBindings, nil
 }
 
-func (mock *Mockstore) InsertService(name string, hosts []string, authTypes []string, authMethod string, retrievalField string, createdOn string) (QService, error) {
+func (mock *Mockstore) InsertServiceType(name string, hosts []string, authTypes []string, authMethod string, retrievalField string, createdOn string) (QServiceType, error) {
 
-	qService := QService{Name: name, Hosts: hosts, AuthTypes: authTypes, AuthMethod: authMethod, RetrievalField: retrievalField, CreatedOn: createdOn}
+	qService := QServiceType{Name: name, Hosts: hosts, AuthTypes: authTypes, AuthMethod: authMethod, RetrievalField: retrievalField, CreatedOn: createdOn}
 
 	mock.Services = append(mock.Services, qService)
 
