@@ -193,13 +193,25 @@ func (suite *StoreTestSuite) TestInsertService() {
 
 	suite.SetUpStoreTestSuite()
 
-	_, err1 := suite.Mockstore.InsertService("sIns", []string{"host1", "host2", "host3"}, []string{"x509, oidc"}, "api-key", "token", "2018-05-05T18:04:05Z")
+	_, err1 := suite.Mockstore.InsertService("sIns", []string{"host1", "host2", "host3"}, []string{"x509", "oidc"}, "api-key", "token", "2018-05-05T18:04:05Z")
 
-	expQServices1 := []QService{{Name: "sIns", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509, oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}}
+	expQServices1 := []QService{{Name: "sIns", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}}
 	qServices1, err1 := suite.Mockstore.QueryServices("sIns")
 
 	suite.Equal(expQServices1[0], qServices1[0])
 	suite.Nil(err1)
+}
+
+func (suite *StoreTestSuite) TestInsertAuthMethod() {
+
+	suite.SetUpStoreTestSuite()
+
+	am := map[string]interface{}{"type": "api-key", "service": "s_temp", "host": "h_temp", "port": 9000.0, "path": "test_path_1", "access_key": "key1"}
+	err := suite.Mockstore.InsertAuthMethod(am)
+	amq, _ := suite.Mockstore.QueryAuthMethods("s_temp", "h_temp", "api-key")
+
+	suite.Equal(am, amq[0])
+	suite.Nil(err)
 }
 
 func (suite *StoreTestSuite) TestInsertBinding() {

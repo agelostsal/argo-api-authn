@@ -1,11 +1,63 @@
   # Auth method API Calls
 
+## [POST] Manage Auth Methods - Create New Auth Method
+
+This request creates a new service.
+
+#### Request
+
+`POST /v1/authM`
+
+### Example request
+```
+curl -X POST -H "Content-Type: application/json"
+  "https://{URL}/v1/authM?key={key_in_the_config}"
+```
+
+
+##### Post Body
+
+```json
+        {
+            "access_key": "key1",
+            "host": "127.0.0.1",
+            "path": "/path/{{identifier}}?key={{access_key}}",
+            "port": 9000,
+            "service": "s1",
+            "type": "api-key"
+        }
+ ```
+ 
+  ### Response
   
-  ## [GET] Manage Services - ListOneAuthMethod
+  If the request is successful, the response contains the newly created auth method.
+  
+  Success Response
+  
+  `201 CREATED`
+  
+  ```json
+        {
+            "access_key": "key1",
+            "host": "127.0.0.1",
+            "path": "/path/{{identifier}}?key={{access_key}}",
+            "port": 9000,
+            "service": "s1",
+            "type": "api-key"
+        }
+   ```
+ 
+  ## [GET] Manage Auth Methods - ListOneAuthMethod
   
   ### Request
   
-  `GET/v1/services/{service}/hosts/{host}/authM`
+  `GET /v1/services/{service}/hosts/{host}/authM`
+  
+  ### Example request
+  ```
+  curl -X GET -H "Content-Type: application/json"
+  "https://{URL}/v1/services/{service}/hosts/{host}/authM?key={key_in_the_config}"
+  ```
   
    If the request is successful, the response contains information for the requested auth method.
    
@@ -15,7 +67,6 @@
    
 ```json
 {
-    "_id": "5af36ae263927f878860c3f0",
     "access_key": "b328c3861f061f87cbd34cf34f36ba2ae20883a5",
     "host": "127.0.0.1",
     "path": "/v1/users:byUUID/{{identifier}}?key={{access_key}}",
@@ -26,13 +77,19 @@
 ```
 
 
-  ## [GET] Manage Services - ListAllAuthMethods
+  ## [GET] Manage Auth Methods - ListAllAuthMethods
   
   ### Request
   
-  `GET/v1/services/{service}/hosts/{host}/authM`
+  `GET /v1/authM`
   
-   If the request is successful, the response contains information for the requested auth method.
+  ### Example request
+  ```
+  curl -X GET -H "Content-Type: application/json"
+  "https://{URL}/v1/authM?key={key_in_the_config}"
+  ```
+  
+   If the request is successful, the response contains information for all the auth methods.
    
    Success Response
    

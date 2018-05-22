@@ -118,6 +118,13 @@ func (mock *Mockstore) InsertService(name string, hosts []string, authTypes []st
 	return qService, nil
 }
 
+func (mock *Mockstore) InsertAuthMethod(authM map[string]interface{}) error {
+
+	mock.AuthMethods = append(mock.AuthMethods, authM)
+
+	return nil
+}
+
 func (mock *Mockstore) InsertBinding(name string, service string, host string, dn string, oidcToken string, uniqueKey string) (QBinding, error) {
 
 	qBinding := QBinding{Name: name, Service: service, Host: host, DN: dn, OIDCToken: oidcToken, UniqueKey: uniqueKey, CreatedOn: utils.ZuluTimeNow()}
