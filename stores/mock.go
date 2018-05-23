@@ -5,12 +5,12 @@ import (
 )
 
 type Mockstore struct {
-	Session     bool
-	Server      string
-	Database    string
-	Services    []QServiceType
-	Bindings    []QBinding
-	AuthMethods []map[string]interface{}
+	Session      bool
+	Server       string
+	Database     string
+	ServiceTypes []QServiceType
+	Bindings     []QBinding
+	AuthMethods  []map[string]interface{}
 }
 
 // SetUp is used to initialize the mock store
@@ -23,7 +23,7 @@ func (mock *Mockstore) SetUp() {
 	service2 := QServiceType{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", UUID: "uuid2", RetrievalField: "user_token", CreatedOn: "2018-05-05T18:04:05Z"}
 	serviceSame1 := QServiceType{Name: "same_name"}
 	serviceSame2 := QServiceType{Name: "same_name"}
-	mock.Services = append(mock.Services, service1, service2, serviceSame1, serviceSame2)
+	mock.ServiceTypes = append(mock.ServiceTypes, service1, service2, serviceSame1, serviceSame2)
 
 	// Populate Bindings
 	binding1 := QBinding{Name: "b1", Service: "s1", Host: "host1", DN: "test_dn_1", OIDCToken: "", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
@@ -32,10 +32,10 @@ func (mock *Mockstore) SetUp() {
 	mock.Bindings = append(mock.Bindings, binding1, binding2, binding3)
 
 	// Populate AuthMethods
-	mock.AuthMethods = []map[string]interface{}{{"service": "s1", "host": "host1", "port": 9000.0, "path": "test_path_1", "access_key": "key1", "type": "api-key"},
-		{"host": "host2", "port": 9000.0, "path": "test_path_1", "type": "api-key", "service": "s1"},
-		{"access_key": "key1", "type": "api-key", "service": "s2", "host": "host3", "port": 9000.0},
-		{"path": "test_path_1", "access_key": "key1", "type": "api-key", "service": "s2", "host": "host4"}}
+	mock.AuthMethods = []map[string]interface{}{{"service_uuid": "uuid1", "host": "host1", "port": 9000.0, "path": "test_path_1", "access_key": "key1", "type": "api-key"},
+		{"host": "host2", "port": 9000.0, "path": "test_path_1", "type": "api-key", "service_uuid": "uuid1"},
+		{"access_key": "key1", "type": "api-key", "service_uuid": "uuid2", "host": "host3", "port": 9000.0},
+		{"path": "test_path_1", "access_key": "key1", "type": "api-key", "service_uuid": "uuid2", "host": "host4"}}
 }
 
 func (mock *Mockstore) Close() {
@@ -47,29 +47,42 @@ func (mock *Mockstore) QueryServiceTypes(name string) ([]QServiceType, error) {
 	var qServices []QServiceType
 
 	if name != "" {
-		for _, service := range mock.Services {
+		for _, service := range mock.ServiceTypes {
 			if service.Name == name {
 				qServices = append(qServices, service)
 			}
 		}
 	} else {
-		qServices = mock.Services
+		qServices = mock.ServiceTypes
 	}
 
 	return qServices, nil
 }
 
-func (mock *Mockstore) QueryAuthMethods(service string, host string, typeName string) ([]map[string]interface{}, error) {
+func (mock *Mockstore) QueryServiceTypesByUUID(uuid string) ([]QServiceType, error) {
+
+	var qServices []QServiceType
+
+	for _, service := range mock.ServiceTypes {
+		if service.UUID == uuid {
+			qServices = append(qServices, service)
+		}
+	}
+
+	return qServices, nil
+}
+
+func (mock *Mockstore) QueryAuthMethods(service_uuid string, host string, typeName string) ([]map[string]interface{}, error) {
 
 	var qAuthMs []map[string]interface{}
 	var authM map[string]interface{}
 
-	if service == "" && host == "" && typeName == "" {
+	if service_uuid == "" && host == "" && typeName == "" {
 		return mock.AuthMethods, nil
 	}
 
 	for _, authM = range mock.AuthMethods {
-		if authM["service"] == service && authM["host"] == host && authM["type"] == typeName {
+		if authM["service_uuid"] == service_uuid && authM["host"] == host && authM["type"] == typeName {
 			qAuthMs = append(qAuthMs, authM)
 			break
 		}
@@ -113,7 +126,7 @@ func (mock *Mockstore) InsertServiceType(name string, hosts []string, authTypes 
 
 	qService := QServiceType{Name: name, Hosts: hosts, AuthTypes: authTypes, AuthMethod: authMethod, UUID: uuid, RetrievalField: retrievalField, CreatedOn: createdOn}
 
-	mock.Services = append(mock.Services, qService)
+	mock.ServiceTypes = append(mock.ServiceTypes, qService)
 
 	return qService, nil
 }

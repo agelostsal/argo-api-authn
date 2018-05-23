@@ -54,15 +54,33 @@ func (mongo *MongoStore) QueryServiceTypes(name string) ([]QServiceType, error) 
 	return qServices, err
 }
 
-func (mongo *MongoStore) QueryAuthMethods(service string, host string, typeName string) ([]map[string]interface{}, error) {
+func (mongo *MongoStore) QueryServiceTypesByUUID(uuid string) ([]QServiceType, error) {
+
+	var qServices []QServiceType
+	var err error
+
+	c := mongo.Session.DB(mongo.Database).C("service_types")
+
+	err = c.Find(bson.M{"uuid": uuid}).All(&qServices)
+
+	if err != nil {
+		log.Fatal("STORE", "\t", err.Error())
+		err = utils.APIErrDatabase(err.Error())
+		return []QServiceType{}, err
+	}
+
+	return qServices, err
+}
+
+func (mongo *MongoStore) QueryAuthMethods(serviceUUID string, host string, typeName string) ([]map[string]interface{}, error) {
 
 	var qAuthMethods []map[string]interface{}
 	var err error
 
 	query := bson.M{}
 
-	if service != "" && host != "" && typeName != "" {
-		query = bson.M{"type": typeName, "service": service, "host": host}
+	if serviceUUID != "" && host != "" && typeName != "" {
+		query = bson.M{"type": typeName, "service_uuid": serviceUUID, "host": host}
 	}
 
 	c := mongo.Session.DB(mongo.Database).C("auth_methods")

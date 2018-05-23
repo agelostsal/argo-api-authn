@@ -188,7 +188,7 @@ paths:
            properties:
             type:
               type: string
-            service:
+            service_uuid:
               type: string
             host:
               type: string
@@ -317,7 +317,7 @@ definitions:
       host:
         type: string
         description: host of the service type
-      service:
+      service_uuid:
         type: string
         description: service type that the auth method is used
       port:

@@ -482,7 +482,7 @@ func (suite *ServiceTypeHandlersSuite) TestServiceTypeListAllEmptyList() {
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
 	mockstore.SetUp()
 	// empty the store
-	mockstore.Services = []stores.QServiceType{}
+	mockstore.ServiceTypes = []stores.QServiceType{}
 
 	cfg := &config.Config{}
 	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")

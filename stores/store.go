@@ -4,6 +4,7 @@ type Store interface {
 	SetUp()
 	Close()
 	QueryServiceTypes(name string) ([]QServiceType, error)
+	QueryServiceTypesByUUID(uuid string) ([]QServiceType, error)
 	QueryAuthMethods(service string, host string, typeName string) ([]map[string]interface{}, error)
 	QueryBindingsByDN(dn string, host string) ([]QBinding, error)
 	QueryBindings(service string, host string) ([]QBinding, error)

@@ -24,7 +24,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListOne() {
  "host": "host1",
  "path": "test_path_1",
  "port": 9000,
- "service": "s1",
+ "service_uuid": "uuid1",
  "type": "api-key"
 }`
 
@@ -212,28 +212,28 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListAll() {
    "host": "host1",
    "path": "test_path_1",
    "port": 9000,
-   "service": "s1",
+   "service_uuid": "uuid1",
    "type": "api-key"
   },
   {
    "host": "host2",
    "path": "test_path_1",
    "port": 9000,
-   "service": "s1",
+   "service_uuid": "uuid1",
    "type": "api-key"
   },
   {
    "access_key": "key1",
    "host": "host3",
    "port": 9000,
-   "service": "s2",
+   "service_uuid": "uuid2",
    "type": "api-key"
   },
   {
    "access_key": "key1",
    "host": "host4",
    "path": "test_path_1",
-   "service": "s2",
+   "service_uuid": "uuid2",
    "type": "api-key"
   }
  ]
@@ -265,7 +265,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreate() {
  "host": "host3",
  "path": "test_path_1/{{identifier}}?key={{access_key}}",
  "port": 9000,
- "service": "s1",
+ "service_uuid": "uuid1",
  "type": "api-key"
 }`
 
@@ -274,7 +274,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreate() {
  "host": "host3",
  "path": "test_path_1/{{identifier}}?key={{access_key}}",
  "port": 9000,
- "service": "s1",
+ "service_uuid": "uuid1",
  "type": "api-key"
 }`
 
@@ -414,12 +414,12 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateUnsupportedAuthMet
  "host": "host3",
  "path": "test_path_1/{{identifier}}?key={{access_key}}",
  "port": 9000,
- "service": "s1",
+ "service_uuid": "uuid1",
  "type": "unsupported-type"
 }`
 	expRespJSON := `{
  "error": {
-  "message": "Field: type contains invalid data. unsupported-type is not yet supported by the service",
+  "message": "Field: type contains invalid data. unsupported-type is not yet supported by the serviceType",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
@@ -456,7 +456,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateMissingServiceFiel
 }`
 	expRespJSON := `{
  "error": {
-  "message": "ServiceType was not found in the request body",
+  "message": "ServiceType UUID was not found in the request body",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
@@ -489,7 +489,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateMissingHostField()
  "path": "test_path_1/{{identifier}}?key={{access_key}}",
  "port": 9000,
  "type": "api-key",
- "service": "s1"
+ "service_uuid": "uuid1"
 }`
 	expRespJSON := `{
  "error": {
@@ -526,7 +526,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateMissingPortField()
  "host": "host3",
  "path": "test_path_1/{{identifier}}?key={{access_key}}",
  "type": "api-key",
- "service": "s1"
+ "service_uuid": "uuid1"
 }`
 	expRespJSON := `{
  "error": {
@@ -562,7 +562,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateMissingPathField()
  "access_key": "key1",
  "host": "host3",
  "port": 9000,
- "service": "s1",
+ "service_uuid": "uuid1",
  "type": "api-key"
 }`
 	expRespJSON := `{
@@ -599,7 +599,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateMissingAccessKeyFi
  "host": "host3",
  "path": "test_path_1/{{identifier}}?key={{access_key}}",
  "port": 9000,
- "service": "s1",
+ "service_uuid": "uuid1",
  "type": "api-key"
 }`
 	expRespJSON := `{
@@ -638,7 +638,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateUnknownService() {
  "port": 9000,
  "path": "test_path_1/{{identifier}}?key={{access_key}}",
  "type": "api-key",
- "service": "unknown_service"
+ "service_uuid": "unknown_service"
 }`
 	expRespJSON := `{
  "error": {
@@ -676,7 +676,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateUnknownHost() {
  "port": 9000,
  "path": "test_path_1/{{identifier}}?key={{access_key}}",
  "type": "api-key",
- "service": "s1"
+ "service_uuid": "uuid1"
 }`
 	expRespJSON := `{
  "error": {
@@ -714,11 +714,11 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateUnknownAuthMethod(
  "port": 9000,
  "path": "test_path_1/{{identifier}}?key={{access_key}}",
  "type": "unknown_authM",
- "service": "unknown_service"
+ "service_uuid": "uuid1"
 }`
 	expRespJSON := `{
  "error": {
-  "message": "Field: type contains invalid data. unknown_authM is not yet supported by the service",
+  "message": "Field: type contains invalid data. unknown_authM is not yet supported by the serviceType",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
@@ -751,7 +751,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateInvalidPathContent
  "host": "host3",
  "path": "test_path_1/{{identifier}}?key=",
  "port": 9000,
- "service": "s1",
+ "service_uuid": "uuid1",
  "type": "api-key"
 }`
 	expRespJSON := `{
@@ -789,7 +789,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateInvalidPathContent
  "host": "host3",
  "path": "test_path_1?key={{access_key}}",
  "port": 9000,
- "service": "s1",
+ "service_uuid": "uuid1",
  "type": "api-key"
 }`
 	expRespJSON := `{
@@ -827,12 +827,12 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateAlreadyExists() {
  "host": "host1",
  "path": "test_path_1?key={{access_key}}",
  "port": 9000,
- "service": "s1",
+ "service_uuid": "uuid1",
  "type": "api-key"
 }`
 	expRespJSON := `{
  "error": {
-  "message": "auth_methods.AuthMethod object with service: s1 already exists",
+  "message": "auth_methods.AuthMethod object with serviceType: uuid1 already exists",
   "code": 409,
   "status": "CONFLICT"
  }
