@@ -38,9 +38,9 @@ func (suite *StoreTestSuite) TestSetUp() {
 	qServices = append(qServices, service1, service2, serviceSame1, serviceSame2)
 
 	// Populate Bindings
-	binding1 := QBinding{Name: "b1", Service: "s1", Host: "host1", DN: "test_dn_1", OIDCToken: "", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
-	binding2 := QBinding{Name: "b2", Service: "s1", Host: "host1", DN: "test_dn_2", OIDCToken: "", UniqueKey: "unique_key_2", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
-	binding3 := QBinding{Name: "b3", Service: "s2", Host: "host2", DN: "test_dn_3", OIDCToken: "", UniqueKey: "unique_key_3", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
+	binding1 := QBinding{Name: "b1", ServiceUUID: "uuid1", Host: "host1", DN: "test_dn_1", OIDCToken: "", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
+	binding2 := QBinding{Name: "b2", ServiceUUID: "uuid1", Host: "host1", DN: "test_dn_2", OIDCToken: "", UniqueKey: "unique_key_2", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
+	binding3 := QBinding{Name: "b3", ServiceUUID: "uuid1", Host: "host2", DN: "test_dn_3", OIDCToken: "", UniqueKey: "unique_key_3", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
 
 	qBindings = append(qBindings, binding1, binding2, binding3)
 
@@ -157,12 +157,12 @@ func (suite *StoreTestSuite) TestQueryBindingsByDN() {
 	suite.SetUpStoreTestSuite()
 
 	// normal case
-	expBinding1 := []QBinding{{Name: "b1", Service: "s1", Host: "host1", DN: "test_dn_1", OIDCToken: "", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}}
-	qBinding1, err1 := suite.Mockstore.QueryBindingsByDN("test_dn_1", "host1")
+	expBinding1 := []QBinding{{Name: "b1", ServiceUUID: "uuid1", Host: "host1", DN: "test_dn_1", OIDCToken: "", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}}
+	qBinding1, err1 := suite.Mockstore.QueryBindingsByDN("test_dn_1", "uuid1", "host1")
 
 	// not found case
 	var expBinding2 []QBinding
-	qBinding2, err2 := suite.Mockstore.QueryBindingsByDN("wrong_dn", "wrong_host")
+	qBinding2, err2 := suite.Mockstore.QueryBindingsByDN("wrong_dn", "wrong_uuid", "wrong_host")
 
 	// tests the normal case
 	suite.Equal(expBinding1, qBinding1)
@@ -179,16 +179,16 @@ func (suite *StoreTestSuite) TestQueryBindings() {
 
 	// normal case - with parameters
 	expBindings1 := []QBinding{
-		{Name: "b1", Service: "s1", Host: "host1", DN: "test_dn_1", OIDCToken: "", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""},
-		{Name: "b2", Service: "s1", Host: "host1", DN: "test_dn_2", OIDCToken: "", UniqueKey: "unique_key_2", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""},
+		{Name: "b1", ServiceUUID: "uuid1", Host: "host1", DN: "test_dn_1", OIDCToken: "", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""},
+		{Name: "b2", ServiceUUID: "uuid1", Host: "host1", DN: "test_dn_2", OIDCToken: "", UniqueKey: "unique_key_2", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""},
 	}
-	qBindings1, err1 := suite.Mockstore.QueryBindings("s1", "host1")
+	qBindings1, err1 := suite.Mockstore.QueryBindings("uuid1", "host1")
 
 	// normal case - without parameters
 	expBindings2 := []QBinding{
-		{Name: "b1", Service: "s1", Host: "host1", DN: "test_dn_1", OIDCToken: "", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""},
-		{Name: "b2", Service: "s1", Host: "host1", DN: "test_dn_2", OIDCToken: "", UniqueKey: "unique_key_2", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""},
-		{Name: "b3", Service: "s2", Host: "host2", DN: "test_dn_3", OIDCToken: "", UniqueKey: "unique_key_3", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""},
+		{Name: "b1", ServiceUUID: "uuid1", Host: "host1", DN: "test_dn_1", OIDCToken: "", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""},
+		{Name: "b2", ServiceUUID: "uuid1", Host: "host1", DN: "test_dn_2", OIDCToken: "", UniqueKey: "unique_key_2", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""},
+		{Name: "b3", ServiceUUID: "uuid1", Host: "host2", DN: "test_dn_3", OIDCToken: "", UniqueKey: "unique_key_3", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""},
 	}
 	qBindings2, err2 := suite.Mockstore.QueryBindings("", "")
 
@@ -239,15 +239,13 @@ func (suite *StoreTestSuite) TestInsertBinding() {
 	suite.SetUpStoreTestSuite()
 
 	var expBinding1 QBinding
-
-	_, err1 := suite.Mockstore.InsertBinding("bIns", "s1", "host1", "test_dn_ins", "", "unique_key_ins")
-
+	_, err1 := suite.Mockstore.InsertBinding("bIns", "uuid1", "host1", "test_dn_ins", "", "unique_key_ins")
 	// check if the new binding can be found
-	expBindings, _ := suite.Mockstore.QueryBindingsByDN("test_dn_ins", "host1")
+	expBindings, _ := suite.Mockstore.QueryBindingsByDN("test_dn_ins", "uuid1", "host1")
 	expBinding1 = expBindings[0]
 
 	suite.Equal("bIns", expBinding1.Name)
-	suite.Equal("s1", expBinding1.Service)
+	suite.Equal("uuid1", expBinding1.ServiceUUID)
 	suite.Equal("host1", expBinding1.Host)
 	suite.Equal("test_dn_ins", expBinding1.DN)
 	suite.Equal("", expBinding1.OIDCToken)
@@ -259,12 +257,12 @@ func (suite *StoreTestSuite) TestUpdateBinding() {
 
 	suite.SetUpStoreTestSuite()
 
-	original := QBinding{Name: "b1", Service: "s1", Host: "host1", DN: "test_dn_1", OIDCToken: "", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
-	updated := QBinding{Name: "b1", Service: "s1", Host: "host1", DN: "test_dn_upd", OIDCToken: "", UniqueKey: "unique_key_upd", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
+	original := QBinding{Name: "b1", ServiceUUID: "uuid1", Host: "host1", DN: "test_dn_1", OIDCToken: "", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
+	updated := QBinding{Name: "b1", ServiceUUID: "uuid1", Host: "host1", DN: "test_dn_upd", OIDCToken: "", UniqueKey: "unique_key_upd", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
 
 	_, err1 := suite.Mockstore.UpdateBinding(original, updated)
 
-	expBindings, _ := suite.Mockstore.QueryBindingsByDN("test_dn_upd", "host1")
+	expBindings, _ := suite.Mockstore.QueryBindingsByDN("test_dn_upd", "uuid1", "host1")
 	expBinding1 := expBindings[0]
 
 	suite.Equal(expBinding1, updated)

@@ -825,7 +825,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateAlreadyExists() {
 	postBody := `{
  "access_key": "key1",
  "host": "host1",
- "path": "test_path_1?key={{access_key}}",
+ "path": "test_path_1/{{identifier}}?key={{access_key}}",
  "port": 9000,
  "service_uuid": "uuid1",
  "type": "api-key"
