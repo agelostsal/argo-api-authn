@@ -124,7 +124,7 @@ func (mongo *MongoStore) QueryBindings(serviceUUID string, host string) ([]QBind
 	c := db.C("bindings")
 
 	if serviceUUID != "" && host != "" {
-		query = bson.M{"serviceUUID": serviceUUID, "host": host}
+		query = bson.M{"service_uuid": serviceUUID, "host": host}
 	}
 
 	if err = c.Find(query).All(&qBindings); err != nil {

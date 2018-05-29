@@ -1,6 +1,6 @@
 # Errors
 
-In case of Error during handling user’s request the API responds using the following schema:
+In case of an Error during handling a user’s request, the API responds using the following schema:
 
 ```json
 {
@@ -13,7 +13,7 @@ In case of Error during handling user’s request the API responds using the fol
 ```
 ## Error Codes
 
-The following error codes are the possinble errors of all methods
+The following error codes are the possible errors of all methods
 
 Error | Code | Status | Related Requests
 ------|------|----------|------------------

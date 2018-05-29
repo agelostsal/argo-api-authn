@@ -129,3 +129,51 @@ func FindBindingByDN(dn string, serviceUUID string, host string, store stores.St
 	return binding, err
 }
 
+// FindAllBindings returns all the bindings in the service
+func FindAllBindings(store stores.Store) (BindingList, error) {
+
+	var err error
+	var qBindings []stores.QBinding
+	var bindings = []Binding{}
+
+	if qBindings, err = store.QueryBindings("", ""); err != nil {
+		return BindingList{Bindings:[]Binding{}}, err
+	}
+
+	// convert the QBindings to Bindings
+	for _, qb := range qBindings {
+		_binding := &Binding{}
+		if err := utils.CopyFields(qb, _binding); err != nil {
+			err = utils.APIGenericInternalError(err.Error())
+			return BindingList{Bindings:[]Binding{}}, err
+		}
+		bindings = append(bindings, *_binding)
+	}
+
+	return BindingList{Bindings:bindings}, err
+
+}
+
+//FindBindingsByServiceTypeAndHost returns all the bindings of a specific service type and host
+func FindBindingsByServiceTypeAndHost(serviceUUID string, host string, store stores.Store) (BindingList, error) {
+
+	var qBindings []stores.QBinding
+	 var bindings = []Binding{}
+	var err error
+
+	if qBindings, err = store.QueryBindings(serviceUUID, host); err != nil {
+		return BindingList{Bindings:[]Binding{}}, err
+	}
+
+	for _, qb := range qBindings {
+		_binding := &Binding{}
+		if err := utils.CopyFields(qb, _binding); err != nil {
+			err = utils.APIGenericInternalError(err.Error())
+			return BindingList{Bindings:[]Binding{}}, err
+		}
+		bindings = append(bindings, *_binding)
+	}
+
+	return BindingList{Bindings:bindings}, err
+}
+

@@ -101,7 +101,11 @@ curl -X POST -H "Content-Type: application/json"
 }
 ```
 
-  ## [GET] Manage Service Types - ListOneServiceType
+ ### Errors
+
+ Please refer to section [Errors](api_errors.md) to see all possible Errors
+
+ ## [GET] Manage Service Types - ListOneServiceType
   
   ### Request
   

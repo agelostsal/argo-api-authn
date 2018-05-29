@@ -23,7 +23,7 @@ import (
 func main() {
 
 	// Retrieve configuration file location through cmd argument
-	var cfgPath = flag.String("config", "/etc/argo-auth/config.json", "Path for the required configuration file.")
+	var cfgPath = flag.String("config", "/etc/argo-api-authN/argo-api-authn-config.json", "Path for the required configuration file.")
 	flag.Parse()
 
 	// initialize the config

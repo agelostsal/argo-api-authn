@@ -1,18 +1,18 @@
 package handlers
 
 import (
-	"github.com/stretchr/testify/suite"
-	"testing"
-	"net/http"
 	"bytes"
 	"github.com/ARGOeu/argo-api-authn/stores"
 	log "github.com/Sirupsen/logrus"
+	"github.com/stretchr/testify/suite"
+	"net/http"
+	"testing"
 
+	"encoding/json"
+	"github.com/ARGOeu/argo-api-authn/bindings"
+	"github.com/ARGOeu/argo-api-authn/config"
 	"github.com/gorilla/mux"
 	"net/http/httptest"
-	"encoding/json"
-	"github.com/ARGOeu/argo-api-authn/config"
-	"github.com/ARGOeu/argo-api-authn/bindings"
 )
 
 type BindingHandlersSuite struct {
@@ -20,7 +20,7 @@ type BindingHandlersSuite struct {
 }
 
 // TestBindingCreate tests the normal case of a binding creation
-func (suite *BindingHandlersSuite) TestBindingCreate(){
+func (suite *BindingHandlersSuite) TestBindingCreate() {
 
 	postJSON := `{
 	"name": "new_binding",
@@ -60,7 +60,7 @@ func (suite *BindingHandlersSuite) TestBindingCreate(){
 }
 
 // TestBindingCreateMissingFieldName tests the case where the binding doesn't contain the  name field
-func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldName(){
+func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldName() {
 
 	postJSON := `{
 	"service_uuid": "uuid1",
@@ -99,7 +99,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldName(){
 }
 
 // TestBindingCreateInvalidJSON tests the case where the request body is not a vlaid json
-func (suite *BindingHandlersSuite) TestBindingCreateInvalidJSON(){
+func (suite *BindingHandlersSuite) TestBindingCreateInvalidJSON() {
 
 	postJSON := `{
 	"service_uuid": "uuid1",
@@ -138,7 +138,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateInvalidJSON(){
 }
 
 // TestBindingCreateMissingFieldServiceUUID tests the case where the binding doesn't contain the service_uuid field
-func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldServiceUUID(){
+func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldServiceUUID() {
 
 	postJSON := `{
     "name": "b1",
@@ -177,7 +177,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldServiceUUID(){
 }
 
 // TestBindingCreateMissingFieldHost tests the case where the binding doesn't contain the host field
-func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldHost(){
+func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldHost() {
 
 	postJSON := `{
     "name": "b1",
@@ -216,7 +216,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldHost(){
 }
 
 // TestBindingCreateMissingFieldDNAndOIDC tests the case where the binding doesn't contain both dn and oidc fields
-func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldDNAndOIDC(){
+func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldDNAndOIDC() {
 
 	postJSON := `{
     "name": "b1",
@@ -254,7 +254,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldDNAndOIDC(){
 }
 
 // TestBindingCreateMissingFieldUniqueKey tests the case where the binding doesn't contain the service_uuid field
-func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldUniqueKey(){
+func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldUniqueKey() {
 
 	postJSON := `{
     "name": "b1",
@@ -289,11 +289,10 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldUniqueKey(){
 	router.ServeHTTP(w, req)
 	suite.Equal(422, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
-
 }
 
 // TestBindingCreateUnknownService tests the case where the service uuid is not known
-func (suite *BindingHandlersSuite) TestBindingCreateUnknownService(){
+func (suite *BindingHandlersSuite) TestBindingCreateUnknownService() {
 
 	postJSON := `{
     "name": "b1",
@@ -329,11 +328,10 @@ func (suite *BindingHandlersSuite) TestBindingCreateUnknownService(){
 	router.ServeHTTP(w, req)
 	suite.Equal(404, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
-
 }
 
 // TestBindingCreateUnknownHost tests the case where the host is not known to the specified service
-func (suite *BindingHandlersSuite) TestBindingCreateUnknownHost(){
+func (suite *BindingHandlersSuite) TestBindingCreateUnknownHost() {
 
 	postJSON := `{
     "name": "b1",
@@ -369,11 +367,10 @@ func (suite *BindingHandlersSuite) TestBindingCreateUnknownHost(){
 	router.ServeHTTP(w, req)
 	suite.Equal(404, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
-
 }
 
 // TestBindingCreateDNAlreadyExists tests the case where the given dn is already used by another binding
-func (suite *BindingHandlersSuite) TestBindingCreateDNAlreadyExists(){
+func (suite *BindingHandlersSuite) TestBindingCreateDNAlreadyExists() {
 
 	postJSON := `{
     "name": "b1",
@@ -409,9 +406,336 @@ func (suite *BindingHandlersSuite) TestBindingCreateDNAlreadyExists(){
 	router.ServeHTTP(w, req)
 	suite.Equal(409, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
-
 }
 
-func TestBindingHandlersSuite(t *testing.T){
+// TestBindingListAll tests the normal case
+func (suite *BindingHandlersSuite) TestBindingListAll() {
+
+	expRespJSON := `{
+ "bindings": [
+  {
+   "name": "b1",
+   "service_uuid": "uuid1",
+   "host": "host1",
+   "dn": "test_dn_1",
+   "unique_key": "unique_key_1",
+   "created_on": "2018-05-05T15:04:05Z"
+  },
+  {
+   "name": "b2",
+   "service_uuid": "uuid1",
+   "host": "host1",
+   "dn": "test_dn_2",
+   "unique_key": "unique_key_2",
+   "created_on": "2018-05-05T15:04:05Z"
+  },
+  {
+   "name": "b3",
+   "service_uuid": "uuid1",
+   "host": "host2",
+   "dn": "test_dn_3",
+   "unique_key": "unique_key_3",
+   "created_on": "2018-05-05T15:04:05Z"
+  }
+ ]
+}`
+	req, err := http.NewRequest("GET", "http://localhost:8080/bindings", nil)
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/bindings", WrapConfig(BindingListAll, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(200, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestBindingListAll tests the normal case
+func (suite *BindingHandlersSuite) TestBindingListAllByServiceTypeAndHost() {
+
+	expRespJSON := `{
+ "bindings": [
+  {
+   "name": "b1",
+   "service_uuid": "uuid1",
+   "host": "host1",
+   "dn": "test_dn_1",
+   "unique_key": "unique_key_1",
+   "created_on": "2018-05-05T15:04:05Z"
+  },
+  {
+   "name": "b2",
+   "service_uuid": "uuid1",
+   "host": "host1",
+   "dn": "test_dn_2",
+   "unique_key": "unique_key_2",
+   "created_on": "2018-05-05T15:04:05Z"
+  }
+ ]
+}`
+	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/s1/hosts/host1/bindings", nil)
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/bindings", WrapConfig(BindingListAllByServiceTypeAndHost, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(200, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestBindingListAllEmpty tests the empty case
+func (suite *BindingHandlersSuite) TestBindingListAllEmpty() {
+
+	expRespJSON := `{
+ "bindings": []
+}`
+	req, err := http.NewRequest("GET", "http://localhost:8080/bindings", nil)
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	// empty the store
+	mockstore.Bindings = []stores.QBinding{}
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/bindings", WrapConfig(BindingListAll, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(200, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// estBindingListAllByServiceTypeAndHostEmpty tests the empty case
+func (suite *BindingHandlersSuite) estBindingListAllByServiceTypeAndHostEmpty() {
+
+	expRespJSON := `{
+ "bindings": []
+}`
+	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/unknown_service/hosts/host1/bindings", nil)
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	// empty the store
+	mockstore.Bindings = []stores.QBinding{}
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/bindings", WrapConfig(BindingListAllByServiceTypeAndHost, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(200, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestBindingListAllByServiceTypeAndHostUnknownServiceType tests the case where the service type is unknown
+func (suite *BindingHandlersSuite) TestBindingListAllByServiceTypeAndHostUnknownServiceType() {
+
+	expRespJSON := `{
+ "error": {
+  "message": "ServiceType was not found",
+  "code": 404,
+  "status": "NOT FOUND"
+ }
+}`
+
+	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/unknown_service/hosts/host1/bindings", nil)
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/bindings", WrapConfig(BindingListAllByServiceTypeAndHost, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(404, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestBindingListAllByServiceTypeAndHostUnknownHost tests the case where the host is not known to the specified service
+func (suite *BindingHandlersSuite) TestBindingListAllByServiceTypeAndHostUnknownHost() {
+
+	expRespJSON := `{
+ "error": {
+  "message": "Host was not found",
+  "code": 404,
+  "status": "NOT FOUND"
+ }
+}`
+
+	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/s1/hosts/unknown_host/bindings", nil)
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/bindings", WrapConfig(BindingListAllByServiceTypeAndHost, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(404, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestBindingListOneByDN tests the normal case
+func (suite *BindingHandlersSuite) TestBindingListOneByDN() {
+
+	expRespJSON := `{
+ "name": "b1",
+ "service_uuid": "uuid1",
+ "host": "host1",
+ "dn": "test_dn_1",
+ "unique_key": "unique_key_1",
+ "created_on": "2018-05-05T15:04:05Z"
+}`
+
+	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/s1/hosts/host1/bindings/test_dn_1", nil)
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/bindings/{dn}", WrapConfig(BindingListOneByDN, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(200, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestBindingListOneByDnUnknownServiceType tests the case where the service type is unknown
+func (suite *BindingHandlersSuite) TestBindingListOneByDnUnknownServiceType() {
+
+	expRespJSON := `{
+ "error": {
+  "message": "ServiceType was not found",
+  "code": 404,
+  "status": "NOT FOUND"
+ }
+}`
+
+	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/unknown_service/hosts/host1/bindings/test_dn_1", nil)
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/bindings/{dn}", WrapConfig(BindingListAllByServiceTypeAndHost, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(404, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestBindingListOneByDnUnknownHost tests the case where the host is not known to the specified service
+func (suite *BindingHandlersSuite) TestBindingListOneByDnUnknownHost() {
+
+	expRespJSON := `{
+ "error": {
+  "message": "Host was not found",
+  "code": 404,
+  "status": "NOT FOUND"
+ }
+}`
+
+	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/s1/hosts/unknown_host/bindings/test_dn_1", nil)
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/bindings/{dn}", WrapConfig(BindingListAllByServiceTypeAndHost, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(404, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestBindingListOneByDnUnknownDN tests the case where the dn doesn't match any binding under the host and service type
+func (suite *BindingHandlersSuite) TestBindingListOneByDnUnknownDN() {
+
+	expRespJSON := `{
+ "error": {
+  "message": "Binding was not found",
+  "code": 404,
+  "status": "NOT FOUND"
+ }
+}`
+
+	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/s1/hosts/host1/bindings/unknown_dn", nil)
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/bindings/{dn}", WrapConfig(BindingListOneByDN, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(404, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+func TestBindingHandlersSuite(t *testing.T) {
 	suite.Run(t, new(BindingHandlersSuite))
 }
