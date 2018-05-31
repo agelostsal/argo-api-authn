@@ -137,7 +137,7 @@ func FindAllBindings(store stores.Store) (BindingList, error) {
 	var bindings = []Binding{}
 
 	if qBindings, err = store.QueryBindings("", ""); err != nil {
-		return BindingList{Bindings:[]Binding{}}, err
+		return BindingList{Bindings: []Binding{}}, err
 	}
 
 	// convert the QBindings to Bindings
@@ -145,12 +145,12 @@ func FindAllBindings(store stores.Store) (BindingList, error) {
 		_binding := &Binding{}
 		if err := utils.CopyFields(qb, _binding); err != nil {
 			err = utils.APIGenericInternalError(err.Error())
-			return BindingList{Bindings:[]Binding{}}, err
+			return BindingList{Bindings: []Binding{}}, err
 		}
 		bindings = append(bindings, *_binding)
 	}
 
-	return BindingList{Bindings:bindings}, err
+	return BindingList{Bindings: bindings}, err
 
 }
 
@@ -158,22 +158,21 @@ func FindAllBindings(store stores.Store) (BindingList, error) {
 func FindBindingsByServiceTypeAndHost(serviceUUID string, host string, store stores.Store) (BindingList, error) {
 
 	var qBindings []stores.QBinding
-	 var bindings = []Binding{}
+	var bindings = []Binding{}
 	var err error
 
 	if qBindings, err = store.QueryBindings(serviceUUID, host); err != nil {
-		return BindingList{Bindings:[]Binding{}}, err
+		return BindingList{Bindings: []Binding{}}, err
 	}
 
 	for _, qb := range qBindings {
 		_binding := &Binding{}
 		if err := utils.CopyFields(qb, _binding); err != nil {
 			err = utils.APIGenericInternalError(err.Error())
-			return BindingList{Bindings:[]Binding{}}, err
+			return BindingList{Bindings: []Binding{}}, err
 		}
 		bindings = append(bindings, *_binding)
 	}
 
-	return BindingList{Bindings:bindings}, err
+	return BindingList{Bindings: bindings}, err
 }
-

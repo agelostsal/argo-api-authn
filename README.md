@@ -69,6 +69,7 @@ Before you start, you need to issue a valid certificate.
    "certificate_key":"/path/to/key/localhost.key",
    "service_token": "some-token",
    "supported_auth_types": ["x509", "oidc"],
-   "supported_auth_methods": ["api-key", "x-api-token"]
+   "supported_auth_methods": ["api-key", "x-api-token"],
+   "verify_ssl": true
  }
  ```

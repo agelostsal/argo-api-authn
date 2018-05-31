@@ -24,6 +24,7 @@ type APIRoute struct {
 	Method  string           // GET, POST, PUT string literals
 	Path    string           // API call path with urlVars included
 	Handler http.HandlerFunc // Handler Function to be used
+	Auth    bool             // whether or not it should use the auth handler
 }
 
 // NewRouting creates a new routing object including mux.Router and routes definitions
@@ -45,7 +46,10 @@ func NewRouting(routes []APIRoute, store stores.Store, config *config.Config) *A
 
 		handler = handlers.WrapLog(handler, route.Name)
 
-		handler = handlers.WrapAuth(handler, store)
+		//  skip the auth handler for the requests that don't require authorization
+		if route.Auth {
+			handler = handlers.WrapAuth(handler, store)
+		}
 
 		handler = handlers.WrapConfig(handler, store, config)
 
@@ -62,15 +66,15 @@ func NewRouting(routes []APIRoute, store stores.Store, config *config.Config) *A
 }
 
 var ApiRoutes = []APIRoute{
-	{"serviceTypes:create", "POST", "/service-types", handlers.ServiceTypeCreate},
-	{"serviceTypes:ListOne", "GET", "/service-types/{service-type}", handlers.ServiceTypesListOne},
-	{"serviceType:ListAll", "GET", "/service-types", handlers.ServiceTypeListAll},
-	{"authMethod:ListOne", "GET", "/service-types/{service-type}/hosts/{host}/authM", handlers.AuthMethodListOne},
-	{"bindings:ListAllByServiceTypeAndHost", "GET", "/service-types/{service-type}/hosts/{host}/bindings", handlers.BindingListAllByServiceTypeAndHost},
-	{"bindings:ListOneByDN", "GET", "/service-types/{service-type}/hosts/{host}/bindings/{dn}", handlers.BindingListOneByDN},
-	{"authMethod:ListAll", "GET", "/authM", handlers.AuthMethodListAll},
-	{"authMethod:Create", "POST", "/authM", handlers.AuthMethodCreate},
-	{"bindings:create", "POST", "/bindings", handlers.BindingCreate},
-	{"bindings:ListAll", "GET", "/bindings", handlers.BindingListAll},
-	//{"auth:dn", "GET", "/auth/{service}/{host}/x509", handlers.AuthViaCert},
+	{"serviceTypes:create", "POST", "/service-types", handlers.ServiceTypeCreate, true},
+	{"serviceTypes:ListOne", "GET", "/service-types/{service-type}", handlers.ServiceTypesListOne, true},
+	{"serviceType:ListAll", "GET", "/service-types", handlers.ServiceTypeListAll, true},
+	{"authMethod:ListOne", "GET", "/service-types/{service-type}/hosts/{host}/authM", handlers.AuthMethodListOne, true},
+	{"bindings:ListAllByServiceTypeAndHost", "GET", "/service-types/{service-type}/hosts/{host}/bindings", handlers.BindingListAllByServiceTypeAndHost, true},
+	{"bindings:ListOneByDN", "GET", "/service-types/{service-type}/hosts/{host}/bindings/{dn}", handlers.BindingListOneByDN, true},
+	{"authMethod:ListAll", "GET", "/authM", handlers.AuthMethodListAll, true},
+	{"authMethod:Create", "POST", "/authM", handlers.AuthMethodCreate, true},
+	{"bindings:create", "POST", "/bindings", handlers.BindingCreate, true},
+	{"bindings:ListAll", "GET", "/bindings", handlers.BindingListAll, true},
+	{"auth:dn", "GET", "/service-types/{service-type}/hosts/{host}:authX509", handlers.AuthViaCert, false},
 }
