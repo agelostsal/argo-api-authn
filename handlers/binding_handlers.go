@@ -123,3 +123,24 @@ func BindingListOneByDN(w http.ResponseWriter, r *http.Request) {
 	utils.RespondOk(w, 200, binding)
 
 }
+
+// BindingListOneByUUID finds and returns information about a binding, associated with the provided UUID
+func BindingListOneByUUID(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	var binding bindings.Binding
+
+	//context references
+	store := context.Get(r, "stores").(stores.Store)
+
+	// url vars
+	vars := mux.Vars(r)
+
+	if binding, err = bindings.FindBindingByUUID(vars["uuid"], store); err != nil {
+		utils.RespondError(w, err)
+		return
+	}
+
+	utils.RespondOk(w, 200, binding)
+
+}

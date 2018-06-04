@@ -12,7 +12,7 @@ type Binding struct {
 	Name        string `json:"name" required:"true"`
 	ServiceUUID string `json:"service_uuid" required:"true"`
 	Host        string `json:"host" required:"true"`
-	UUID        string `json:"uuid,omitempty"`
+	UUID        string `json:"uuid"`
 	DN          string `json:"dn,omitempty"`
 	OIDCToken   string `json:"oidc_token,omitempty"`
 	UniqueKey   string `json:"unique_key" required:"true"`
@@ -111,7 +111,7 @@ func FindBindingByDN(dn string, serviceUUID string, host string, store stores.St
 	}
 
 	if len(qBindings) > 1 {
-		log.Warning("STORE", "\t", "More than 1 Users found under the host: "+host+" using the same DN: "+dn)
+		log.Warning("STORE", "\t", "More than 1 Bindings found under the host: "+host+" using the same DN: "+dn)
 		err = utils.APIErrDatabase("More than 1 bindings found under the service type: " + serviceUUID + " and host: " + host + " using the same DN: " + dn)
 		return Binding{}, err
 	}
@@ -180,4 +180,34 @@ func FindBindingsByServiceTypeAndHost(serviceUUID string, host string, store sto
 	}
 
 	return BindingList{Bindings: bindings}, err
+}
+
+// FindBindingByUUID returns the binding associated with the provided uuid
+func FindBindingByUUID(uuid string, store stores.Store) (Binding, error) {
+
+	var qBindings []stores.QBinding
+	var err error
+	var binding Binding
+
+	if qBindings, err = store.QueryBindingsByUUID(uuid); err != nil {
+		return Binding{}, err
+	}
+
+	if len(qBindings) > 1 {
+		log.Warning("STORE", "\t", "More than 1 Bindings found with the same UUID: "+uuid)
+		err = utils.APIErrDatabase("More than 1 Bindings found with the same UUID: " + uuid)
+		return Binding{}, err
+	}
+
+	if len(qBindings) == 0 {
+		err = utils.APIErrNotFound("Binding")
+		return Binding{}, err
+	}
+
+	if err = utils.CopyFields(qBindings[0], &binding); err != nil {
+		err = utils.APIGenericInternalError(err.Error())
+		return binding, err
+	}
+
+	return binding, err
 }
