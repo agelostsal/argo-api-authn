@@ -171,12 +171,12 @@ func (mongo *MongoStore) InsertAuthMethod(authM map[string]interface{}) error {
 }
 
 //InsertBinding inserts a new binding into the datastore
-func (mongo *MongoStore) InsertBinding(name string, serviceUUID string, host string, dn string, oidcToken string, uniqueKey string) (QBinding, error) {
+func (mongo *MongoStore) InsertBinding(name string, serviceUUID string, host string, uuid string, dn string, oidcToken string, uniqueKey string) (QBinding, error) {
 
 	var qBinding QBinding
 	var err error
 
-	qBinding = QBinding{Name: name, ServiceUUID: serviceUUID, Host: host, DN: dn, OIDCToken: oidcToken, UniqueKey: uniqueKey, CreatedOn: utils.ZuluTimeNow()}
+	qBinding = QBinding{Name: name, ServiceUUID: serviceUUID, Host: host, UUID: uuid, DN: dn, OIDCToken: oidcToken, UniqueKey: uniqueKey, CreatedOn: utils.ZuluTimeNow()}
 	db := mongo.Session.DB(mongo.Database)
 	c := db.C("bindings")
 

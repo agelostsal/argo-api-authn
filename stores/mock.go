@@ -138,9 +138,9 @@ func (mock *Mockstore) InsertAuthMethod(authM map[string]interface{}) error {
 	return nil
 }
 
-func (mock *Mockstore) InsertBinding(name string, serviceUUID string, host string, dn string, oidcToken string, uniqueKey string) (QBinding, error) {
+func (mock *Mockstore) InsertBinding(name string, serviceUUID string, host string, uuid string, dn string, oidcToken string, uniqueKey string) (QBinding, error) {
 
-	qBinding := QBinding{Name: name, ServiceUUID: serviceUUID, Host: host, DN: dn, OIDCToken: oidcToken, UniqueKey: uniqueKey, CreatedOn: utils.ZuluTimeNow()}
+	qBinding := QBinding{Name: name, ServiceUUID: serviceUUID, Host: host, DN: dn, UUID: uuid, OIDCToken: oidcToken, UniqueKey: uniqueKey, CreatedOn: utils.ZuluTimeNow()}
 
 	mock.Bindings = append(mock.Bindings, qBinding)
 

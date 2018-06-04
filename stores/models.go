@@ -15,6 +15,7 @@ type QBinding struct {
 	ServiceUUID string `json:"service_uuid" bson:"service_uuid"`
 	Host        string `json:"host" bson:"host"`
 	DN          string `json:"dn,omitempty" bson:"dn,omitempty"`
+	UUID        string `json:"uuid" bson:"uuid"`
 	OIDCToken   string `json:"oidc_token,omitempty"`
 	UniqueKey   string `json:"unique_key,omitempty"`
 	CreatedOn   string `json:"created_on,omitempty" bson:"created_on,omitempty"`

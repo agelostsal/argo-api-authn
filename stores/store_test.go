@@ -239,7 +239,7 @@ func (suite *StoreTestSuite) TestInsertBinding() {
 	suite.SetUpStoreTestSuite()
 
 	var expBinding1 QBinding
-	_, err1 := suite.Mockstore.InsertBinding("bIns", "uuid1", "host1", "test_dn_ins", "", "unique_key_ins")
+	_, err1 := suite.Mockstore.InsertBinding("bIns", "uuid1", "host1", "b_uuid", "test_dn_ins", "", "unique_key_ins")
 	// check if the new binding can be found
 	expBindings, _ := suite.Mockstore.QueryBindingsByDN("test_dn_ins", "uuid1", "host1")
 	expBinding1 = expBindings[0]
@@ -247,6 +247,7 @@ func (suite *StoreTestSuite) TestInsertBinding() {
 	suite.Equal("bIns", expBinding1.Name)
 	suite.Equal("uuid1", expBinding1.ServiceUUID)
 	suite.Equal("host1", expBinding1.Host)
+	suite.Equal("b_uuid", expBinding1.UUID)
 	suite.Equal("test_dn_ins", expBinding1.DN)
 	suite.Equal("", expBinding1.OIDCToken)
 	suite.Equal("unique_key_ins", expBinding1.UniqueKey)
