@@ -20,6 +20,7 @@ type Config struct {
 	ServiceToken           string   `json:"service_token" required:"true"`
 	SupportedAuthTypes     []string `json:"supported_auth_types" required:"true"`
 	SupportedAuthMethods   []string `json:"supported_auth_methods" required:"true"`
+	VerifySSL              bool     `json:"verify_ssl" `
 }
 
 // ConfigSetUp unmarshals a json file specified by the input parameter into the config object

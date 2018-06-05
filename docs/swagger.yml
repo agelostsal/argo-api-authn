@@ -153,6 +153,36 @@ paths:
         500:
           $ref: "#/responses/500"
 
+  /service-types/{Name}/hosts/{Host}:authX509:
+    get:
+      summary: Use an x509 ceritficate to retrieve a token from the given service type
+      description: |
+        Retrieve a token from a service type using an x509.
+        *NOTE You need to provide the request with a valid certificate.
+      parameters:
+        - name: Name
+          in: path
+          description: Name of the service type
+          required: true
+          type: string
+        - name: Host
+          in: path
+          description: Name of the host
+          required: true
+          type: string
+      tags:
+        - Service Types
+      responses:
+        200:
+          description: Returns the token
+          schema:
+            $ref: '#/definitions/TokenResponse'
+        400:
+          $ref: "#/responses/400"
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: "#/responses/500"
   /authM:
     get:
       summary: Retrieve information for all authentication methods
@@ -400,6 +430,12 @@ definitions:
       type:
         type: string
         description: api-key, x-api-token (type of auth method)
+
+  TokenResponse:
+    type: object
+    properties:
+      token:
+        type: string
 
   ServiceTypes:
     type: object
