@@ -10,6 +10,6 @@ type Store interface {
 	QueryBindings(serviceUUID string, host string) ([]QBinding, error)
 	InsertServiceType(name string, hosts []string, authTypes []string, authMethod string, uuid string, retrievalField string, createdOn string) (QServiceType, error)
 	InsertAuthMethod(authM map[string]interface{}) error
-	InsertBinding(name string, serviceUUID string, host string, dn string, oidcToken string, uniqueKey string) (QBinding, error)
+	InsertBinding(name string, serviceUUID string, host string, uuid string, dn string, oidcToken string, uniqueKey string) (QBinding, error)
 	UpdateBinding(original QBinding, updated QBinding) (QBinding, error)
 }

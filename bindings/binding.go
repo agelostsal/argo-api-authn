@@ -5,12 +5,14 @@ import (
 	"github.com/ARGOeu/argo-api-authn/stores"
 	"github.com/ARGOeu/argo-api-authn/utils"
 	log "github.com/Sirupsen/logrus"
+	uuid2 "github.com/satori/go.uuid"
 )
 
 type Binding struct {
 	Name        string `json:"name" required:"true"`
 	ServiceUUID string `json:"service_uuid" required:"true"`
 	Host        string `json:"host" required:"true"`
+	UUID        string `json:"uuid,omitempty"`
 	DN          string `json:"dn,omitempty"`
 	OIDCToken   string `json:"oidc_token,omitempty"`
 	UniqueKey   string `json:"unique_key" required:"true"`
@@ -33,7 +35,10 @@ func CreateBinding(binding Binding, store stores.Store) (Binding, error) {
 		return binding, err
 	}
 
-	if qBinding, err = store.InsertBinding(binding.Name, binding.ServiceUUID, binding.Host, binding.DN, binding.OIDCToken, binding.UniqueKey); err != nil {
+	// generate uuid
+	uuid := uuid2.NewV4().String()
+
+	if qBinding, err = store.InsertBinding(binding.Name, binding.ServiceUUID, binding.Host, uuid, binding.DN, binding.OIDCToken, binding.UniqueKey); err != nil {
 		return binding, err
 	}
 

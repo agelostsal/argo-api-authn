@@ -55,6 +55,7 @@ func (suite *BindingTestSuite) TestCreateBinding() {
 	suite.Equal(b1.Name, res1[0].Name)
 	suite.Equal(b1.ServiceUUID, res1[0].ServiceUUID)
 	suite.Equal(b1.Host, res1[0].Host)
+	suite.NotEqual("", res1[0].UUID)
 	suite.Equal(b1.OIDCToken, res1[0].OIDCToken)
 	suite.Equal(b1.UniqueKey, res1[0].UniqueKey)
 

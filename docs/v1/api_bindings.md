@@ -53,6 +53,7 @@ curl -X POST -H "Content-Type: application/json"
      "name": "b1",
      "service_uuid": "b61030d9-bef3-4768-9a03-7b1ff36e8af4cc",
      "host": "host1",
+     "uuid": "p61020d9-bef3-4768-9a03-331ff36e8af4cc",
      "dn": "host1",
      "oidc_token": "token",
      "unique_key": "key",

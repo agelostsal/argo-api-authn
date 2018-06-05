@@ -358,6 +358,9 @@ definitions:
       host:
         type: string
         description: a host assosciated with the declared service type
+      uuid:
+        type: string
+        description: binding's uuid
       dn:
         type: string
         description: the dn of the certificate
