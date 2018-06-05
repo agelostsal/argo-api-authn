@@ -2,3 +2,4 @@
 .DS_STORE
 argo-api-authn
 config.json
+ams-create-users-gocdb.cfg

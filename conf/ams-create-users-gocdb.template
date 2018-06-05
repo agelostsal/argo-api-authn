@@ -1,0 +1,39 @@
+[AMS]
+
+# under which ams project, the users will be created
+ams_project: EGI-ACCOUNTING
+
+# goc db url to pull user data
+goc_db_host: https://goc.egi.eu/gocdbpi/public/?method=get_service_endpoint&service_type={{service-type}}
+
+# service types referes to the different service types that will we should keep from the xml and assign them to the respectivew ams topic
+service-types: gLite-APEL, eu.egi.cloud.accounting, eu.egi.storage.accounting
+
+# ams use role
+users_role: publisher
+
+# token to access ams
+ams_token:
+
+# ams url
+ams_host:
+
+# ams user email
+ams_email: goc_db_user
+
+[AUTHN]
+
+# token to access authn
+authn_token:
+
+# authn url to create bindings
+authn_host:
+
+# service's uuid where bindings will belong
+service_uuid:
+
+# service's host where bindings will belong
+service_host:
+
+[LOGS]
+syslog_socket: /dev/log
