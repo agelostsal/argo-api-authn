@@ -77,7 +77,7 @@ func (suite *BindingTestSuite) TestFindBindingByDN() {
 	mockstore.SetUp()
 
 	// tests the normal case
-	expBinding1 := Binding{Name: "b1", ServiceUUID: "uuid1", Host: "host1", DN: "test_dn_1", OIDCToken: "", UniqueKey: "unique_key_1"}
+	expBinding1 := Binding{Name: "b1", ServiceUUID: "uuid1", Host: "host1", UUID: "b_uuid1", DN: "test_dn_1", OIDCToken: "", UniqueKey: "unique_key_1"}
 	b1, err1 := FindBindingByDN("test_dn_1", "uuid1", "host1", mockstore)
 
 	suite.Equal(expBinding1.Name, b1.Name)
@@ -100,6 +100,36 @@ func (suite *BindingTestSuite) TestFindBindingByDN() {
 
 }
 
+func (suite *BindingTestSuite) TestFindBindingByUUID() {
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	// tests the normal case
+	expBinding1 := Binding{Name: "b1", ServiceUUID: "uuid1", Host: "host1", UUID: "b_uuid1", DN: "test_dn_1", OIDCToken: "", UniqueKey: "unique_key_1"}
+	b1, err1 := FindBindingByUUID("b_uuid1", mockstore)
+
+	suite.Equal(expBinding1.Name, b1.Name)
+	suite.Equal(expBinding1.ServiceUUID, b1.ServiceUUID)
+	suite.Equal(expBinding1.Host, b1.Host)
+	suite.Equal(expBinding1.UUID, b1.UUID)
+	suite.Equal(expBinding1.DN, b1.DN)
+	suite.Equal(expBinding1.UniqueKey, b1.UniqueKey)
+
+	// tests the not found case
+	_, err2 := FindBindingByUUID("unknown", mockstore)
+
+	// tests the case of more than 2 bindigs with the same dn exist under the same host and service
+	// append one more binding , same to an existing
+	mockstore.Bindings = append(mockstore.Bindings, stores.QBinding{Name: "b1", ServiceUUID: "uuid1", Host: "host1", UUID: "b_uuid1", DN: "test_dn_1", OIDCToken: "", UniqueKey: "unique_key_1"})
+	_, err3 := FindBindingByUUID("b_uuid1", mockstore)
+
+	suite.Nil(err1)
+	suite.Equal("Binding was not found", err2.Error())
+	suite.Equal("Database Error: More than 1 Bindings found with the same UUID: b_uuid1", err3.Error())
+
+}
+
 func (suite *BindingTestSuite) TestFindAllBindings() {
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -107,9 +137,9 @@ func (suite *BindingTestSuite) TestFindAllBindings() {
 
 	// tests the normal case
 	expectedBL := BindingList{}
-	binding1 := Binding{Name: "b1", ServiceUUID: "uuid1", Host: "host1", DN: "test_dn_1", OIDCToken: "", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
-	binding2 := Binding{Name: "b2", ServiceUUID: "uuid1", Host: "host1", DN: "test_dn_2", OIDCToken: "", UniqueKey: "unique_key_2", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
-	binding3 := Binding{Name: "b3", ServiceUUID: "uuid1", Host: "host2", DN: "test_dn_3", OIDCToken: "", UniqueKey: "unique_key_3", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
+	binding1 := Binding{Name: "b1", ServiceUUID: "uuid1", Host: "host1", UUID: "b_uuid1", DN: "test_dn_1", OIDCToken: "", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
+	binding2 := Binding{Name: "b2", ServiceUUID: "uuid1", Host: "host1", UUID: "b_uuid2", DN: "test_dn_2", OIDCToken: "", UniqueKey: "unique_key_2", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
+	binding3 := Binding{Name: "b3", ServiceUUID: "uuid1", Host: "host2", UUID: "b_uuid3", DN: "test_dn_3", OIDCToken: "", UniqueKey: "unique_key_3", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
 	expectedBL.Bindings = append(expectedBL.Bindings, binding1, binding2, binding3)
 
 	bl, err := FindAllBindings(mockstore)
@@ -132,8 +162,8 @@ func (suite *BindingTestSuite) TestFindBindingsByServiceTypeAndHost() {
 
 	// tests the normal case
 	expectedBL := BindingList{}
-	binding1 := Binding{Name: "b1", ServiceUUID: "uuid1", Host: "host1", DN: "test_dn_1", OIDCToken: "", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
-	binding2 := Binding{Name: "b2", ServiceUUID: "uuid1", Host: "host1", DN: "test_dn_2", OIDCToken: "", UniqueKey: "unique_key_2", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
+	binding1 := Binding{Name: "b1", ServiceUUID: "uuid1", Host: "host1", UUID: "b_uuid1", DN: "test_dn_1", OIDCToken: "", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
+	binding2 := Binding{Name: "b2", ServiceUUID: "uuid1", Host: "host1", UUID: "b_uuid2", DN: "test_dn_2", OIDCToken: "", UniqueKey: "unique_key_2", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
 	expectedBL.Bindings = append(expectedBL.Bindings, binding1, binding2)
 
 	b1, err1 := FindBindingsByServiceTypeAndHost("uuid1", "host1", mockstore)

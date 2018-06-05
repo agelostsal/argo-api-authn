@@ -114,6 +114,23 @@ func (mongo *MongoStore) QueryBindingsByDN(dn string, serviceUUID string, host s
 	return qBindings, err
 }
 
+func (mongo *MongoStore) QueryBindingsByUUID(uuid string) ([]QBinding, error) {
+
+	var qBindings []QBinding
+	var err error
+
+	c := mongo.Session.DB(mongo.Database).C("bindings")
+	err = c.Find(bson.M{"uuid": uuid}).All(&qBindings)
+
+	if err != nil {
+		log.Fatal("STORE", "\t", err.Error())
+		err = utils.APIErrDatabase(err.Error())
+		return []QBinding{}, err
+	}
+
+	return qBindings, err
+}
+
 func (mongo *MongoStore) QueryBindings(serviceUUID string, host string) ([]QBinding, error) {
 
 	var qBindings []QBinding

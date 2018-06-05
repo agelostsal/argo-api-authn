@@ -7,6 +7,7 @@ type Store interface {
 	QueryServiceTypesByUUID(uuid string) ([]QServiceType, error)
 	QueryAuthMethods(serviceUUID string, host string, typeName string) ([]map[string]interface{}, error)
 	QueryBindingsByDN(dn string, serviceUUID string, host string) ([]QBinding, error)
+	QueryBindingsByUUID(uuid string) ([]QBinding, error)
 	QueryBindings(serviceUUID string, host string) ([]QBinding, error)
 	InsertServiceType(name string, hosts []string, authTypes []string, authMethod string, uuid string, retrievalField string, createdOn string) (QServiceType, error)
 	InsertAuthMethod(authM map[string]interface{}) error

@@ -417,6 +417,7 @@ func (suite *BindingHandlersSuite) TestBindingListAll() {
    "name": "b1",
    "service_uuid": "uuid1",
    "host": "host1",
+   "uuid": "b_uuid1",
    "dn": "test_dn_1",
    "unique_key": "unique_key_1",
    "created_on": "2018-05-05T15:04:05Z"
@@ -425,6 +426,7 @@ func (suite *BindingHandlersSuite) TestBindingListAll() {
    "name": "b2",
    "service_uuid": "uuid1",
    "host": "host1",
+   "uuid": "b_uuid2",
    "dn": "test_dn_2",
    "unique_key": "unique_key_2",
    "created_on": "2018-05-05T15:04:05Z"
@@ -433,6 +435,7 @@ func (suite *BindingHandlersSuite) TestBindingListAll() {
    "name": "b3",
    "service_uuid": "uuid1",
    "host": "host2",
+   "uuid": "b_uuid3",
    "dn": "test_dn_3",
    "unique_key": "unique_key_3",
    "created_on": "2018-05-05T15:04:05Z"
@@ -467,6 +470,7 @@ func (suite *BindingHandlersSuite) TestBindingListAllByServiceTypeAndHost() {
    "name": "b1",
    "service_uuid": "uuid1",
    "host": "host1",
+   "uuid": "b_uuid1",
    "dn": "test_dn_1",
    "unique_key": "unique_key_1",
    "created_on": "2018-05-05T15:04:05Z"
@@ -475,6 +479,7 @@ func (suite *BindingHandlersSuite) TestBindingListAllByServiceTypeAndHost() {
    "name": "b2",
    "service_uuid": "uuid1",
    "host": "host1",
+   "uuid": "b_uuid2",
    "dn": "test_dn_2",
    "unique_key": "unique_key_2",
    "created_on": "2018-05-05T15:04:05Z"
@@ -528,13 +533,13 @@ func (suite *BindingHandlersSuite) TestBindingListAllEmpty() {
 	suite.Equal(expRespJSON, w.Body.String())
 }
 
-// estBindingListAllByServiceTypeAndHostEmpty tests the empty case
-func (suite *BindingHandlersSuite) estBindingListAllByServiceTypeAndHostEmpty() {
+// TestBindingListAllByServiceTypeAndHostEmpty tests the empty case
+func (suite *BindingHandlersSuite) TestBindingListAllByServiceTypeAndHostEmpty() {
 
 	expRespJSON := `{
  "bindings": []
 }`
-	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/unknown_service/hosts/host1/bindings", nil)
+	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/s1/hosts/host1/bindings", nil)
 	if err != nil {
 		log.Error(err.Error())
 	}
@@ -623,6 +628,7 @@ func (suite *BindingHandlersSuite) TestBindingListOneByDN() {
  "name": "b1",
  "service_uuid": "uuid1",
  "host": "host1",
+ "uuid": "b_uuid1",
  "dn": "test_dn_1",
  "unique_key": "unique_key_1",
  "created_on": "2018-05-05T15:04:05Z"
@@ -644,6 +650,40 @@ func (suite *BindingHandlersSuite) TestBindingListOneByDN() {
 	router.HandleFunc("/service-types/{service-type}/hosts/{host}/bindings/{dn}", WrapConfig(BindingListOneByDN, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(200, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestBindingListOneByDNMultipleEntries tests case where two bindings with the same dn exist, under the same service type and host
+func (suite *BindingHandlersSuite) TestBindingListOneByDNMultipleEntries() {
+
+	expRespJSON := `{
+ "error": {
+  "message": "Database Error: More than 1 bindings found under the service type: uuid1 and host: host1 using the same DN: test_dn_1",
+  "code": 500,
+  "status": "INTERNAL SERVER ERROR"
+ }
+}`
+
+	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/s1/hosts/host1/bindings/test_dn_1", nil)
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	// add a binding that already exists
+	binding1 := stores.QBinding{Name: "b1", ServiceUUID: "uuid1", Host: "host1", UUID: "b_uuid1", DN: "test_dn_1", OIDCToken: "", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
+	mockstore.Bindings = append(mockstore.Bindings, binding1)
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/bindings/{dn}", WrapConfig(BindingListOneByDN, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(500, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
 }
 
@@ -736,6 +776,101 @@ func (suite *BindingHandlersSuite) TestBindingListOneByDnUnknownDN() {
 	suite.Equal(404, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
 }
+
+// TestBindingListOneByUUID tests the normal case
+func (suite *BindingHandlersSuite) TestBindingListOneByUUID() {
+
+	expRespJSON := `{
+ "name": "b1",
+ "service_uuid": "uuid1",
+ "host": "host1",
+ "uuid": "b_uuid1",
+ "dn": "test_dn_1",
+ "unique_key": "unique_key_1",
+ "created_on": "2018-05-05T15:04:05Z"
+}`
+
+	req, err := http.NewRequest("GET", "http://localhost:8080/bindings/b_uuid1", nil)
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingListOneByUUID, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(200, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestBindingListOneByUUIDUnknownUUID tests the case where the provided UUID doesn't exist
+func (suite *BindingHandlersSuite) TestBindingListOneByUUIDUnknownUUID() {
+
+	expRespJSON := `{
+ "error": {
+  "message": "Binding was not found",
+  "code": 404,
+  "status": "NOT FOUND"
+ }
+}`
+	req, err := http.NewRequest("GET", "http://localhost:8080/bindings/unknown_uuid", nil)
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingListOneByUUID, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(404, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestBindingListOneByUUIDMultipleEntries tests the case where two or more bindings exists with the same uuid
+func (suite *BindingHandlersSuite) TestBindingListOneByUUIDMultipleEntries() {
+
+	expRespJSON := `{
+ "error": {
+  "message": "Database Error: More than 1 Bindings found with the same UUID: b_uuid1",
+  "code": 500,
+  "status": "INTERNAL SERVER ERROR"
+ }
+}`
+	req, err := http.NewRequest("GET", "http://localhost:8080/bindings/b_uuid1", nil)
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	// add a binding that already exists
+	binding1 := stores.QBinding{Name: "b1", ServiceUUID: "uuid1", Host: "host1", UUID: "b_uuid1", DN: "test_dn_1", OIDCToken: "", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
+	mockstore.Bindings = append(mockstore.Bindings, binding1)
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingListOneByUUID, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(500, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
 func TestBindingHandlersSuite(t *testing.T) {
 	suite.Run(t, new(BindingHandlersSuite))
 }

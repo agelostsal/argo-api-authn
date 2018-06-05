@@ -183,6 +183,42 @@ paths:
           $ref: '#/responses/404'
         500:
           $ref: "#/responses/500"
+
+  /service-types/{Name}/hosts/{Host}/bindings:
+    get:
+      summary: Retrieve all the bindings under a specific service type and host
+      description: |
+        Retrieve all the bindings under a specific service type and host
+      parameters:
+        - name: Name
+          in: path
+          description: Name of the service type
+          required: true
+          type: string
+        - name: Host
+          in: path
+          description: Name of the host
+          required: true
+          type: string
+        - $ref: '#/parameters/ApiKey'
+      tags:
+        - Service Types
+      responses:
+        200:
+          description: Return a list of bindings
+          schema:
+            $ref: '#/definitions/Bindings'
+        400:
+          $ref: "#/responses/400"
+        401:
+          $ref: "#/responses/401"
+        403:
+          $ref: "#/responses/403"
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: "#/responses/500"
+
   /authM:
     get:
       summary: Retrieve information for all authentication methods
@@ -284,7 +320,7 @@ paths:
         201:
           description: Returns the newly created binding
           schema:
-            $ref: '#/definitions/Bindings'
+            $ref: '#/definitions/Binding'
         400:
           $ref: "#/responses/400"
         401:
@@ -300,6 +336,57 @@ paths:
         500:
           $ref: "#/responses/500"
 
+    get:
+      summary: Retrieves all the bindings
+      description: |
+        Retrieves all the bindings
+      parameters:
+        - $ref: '#/parameters/ApiKey'
+      tags:
+        - Bindings
+      responses:
+        200:
+          description: Returns a list containing all the bindings
+          schema:
+            $ref: '#/definitions/Bindings'
+        400:
+          $ref: "#/responses/400"
+        401:
+          $ref: "#/responses/401"
+        403:
+          $ref: "#/responses/403"
+        500:
+          $ref: "#/responses/500"
+
+  /bindings/{UUID}:
+    get:
+      summary: Retrieve information for a specific binding
+      description: |
+         Retrieve information for a specific binding
+      parameters:
+        - name: UUID
+          in: path
+          description: UUID of the binding
+          required: true
+          type: string
+        - $ref: '#/parameters/ApiKey'
+      tags:
+        - Bindings
+      responses:
+        200:
+          description: Returns the information of the requested binding
+          schema:
+            $ref: '#/definitions/Binding'
+        400:
+          $ref: "#/responses/400"
+        401:
+          $ref: "#/responses/401"
+        403:
+          $ref: "#/responses/403"
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: "#/responses/500"
 
 parameters:
   ApiKey:
@@ -347,7 +434,7 @@ responses:
 
 definitions:
 
-  Bindings:
+  Binding:
     type: object
     properties:
       name:
@@ -373,6 +460,14 @@ definitions:
         type: string
       last_auth:
         type: string
+
+  Bindings:
+    type: object
+    properties:
+      bindings:
+        type: array
+        items:
+          $ref: '#/definitions/Binding'
 
   ServiceType:
     type: object

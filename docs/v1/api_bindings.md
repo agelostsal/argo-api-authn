@@ -87,6 +87,7 @@ This request lists all bindings that are currently present in th service.
                   "name": "testb",
                   "service_uuid": "uuid1",
                   "host": "host1",
+                  "uuid": "p61020d9-bef3-4768-9a03-331ff36e8af4cc",
                   "oidc_token": "testdn",
                   "unique_key": "key",
                   "created_on": "2018-05-23T09:25:25Z",
@@ -96,6 +97,7 @@ This request lists all bindings that are currently present in th service.
                   "name": "testb2",
                   "service_uuid": "uuid1",
                   "host": "host1",
+                  "uuid": "p61020d9-bef3-4768-9a03-331ff36e8af4rr",
                   "oidc_token": "testdn",
                   "unique_key": "key",
                   "created_on": "2018-05-23T09:25:43Z",
@@ -133,6 +135,7 @@ This request returns all the bindings under the specified service type and host.
                   "service_uuid": "uuid1",
                   "host": "host1",
                   "oidc_token": "testdn",
+                  "uuid": "p61020d9-bef3-4768-9a03-331ff36e8af4cc",
                   "unique_key": "key",
                   "created_on": "2018-05-23T09:25:25Z",
                   "last_auth": "2018-05-23T09:25:25Z"
@@ -141,6 +144,7 @@ This request returns all the bindings under the specified service type and host.
                   "name": "testb2",
                   "service_uuid": "uuid1",
                   "host": "host1",
+                  "uuid": "p61020d9-bef3-4768-9a03-331ff36e8af4rr",
                   "oidc_token": "testdn",
                   "unique_key": "key",
                   "created_on": "2018-05-23T09:25:43Z",
@@ -154,17 +158,17 @@ This request returns all the bindings under the specified service type and host.
 
 Please refer to section [Errors](api_errors.md) to see all possible Errors
 
-## [GET] Manage Bindings - List One Binding By DN
+## [GET] Manage Bindings - List One Binding By UUID
 
-This request retrieves the information of a binding associated with the provided dn, service type and host.
+This request retrieves the information of a binding associated with the provided uuid.
     
  ### Request
     
- `GET /v1/service-types/{service-type}/hosts/{host}/bindings/{dn}`
+ `GET /v1/bindings/{uuid}`
     
   ### Response
      
-   If the request is successful, the response contains the binding associated with the given dn under the given host and service type
+   If the request is successful, the response contains the binding associated with the given uuid
    
    Success Response
      
@@ -175,6 +179,7 @@ This request retrieves the information of a binding associated with the provided
       "name": "testb",
       "service_uuid": "uuid1",
       "host": "host1",
+      "uuid": "p61020d9-bef3-4768-9a03-331ff36e8af4cc",
       "oidc_token": "testdn",
       "unique_key": "key",
       "created_on": "2018-05-23T09:25:25Z",
