@@ -20,6 +20,17 @@ type Binding struct {
 	LastAuth    string `json:"last_auth,omitempty"`
 }
 
+// TempUpdateBinding is a struct to be used as an intermediate node when updating a binding
+// containing only the `allowed to be updated fields`
+type TempUpdateBinding struct {
+	Name        string `json:"name"`
+	ServiceUUID string `json:"service_uuid"`
+	Host        string `json:"host"`
+	DN          string `json:"dn"`
+	OIDCToken   string `json:"oidc_token"`
+	UniqueKey   string `json:"unique_key"`
+}
+
 type BindingList struct {
 	Bindings []Binding `json:"bindings"`
 }
@@ -32,6 +43,11 @@ func CreateBinding(binding Binding, store stores.Store) (Binding, error) {
 
 	// validate the binding
 	if err = binding.Validate(store); err != nil {
+		return binding, err
+	}
+
+	// check if a binding with same dn already exists under the same service type and host
+	if err := ExistsWithDN(binding.DN, binding.ServiceUUID, binding.Host, store); err != nil {
 		return binding, err
 	}
 
@@ -50,6 +66,7 @@ func CreateBinding(binding Binding, store stores.Store) (Binding, error) {
 	return binding, err
 }
 
+// Validate performs various checks on the fields of a binding
 func (binding *Binding) Validate(store stores.Store) error {
 
 	var err error
@@ -79,9 +96,17 @@ func (binding *Binding) Validate(store stores.Store) error {
 		return err
 	}
 
+	return nil
+}
+
+// ExistsWithDN checks if a binding with the provided dn already exists under the given service type and host
+func ExistsWithDN(dn string, serviceUUID string, host string, store stores.Store) error {
+
+	var err error
+
 	// check if the given dn doesn't already exist under the given service type and host
 	// first check for all the other errors regrading bindings
-	if _, err = FindBindingByDN(binding.DN, binding.ServiceUUID, binding.Host, store); err != nil {
+	if _, err = FindBindingByDN(dn, serviceUUID, host, store); err != nil {
 		log.Info(err)
 		if err.Error() != "Binding was not found" {
 			return err
@@ -90,14 +115,14 @@ func (binding *Binding) Validate(store stores.Store) error {
 
 	// if the error is nil, it means the function found and returned a binding
 	if err == nil {
-		err = utils.APIErrConflict(*binding, "dn", binding.DN)
+		err = utils.APIErrConflict(Binding{}, "dn", dn)
 		return err
 	}
 
-	//TODO check if the given OIDC token already exists
-
 	return nil
 }
+
+//TODO ExistsWithOIDCToken
 
 // FindBindingByDn queries the datastore and returns a binding based on the given dn and host
 func FindBindingByDN(dn string, serviceUUID string, host string, store stores.Store) (Binding, error) {
@@ -210,4 +235,62 @@ func FindBindingByUUID(uuid string, store stores.Store) (Binding, error) {
 	}
 
 	return binding, err
+}
+
+//UpdateBinding updates a binding after validating its fields
+func UpdateBinding(original Binding, tempBind TempUpdateBinding, store stores.Store) (Binding, error) {
+
+	var err error
+	var updated Binding
+	var qOriginalBinding stores.QBinding
+	var qUpdatedBinding stores.QBinding
+
+	// created the updated binding, combining the fields from the original and the temporary
+	if err := utils.CopyFields(original, &updated); err != nil {
+		err = utils.APIGenericInternalError(err.Error())
+		return Binding{}, err
+	}
+
+	if err := utils.CopyFields(tempBind, &updated); err != nil {
+		err = utils.APIGenericInternalError(err.Error())
+		return Binding{}, err
+	}
+
+	// validate the updated binding
+	if err = updated.Validate(store); err != nil {
+		log.Infof("\nERR:\n%+v\n", err)
+		return updated, err
+	}
+
+	// if there is a new dn provided, check whether or not it already exists
+	if original.DN != updated.DN {
+
+		// check if a binding with same dn already exists under the same service type and host
+		if err := ExistsWithDN(updated.DN, updated.ServiceUUID, updated.Host, store); err != nil {
+			return Binding{}, err
+		}
+
+	}
+
+	//TODO check for the same oidc token
+
+	// convert the original binding to a QBinding
+	if err := utils.CopyFields(original, &qOriginalBinding); err != nil {
+		err = utils.APIGenericInternalError(err.Error())
+		return Binding{}, err
+	}
+
+	// convert the updated binding to a QBinding
+	if err := utils.CopyFields(updated, &qUpdatedBinding); err != nil {
+		err = utils.APIGenericInternalError(err.Error())
+		return Binding{}, err
+	}
+
+	// update the binding
+	if _, err = store.UpdateBinding(qOriginalBinding, qUpdatedBinding); err != nil {
+		err = &utils.APIError{Status: "INTERNAL SERVER ERROR", Code: 500, Message: err.Error()}
+		return Binding{}, err
+	}
+
+	return updated, err
 }
