@@ -871,15 +871,14 @@ func (suite *BindingHandlersSuite) TestBindingListOneByUUIDMultipleEntries() {
 	suite.Equal(expRespJSON, w.Body.String())
 }
 
-
 // TestBindingUpdate tests the normal case of a updating a binding - updates the name
 func (suite *BindingHandlersSuite) TestBindingUpdate() {
 
-			postJSON := `{
+	postJSON := `{
 	"name": "updated_name"
 }`
 
-			expRespJSON := `{
+	expRespJSON := `{
  "name": "updated_name",
  "service_uuid": "uuid1",
  "host": "host1",
@@ -888,293 +887,293 @@ func (suite *BindingHandlersSuite) TestBindingUpdate() {
  "unique_key": "unique_key_1",
  "created_on": "2018-05-05T15:04:05Z"
 }`
-		req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
-		if err != nil {
-				log.Error(err.Error())
-			}
-
-			mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
-		mockstore.SetUp()
-
-			cfg := &config.Config{}
-		_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
-
-			router := mux.NewRouter().StrictSlash(true)
-		w := httptest.NewRecorder()
-		router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
-		router.ServeHTTP(w, req)
-		suite.Equal(200, w.Code)
-		suite.Equal(expRespJSON, w.Body.String())
+	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
+	if err != nil {
+		log.Error(err.Error())
 	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(200, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
 
 // TestBindingUpdateServiceUUIDEmpty tests case of updating a binding's service_uuid into an empty string
 func (suite *BindingHandlersSuite) TestBindingUpdateServiceUUIDEmpty() {
 
-			postJSON := `{
+	postJSON := `{
 	"service_uuid": ""
 }`
 
-			expRespJSON := `{
+	expRespJSON := `{
  "error": {
   "message": "bindings.Binding object contains an empty value for field: ServiceUUID",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
 }`
-		req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
-		if err != nil {
-				log.Error(err.Error())
-			}
-
-			mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
-		mockstore.SetUp()
-
-			cfg := &config.Config{}
-		_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
-
-			router := mux.NewRouter().StrictSlash(true)
-		w := httptest.NewRecorder()
-		router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
-		router.ServeHTTP(w, req)
-		suite.Equal(422, w.Code)
-		suite.Equal(expRespJSON, w.Body.String())
+	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
+	if err != nil {
+		log.Error(err.Error())
 	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(422, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
 
 // TestBindingUpdateHostEmpty tests case of updating a binding's host into an empty string
 func (suite *BindingHandlersSuite) TestBindingUpdateHostEmpty() {
 
-			postJSON := `{
+	postJSON := `{
 	"host": ""
 }`
 
-			expRespJSON := `{
+	expRespJSON := `{
  "error": {
   "message": "bindings.Binding object contains an empty value for field: Host",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
 }`
-		req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
-		if err != nil {
-				log.Error(err.Error())
-			}
-
-			mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
-		mockstore.SetUp()
-
-			cfg := &config.Config{}
-		_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
-
-			router := mux.NewRouter().StrictSlash(true)
-		w := httptest.NewRecorder()
-		router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
-		router.ServeHTTP(w, req)
-		suite.Equal(422, w.Code)
-		suite.Equal(expRespJSON, w.Body.String())
+	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
+	if err != nil {
+		log.Error(err.Error())
 	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(422, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
 
 // TestBindingUpdateUniqueKeyEmpty tests case of updating a binding's unique key into an empty string
 func (suite *BindingHandlersSuite) TestBindingUpdateUniqueKeyEmpty() {
 
-			postJSON := `{
+	postJSON := `{
 	"unique_key": ""
 }`
 
-			expRespJSON := `{
+	expRespJSON := `{
  "error": {
   "message": "bindings.Binding object contains an empty value for field: UniqueKey",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
 }`
-		req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
-		if err != nil {
-				log.Error(err.Error())
-			}
-
-			mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
-		mockstore.SetUp()
-
-			cfg := &config.Config{}
-		_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
-
-			router := mux.NewRouter().StrictSlash(true)
-		w := httptest.NewRecorder()
-		router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
-		router.ServeHTTP(w, req)
-		suite.Equal(422, w.Code)
-		suite.Equal(expRespJSON, w.Body.String())
+	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
+	if err != nil {
+		log.Error(err.Error())
 	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(422, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
 
 // TestBindingUpdateDNEmpty tests case of updating a binding's dn into an empty string
 func (suite *BindingHandlersSuite) TestBindingUpdateDNEmpty() {
 
-			postJSON := `{
+	postJSON := `{
 	"dn": ""
 }`
 
-			expRespJSON := `{
+	expRespJSON := `{
  "error": {
   "message": "Both DN and OIDC Token fields are empty",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
 }`
-		req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
-		if err != nil {
-				log.Error(err.Error())
-			}
-
-			mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
-		mockstore.SetUp()
-
-			cfg := &config.Config{}
-		_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
-
-			router := mux.NewRouter().StrictSlash(true)
-		w := httptest.NewRecorder()
-		router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
-		router.ServeHTTP(w, req)
-		suite.Equal(422, w.Code)
-		suite.Equal(expRespJSON, w.Body.String())
+	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
+	if err != nil {
+		log.Error(err.Error())
 	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(422, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
 
 // TestBindingUpdateUnknownHost tests case of updating a binding's host into an unknown host
 func (suite *BindingHandlersSuite) TestBindingUpdateUnknownHost() {
 
-			postJSON := `{
+	postJSON := `{
 	"host": "unknown"
 }`
 
-			expRespJSON := `{
+	expRespJSON := `{
  "error": {
   "message": "Host was not found",
   "code": 404,
   "status": "NOT FOUND"
  }
 }`
-		req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
-		if err != nil {
-				log.Error(err.Error())
-			}
-
-			mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
-		mockstore.SetUp()
-
-			cfg := &config.Config{}
-		_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
-
-			router := mux.NewRouter().StrictSlash(true)
-		w := httptest.NewRecorder()
-		router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
-		router.ServeHTTP(w, req)
-		suite.Equal(404, w.Code)
-		suite.Equal(expRespJSON, w.Body.String())
+	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
+	if err != nil {
+		log.Error(err.Error())
 	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(404, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
 
 // TestBindingUpdateUnknownServiceUUID tests case of updating a binding's service type uuid into an unknown service type uuid
 func (suite *BindingHandlersSuite) TestBindingUpdateUnknownServiceUUID() {
 
-			postJSON := `{
+	postJSON := `{
 	"service_uuid": "unknown"
 }`
 
-			expRespJSON := `{
+	expRespJSON := `{
  "error": {
   "message": "ServiceType was not found",
   "code": 404,
   "status": "NOT FOUND"
  }
 }`
-		req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
-		if err != nil {
-				log.Error(err.Error())
-			}
-
-			mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
-		mockstore.SetUp()
-
-			cfg := &config.Config{}
-		_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
-
-			router := mux.NewRouter().StrictSlash(true)
-		w := httptest.NewRecorder()
-		router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
-		router.ServeHTTP(w, req)
-		suite.Equal(404, w.Code)
-		suite.Equal(expRespJSON, w.Body.String())
+	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
+	if err != nil {
+		log.Error(err.Error())
 	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(404, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
 
 // TestBindingUpdateInvalidJSON tests case of updating a binding using an invalid json
 func (suite *BindingHandlersSuite) TestBindingUpdateInvalidJSON() {
 
-			postJSON := `{
+	postJSON := `{
 	"service_uuid": "uuid2"
 ` // missing closing bracket
 
-			expRespJSON := `{
+	expRespJSON := `{
  "error": {
   "message": "Poorly formatted JSON. unexpected EOF",
   "code": 400,
   "status": "BAD REQUEST"
  }
 }`
-		req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
-		if err != nil {
-				log.Error(err.Error())
-			}
-
-			mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
-		mockstore.SetUp()
-
-			cfg := &config.Config{}
-		_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
-
-			router := mux.NewRouter().StrictSlash(true)
-		w := httptest.NewRecorder()
-		router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
-		router.ServeHTTP(w, req)
-		suite.Equal(400, w.Code)
-		suite.Equal(expRespJSON, w.Body.String())
+	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
+	if err != nil {
+		log.Error(err.Error())
 	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(400, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
 
 // TestBindingUpdateDNAlreadyExists tests case of updating a binding's dn into an already existing one
 func (suite *BindingHandlersSuite) TestBindingUpdateDNAlreadyExists() {
 
-			postJSON := `{
+	postJSON := `{
 	"dn": "test_dn_2"
 }`
 
-			expRespJSON := `{
+	expRespJSON := `{
  "error": {
   "message": "bindings.Binding object with dn: test_dn_2 already exists",
   "code": 409,
   "status": "CONFLICT"
  }
 }`
-		req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
-		if err != nil {
-				log.Error(err.Error())
-			}
-
-			mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
-		mockstore.SetUp()
-
-			cfg := &config.Config{}
-		_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
-
-			router := mux.NewRouter().StrictSlash(true)
-		w := httptest.NewRecorder()
-		router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
-		router.ServeHTTP(w, req)
-		suite.Equal(409, w.Code)
-		suite.Equal(expRespJSON, w.Body.String())
+	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
+	if err != nil {
+		log.Error(err.Error())
 	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(409, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
 
 // TestBindingUpdateUnknownUUID tests the case where the UUID doesn't exist
 func (suite *BindingHandlersSuite) TestBindingUpdateUnknownUUID() {
 
-			expRespJSON := `{
+	expRespJSON := `{
  "error": {
   "message": "Binding was not found",
   "code": 404,
@@ -1182,25 +1181,75 @@ func (suite *BindingHandlersSuite) TestBindingUpdateUnknownUUID() {
  }
 }`
 
-			req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/unknown", nil)
-		if err != nil {
-				log.Error(err.Error())
-			}
-
-			mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
-		mockstore.SetUp()
-
-			cfg := &config.Config{}
-		_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
-
-			router := mux.NewRouter().StrictSlash(true)
-		w := httptest.NewRecorder()
-		router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
-		router.ServeHTTP(w, req)
-		suite.Equal(404, w.Code)
-		suite.Equal(expRespJSON, w.Body.String())
+	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/unknown", nil)
+	if err != nil {
+		log.Error(err.Error())
 	}
 
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(404, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestBindingDelete tests the normal case
+func (suite *BindingHandlersSuite) TestBindingDelete() {
+
+	req, err := http.NewRequest("DELETE", "http://localhost:8080/bindings/b_uuid1", nil)
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingDelete, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(204, w.Code)
+}
+
+// TestBindingDeleteUnknownHost tests the case where the given uuid is unknown
+func (suite *BindingHandlersSuite) TestBindingDeleteUnknownDN() {
+
+	expRespJSON := `{
+ "error": {
+  "message": "Binding was not found",
+  "code": 404,
+  "status": "NOT FOUND"
+ }
+}`
+
+	req, err := http.NewRequest("DELETE", "http://localhost:8080/bindings/unknown", nil)
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingDelete, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(404, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
 
 func TestBindingHandlersSuite(t *testing.T) {
 	suite.Run(t, new(BindingHandlersSuite))

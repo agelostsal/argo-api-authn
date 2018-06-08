@@ -185,3 +185,29 @@ func BindingUpdate(w http.ResponseWriter, r *http.Request) {
 	utils.RespondOk(w, 200, updatedBinding)
 
 }
+
+// BindingDelete finds and deletes a binding using its UUID
+func BindingDelete(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	var resourceBinding bindings.Binding
+
+	//context references
+	store := context.Get(r, "stores").(stores.Store)
+
+	// url vars
+	vars := mux.Vars(r)
+
+	// check if the binding exists
+	if resourceBinding, err = bindings.FindBindingByUUID(vars["uuid"], store); err != nil {
+		utils.RespondError(w, err)
+		return
+	}
+
+	if err = bindings.DeleteBinding(resourceBinding, store); err != nil {
+		utils.RespondError(w, err)
+		return
+	}
+
+	utils.RespondOk(w, 204, nil)
+}

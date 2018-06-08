@@ -173,3 +173,17 @@ func (mock *Mockstore) UpdateBinding(original QBinding, updated QBinding) (QBind
 
 	return updated, nil
 }
+
+// DeleteBinding removes the given qBinding from the slice of bindings
+func (mock *Mockstore) DeleteBinding(qBinding QBinding) error {
+
+	// find the  binding in the list and replace it
+	for idx, qb := range mock.Bindings {
+		if qb == qBinding {
+			mock.Bindings = append(mock.Bindings[:idx], mock.Bindings[idx+1:]...)
+			break
+		}
+	}
+
+	return nil
+}

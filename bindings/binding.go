@@ -258,7 +258,7 @@ func UpdateBinding(original Binding, tempBind TempUpdateBinding, store stores.St
 
 	// validate the updated binding
 	if err = updated.Validate(store); err != nil {
-		log.Infof("\nERR:\n%+v\n", err)
+		log.Infof("\nERR:\n%v\n", err)
 		return updated, err
 	}
 
@@ -293,4 +293,24 @@ func UpdateBinding(original Binding, tempBind TempUpdateBinding, store stores.St
 	}
 
 	return updated, err
+}
+
+// DeleteBinding deletes the given binding from the store
+func DeleteBinding(binding Binding, store stores.Store) error {
+
+	var err error
+	var qBinding stores.QBinding
+
+	// convert the binding Binding to a QBinding
+	if err = utils.CopyFields(binding, &qBinding); err != nil {
+		err = utils.APIGenericInternalError(err.Error())
+		return err
+	}
+
+	if err = store.DeleteBinding(qBinding); err != nil {
+		return err
+	}
+
+	return err
+
 }
