@@ -60,14 +60,14 @@ func (suite *BindingTestSuite) TestCreateBinding() {
 	suite.Equal(b1.UniqueKey, res1[0].UniqueKey)
 
 	suite.Nil(err1)
-	suite.Equal("bindings.Binding object contains an empty value for field: Name", err2.Error())
-	suite.Equal("bindings.Binding object contains an empty value for field: ServiceUUID", err3.Error())
-	suite.Equal("bindings.Binding object contains an empty value for field: Host", err4.Error())
-	suite.Equal("bindings.Binding object contains an empty value for field: UniqueKey", err5.Error())
-	suite.Equal("Both DN and OIDC Token fields are empty", err6.Error())
-	suite.Equal("ServiceType was not found", err7.Error())
+	suite.Equal("binding object contains empty fields. empty value for field: name", err2.Error())
+	suite.Equal("binding object contains empty fields. empty value for field: service_uuid", err3.Error())
+	suite.Equal("binding object contains empty fields. empty value for field: host", err4.Error())
+	suite.Equal("binding object contains empty fields. empty value for field: unique_key", err5.Error())
+	suite.Equal("binding object contains empty fields. Both DN and OIDC Token fields are empty", err6.Error())
+	suite.Equal("Service-type was not found", err7.Error())
 	suite.Equal("Host was not found", err8.Error())
-	suite.Equal("bindings.Binding object with dn: test_dn_1 already exists", err9.Error())
+	suite.Equal("binding object with dn: test_dn_1 already exists", err9.Error())
 
 }
 
@@ -234,14 +234,14 @@ func (suite *BindingTestSuite) TestUpdateBinding() {
 	suite.Equal(b1_upd.UniqueKey, res1[0].UniqueKey)
 
 	suite.Nil(err1)
-	suite.Equal("bindings.Binding object contains an empty value for field: Name", err2.Error())
-	suite.Equal("bindings.Binding object contains an empty value for field: ServiceUUID", err3.Error())
-	suite.Equal("bindings.Binding object contains an empty value for field: Host", err4.Error())
-	suite.Equal("bindings.Binding object contains an empty value for field: UniqueKey", err5.Error())
-	suite.Equal("Both DN and OIDC Token fields are empty", err6.Error())
-	suite.Equal("ServiceType was not found", err7.Error())
+	suite.Equal("binding object contains empty fields. empty value for field: name", err2.Error())
+	suite.Equal("binding object contains empty fields. empty value for field: service_uuid", err3.Error())
+	suite.Equal("binding object contains empty fields. empty value for field: host", err4.Error())
+	suite.Equal("binding object contains empty fields. empty value for field: unique_key", err5.Error())
+	suite.Equal("binding object contains empty fields. Both DN and OIDC Token fields are empty", err6.Error())
+	suite.Equal("Service-type was not found", err7.Error())
 	suite.Equal("Host was not found", err8.Error())
-	suite.Equal("bindings.Binding object with dn: test_dn_1 already exists", err9.Error())
+	suite.Equal("binding object with dn: test_dn_1 already exists", err9.Error())
 }
 
 func (suite *BindingTestSuite) TestDeleteBinding() {

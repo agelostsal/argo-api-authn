@@ -72,7 +72,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldName() {
 
 	expRespJSON := `{
  "error": {
-  "message": "bindings.Binding object contains an empty value for field: Name",
+  "message": "binding object contains empty fields. empty value for field: name",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
@@ -150,7 +150,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldServiceUUID() {
 
 	expRespJSON := `{
  "error": {
-  "message": "bindings.Binding object contains an empty value for field: ServiceUUID",
+  "message": "binding object contains empty fields. empty value for field: service_uuid",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
@@ -189,7 +189,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldHost() {
 
 	expRespJSON := `{
  "error": {
-  "message": "bindings.Binding object contains an empty value for field: Host",
+  "message": "binding object contains empty fields. empty value for field: host",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
@@ -227,7 +227,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldDNAndOIDC() {
 
 	expRespJSON := `{
  "error": {
-  "message": "Both DN and OIDC Token fields are empty",
+  "message": "binding object contains empty fields. Both DN and OIDC Token fields are empty",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
@@ -266,7 +266,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldUniqueKey() {
 
 	expRespJSON := `{
  "error": {
-  "message": "bindings.Binding object contains an empty value for field: UniqueKey",
+  "message": "binding object contains empty fields. empty value for field: unique_key",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
@@ -305,7 +305,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateUnknownService() {
 
 	expRespJSON := `{
  "error": {
-  "message": "ServiceType was not found",
+  "message": "Service-type was not found",
   "code": 404,
   "status": "NOT FOUND"
  }
@@ -383,7 +383,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateDNAlreadyExists() {
 
 	expRespJSON := `{
  "error": {
-  "message": "bindings.Binding object with dn: test_dn_1 already exists",
+  "message": "binding object with dn: test_dn_1 already exists",
   "code": 409,
   "status": "CONFLICT"
  }
@@ -566,7 +566,7 @@ func (suite *BindingHandlersSuite) TestBindingListAllByServiceTypeAndHostUnknown
 
 	expRespJSON := `{
  "error": {
-  "message": "ServiceType was not found",
+  "message": "Service-type was not found",
   "code": 404,
   "status": "NOT FOUND"
  }
@@ -692,7 +692,7 @@ func (suite *BindingHandlersSuite) TestBindingListOneByDnUnknownServiceType() {
 
 	expRespJSON := `{
  "error": {
-  "message": "ServiceType was not found",
+  "message": "Service-type was not found",
   "code": 404,
   "status": "NOT FOUND"
  }
@@ -915,7 +915,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateServiceUUIDEmpty() {
 
 	expRespJSON := `{
  "error": {
-  "message": "bindings.Binding object contains an empty value for field: ServiceUUID",
+  "message": "binding object contains empty fields. empty value for field: service_uuid",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
@@ -948,7 +948,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateHostEmpty() {
 
 	expRespJSON := `{
  "error": {
-  "message": "bindings.Binding object contains an empty value for field: Host",
+  "message": "binding object contains empty fields. empty value for field: host",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
@@ -981,7 +981,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateUniqueKeyEmpty() {
 
 	expRespJSON := `{
  "error": {
-  "message": "bindings.Binding object contains an empty value for field: UniqueKey",
+  "message": "binding object contains empty fields. empty value for field: unique_key",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
@@ -1014,7 +1014,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateDNEmpty() {
 
 	expRespJSON := `{
  "error": {
-  "message": "Both DN and OIDC Token fields are empty",
+  "message": "binding object contains empty fields. Both DN and OIDC Token fields are empty",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
@@ -1080,7 +1080,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateUnknownServiceUUID() {
 
 	expRespJSON := `{
  "error": {
-  "message": "ServiceType was not found",
+  "message": "Service-type was not found",
   "code": 404,
   "status": "NOT FOUND"
  }
@@ -1146,7 +1146,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateDNAlreadyExists() {
 
 	expRespJSON := `{
  "error": {
-  "message": "bindings.Binding object with dn: test_dn_2 already exists",
+  "message": "binding object with dn: test_dn_2 already exists",
   "code": 409,
   "status": "CONFLICT"
  }

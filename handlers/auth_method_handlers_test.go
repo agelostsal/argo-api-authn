@@ -145,7 +145,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListOneUnknownServiceTyp
 
 	expRespJSON := `{
  "error": {
-  "message": "ServiceType was not found",
+  "message": "Service-type was not found",
   "code": 404,
   "status": "NOT FOUND"
  }
@@ -409,7 +409,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateMissingTypeField()
 }`
 	expRespJSON := `{
  "error": {
-  "message": "Type was not found in the request body",
+  "message": "api-key-auth object contains empty fields. type was not found in the request body",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
@@ -434,7 +434,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateMissingTypeField()
 	suite.Equal(expRespJSON, w.Body.String())
 }
 
-// TestAuthMethodCreateUnsupportedAuthMethod tests the case where the type field contains an unsupported auth method by the authentication service
+// TestAuthMethodCreateUnsupportedAuthMethod tests the case where the type field contains an unsupported auth method by the authentication service but supported from the authn service
 func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateUnsupportedAuthMethod() {
 
 	postBody := `{
@@ -443,11 +443,11 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateUnsupportedAuthMet
  "path": "test_path_1/{{identifier}}?key={{access_key}}",
  "port": 9000,
  "service_uuid": "uuid1",
- "type": "unsupported-type"
+ "type": "x-api-token"
 }`
 	expRespJSON := `{
  "error": {
-  "message": "Field: type contains invalid data. unsupported-type is not yet supported by the serviceType",
+  "message": "type: x-api-token is not yet supported.Supported:api-key",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
@@ -484,7 +484,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateMissingServiceFiel
 }`
 	expRespJSON := `{
  "error": {
-  "message": "ServiceType UUID was not found in the request body",
+  "message": "api-key-auth object contains empty fields. service_uuid was not found in the request body",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
@@ -521,7 +521,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateMissingHostField()
 }`
 	expRespJSON := `{
  "error": {
-  "message": "Host was not found in the request body",
+  "message": "api-key-auth object contains empty fields. host was not found in the request body",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
@@ -558,7 +558,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateMissingPortField()
 }`
 	expRespJSON := `{
  "error": {
-  "message": "Port was not found in the request body",
+  "message": "api-key-auth object contains empty fields. port was not found in the request body",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
@@ -595,7 +595,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateMissingPathField()
 }`
 	expRespJSON := `{
  "error": {
-  "message": "Path was not found in the request body",
+  "message": "api-key-auth object contains empty fields. path was not found in the request body",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
@@ -632,7 +632,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateMissingAccessKeyFi
 }`
 	expRespJSON := `{
  "error": {
-  "message": "access_key was not found in the request body",
+  "message": "api-key-auth object contains empty fields. access_key was not found in the request body",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
@@ -670,7 +670,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateUnknownService() {
 }`
 	expRespJSON := `{
  "error": {
-  "message": "ServiceType was not found",
+  "message": "Service-type was not found",
   "code": 404,
   "status": "NOT FOUND"
  }
@@ -746,7 +746,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateUnknownAuthMethod(
 }`
 	expRespJSON := `{
  "error": {
-  "message": "Field: type contains invalid data. unknown_authM is not yet supported by the serviceType",
+  "message": "type: unknown_authM is not yet supported.Supported:[api-key x-api-token]",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
@@ -860,7 +860,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateAlreadyExists() {
 }`
 	expRespJSON := `{
  "error": {
-  "message": "auth_methods.AuthMethod object with serviceType: uuid1 already exists",
+  "message": "auth-method object with service_uuid: uuid1 already exists",
   "code": 409,
   "status": "CONFLICT"
  }

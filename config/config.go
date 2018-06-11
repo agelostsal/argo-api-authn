@@ -40,7 +40,7 @@ func (cfg *Config) ConfigSetUp(path string) error {
 	log.Info(fmt.Sprintf("%+v", cfg))
 
 	if err = utils.ValidateRequired(*cfg); err != nil {
-		return err
+		return utils.StructGenericEmptyRequiredField("config", err.Error())
 	}
 	return nil
 }

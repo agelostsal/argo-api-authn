@@ -170,7 +170,7 @@ func (suite *CertificateHandlerSuite) TestAuthViaCertUnknownServiceType() {
 
 	expRespJSON := `{
  "error": {
-  "message": "ServiceType was not found",
+  "message": "Service-type was not found",
   "code": 404,
   "status": "NOT FOUND"
  }

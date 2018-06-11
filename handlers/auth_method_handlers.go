@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/ARGOeu/argo-api-authn/auth-methods"
 	"github.com/ARGOeu/argo-api-authn/config"
 	"github.com/ARGOeu/argo-api-authn/servicetypes"
@@ -41,13 +42,13 @@ func AuthMethodCreate(w http.ResponseWriter, r *http.Request) {
 
 	// required variables for every type of auth method
 	if i, ok = authM["type"]; ok == false {
-		err = utils.APIErrEmptyRequiredField("Type was not found in the request body")
+		err = utils.APIErrEmptyRequiredField("api-key-auth", "type was not found in the request body")
 		utils.RespondError(w, err)
 		return
 	}
 	typeM = i.(string)
 
-	// check if the type is supported
+	// check if the type is supported by the authn service
 	flag = false
 	for _, am := range cfg.SupportedAuthMethods {
 		if am == typeM {
@@ -56,31 +57,31 @@ func AuthMethodCreate(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if !flag {
-		err = utils.APIErrInvalidFieldContent("type", typeM+" is not yet supported by the serviceType")
+		err = utils.APIErrUnsupportedContent("type", typeM, fmt.Sprintf("Supported:%v", cfg.SupportedAuthMethods))
 		utils.RespondError(w, err)
 		return
 	}
 
 	if _, ok = authM["service_uuid"]; ok == false {
-		err = utils.APIErrEmptyRequiredField("ServiceType UUID was not found in the request body")
+		err = utils.APIErrEmptyRequiredField("api-key-auth", "service_uuid was not found in the request body")
 		utils.RespondError(w, err)
 		return
 	}
 
 	if _, ok = authM["host"]; ok == false {
-		err = utils.APIErrEmptyRequiredField("Host was not found in the request body")
+		err = utils.APIErrEmptyRequiredField("api-key-auth", "host was not found in the request body")
 		utils.RespondError(w, err)
 		return
 	}
 
 	if _, ok = authM["port"]; ok == false {
-		err = utils.APIErrEmptyRequiredField("Port was not found in the request body")
+		err = utils.APIErrEmptyRequiredField("api-key-auth", "port was not found in the request body")
 		utils.RespondError(w, err)
 		return
 	}
 
 	if _, ok = authM["path"]; ok == false {
-		err = utils.APIErrEmptyRequiredField("Path was not found in the request body")
+		err = utils.APIErrEmptyRequiredField("api-key-auth", "path was not found in the request body")
 		utils.RespondError(w, err)
 		return
 	}
@@ -100,7 +101,7 @@ func AuthMethodCreate(w http.ResponseWriter, r *http.Request) {
 
 	// check if the serviceType supports this kind of auth method
 	if serviceType.AuthMethod != typeM {
-		err = utils.APIErrUnsupportedContentNonVerbose("type", typeM)
+		err = utils.APIErrUnsupportedContent("type", typeM, fmt.Sprintf("Supported:%v", serviceType.AuthMethod))
 		utils.RespondError(w, err)
 		return
 	}
@@ -110,7 +111,7 @@ func AuthMethodCreate(w http.ResponseWriter, r *http.Request) {
 	authMFinder := auth_methods.AuthMethodFinders[typeM]
 
 	if _, err := authMFinder(authM["service_uuid"].(string), authM["host"].(string), store); err == nil {
-		err = utils.APIErrConflict(auth_methods.AuthMethod{}, "serviceType", authM["service_uuid"].(string))
+		err = utils.APIErrConflict("auth-method", "service_uuid", authM["service_uuid"].(string))
 		utils.RespondError(w, err)
 		return
 	}

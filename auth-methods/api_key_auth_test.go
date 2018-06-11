@@ -74,7 +74,7 @@ func (suite *TestApiKeyAuthSuite) TestCreateApiKeyMethod() {
 	_, err4 := CreateApiKeyAuthMethod(AmInvalidPath2, mockstore)
 
 	suite.Equal(am, am1)
-	suite.Equal("access_key was not found in the request body", err2.Error())
+	suite.Equal("api-key-auth object contains empty fields. access_key was not found in the request body", err2.Error())
 	suite.Equal("Field: path contains invalid data. Doesn't contain {{identifier}}", err3.Error())
 	suite.Equal("Field: path contains invalid data. Doesn't contain {{access_key}}", err4.Error())
 

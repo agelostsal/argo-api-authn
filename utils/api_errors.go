@@ -21,13 +21,13 @@ var APIErrNotFound = func(resource string) *APIError {
 	return &APIError{msg, 404, "NOT FOUND"}
 }
 
-var APIErrConflict = func(resource interface{}, field string, value string) *APIError {
-	msg := fmt.Sprintf("%T object with %v: %v already exists", resource, field, value)
+var APIErrConflict = func(resource string, field string, value string) *APIError {
+	msg := fmt.Sprintf("%v object with %v: %v already exists", resource, field, value)
 	return &APIError{msg, 409, "CONFLICT"}
 }
 
-var APIErrEmptyRequiredField = func(msg string) *APIError {
-	return &APIError{msg, 422, "UNPROCESSABLE ENTITY"}
+var APIErrEmptyRequiredField = func(resource string, msg string) *APIError {
+	return &APIError{fmt.Sprintf("%v object contains empty fields. %v", resource, msg), 422, "UNPROCESSABLE ENTITY"}
 }
 
 var APIErrInvalidFieldContent = func(field string, reason string) *APIError {
@@ -56,6 +56,11 @@ var APIGenericInternalError = func(msg string) error {
 
 // Generic Errors
 
-var GenericEmptyRequiredField = func(instance interface{}, fieldName string) error {
-	return errors.New(fmt.Sprintf("%T object contains an empty value for field: %v", instance, fieldName))
+var GenericEmptyRequiredField = func(fieldName string) error {
+	return errors.New(fmt.Sprintf("empty value for field: %v", fieldName))
+}
+
+// also contains struct information
+var StructGenericEmptyRequiredField = func(strct string, reason string) error {
+	return errors.New(fmt.Sprintf("%v object contains empty fields. %v", strct, reason))
 }

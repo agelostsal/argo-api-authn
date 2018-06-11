@@ -30,7 +30,7 @@ func ServiceTypeCreate(w http.ResponseWriter, r *http.Request) {
 
 	// check if all required field have been provided
 	if err = utils.ValidateRequired(service); err != nil {
-		err := utils.APIErrEmptyRequiredField(err.Error())
+		err := utils.APIErrEmptyRequiredField("service-type", err.Error())
 		utils.RespondError(w, err)
 		return
 	}

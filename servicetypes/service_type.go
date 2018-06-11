@@ -45,7 +45,7 @@ func CreateServiceType(service ServiceType, store stores.Store, cfg config.Confi
 	}
 
 	if len(qServices) > 0 {
-		err = utils.APIErrConflict(service, "name", service.Name)
+		err = utils.APIErrConflict("service-type", "name", service.Name)
 		return ServiceType{}, err
 	}
 
@@ -78,7 +78,7 @@ func FindServiceTypeByName(name string, store stores.Store) (ServiceType, error)
 	}
 
 	if len(qServices) == 0 {
-		err = utils.APIErrNotFound("ServiceType")
+		err = utils.APIErrNotFound("Service-type")
 		return ServiceType{}, err
 	}
 
@@ -107,7 +107,7 @@ func FindServiceTypeByUUID(uuid string, store stores.Store) (ServiceType, error)
 	}
 
 	if len(qServices) == 0 {
-		err = utils.APIErrNotFound("ServiceType")
+		err = utils.APIErrNotFound("Service-type")
 		return ServiceType{}, err
 	}
 

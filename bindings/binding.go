@@ -75,13 +75,13 @@ func (binding *Binding) Validate(store stores.Store) error {
 
 	// check if all required field have been provided
 	if err = utils.ValidateRequired(*binding); err != nil {
-		err := utils.APIErrEmptyRequiredField(err.Error())
+		err := utils.APIErrEmptyRequiredField("binding", err.Error())
 		return err
 	}
 
 	// check if one of DN or OIDCToken has been provided
 	if binding.DN == "" && binding.OIDCToken == "" {
-		err = utils.APIErrEmptyRequiredField("Both DN and OIDC Token fields are empty")
+		err = utils.APIErrEmptyRequiredField("binding", "Both DN and OIDC Token fields are empty")
 		return err
 	}
 
@@ -115,7 +115,7 @@ func ExistsWithDN(dn string, serviceUUID string, host string, store stores.Store
 
 	// if the error is nil, it means the function found and returned a binding
 	if err == nil {
-		err = utils.APIErrConflict(Binding{}, "dn", dn)
+		err = utils.APIErrConflict("binding", "dn", dn)
 		return err
 	}
 
