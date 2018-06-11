@@ -54,9 +54,9 @@ func (suite *ServiceTestSuite) TestCreateServiceType() {
 
 	suite.Nil(err)
 	suite.Equal("servicetypes.ServiceType object with name: s1 already exists", err2.Error())
-	suite.Equal("Authentication Type: unsup_type is not yet supported", err3.Error())
-	suite.Equal("Authentication Type: empty is not yet supported", err4.Error())
-	suite.Equal("Authentication Method: unsup_method is not yet supported", err5.Error())
+	suite.Equal("auth_types: unsup_type is not yet supported.Supported:[x509 oidc]", err3.Error())
+	suite.Equal("auth_types: empty is not yet supported.Supported:[x509 oidc]", err4.Error())
+	suite.Equal("auth_method: unsup_method is not yet supported.Supported:[api-key x-api-token]", err5.Error())
 
 }
 

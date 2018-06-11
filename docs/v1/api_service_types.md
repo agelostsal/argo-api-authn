@@ -8,6 +8,12 @@ This request creates a new service type.
 
 `POST /v1/service-types`
 
+`auth_types:` This field refers to the authentication types that the service type wishes to support.The provided authentication types should also be supported by the authn service. E.g. a service type wishes to use an authentication type of x509 certificate, meaning that it will enable its users to use x509 certificates as an alternative authentication mechanism.The authn service will use an internal handler to map x509 certificates to a service-types credentials, so when declaring an auth-type, it needs to be first, supported b the authn-service itself.
+
+
+`auth_method`: This field refers to the authentication method that the service type uses in order to authenticate requests against it.The specified authentication method should also be supported by the authn service. E.g. a service type can use the `api-key` authentication method which means that it uses an api key/token to authenticate/authorize requests against it. Each authentication method uses an internal handlers from the authn service in order to be executed, that's why the declared authentication method must be supported.
+
+`retrieval_field`:The field refers to the response's field from the respective service type, which will contain the token we need. E.g. when accessing a service type's users, the response's field that might contain the token we are looking for, might come in different placeholders, like, access_token, token, jwt, etc.
 ### Example request
 ```
 curl -X POST -H "Content-Type: application/json"

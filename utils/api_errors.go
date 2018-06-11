@@ -35,8 +35,13 @@ var APIErrInvalidFieldContent = func(field string, reason string) *APIError {
 	return &APIError{msg, 422, "UNPROCESSABLE ENTITY"}
 }
 
-var APIErrUnsupportedContent = func(place, content string) *APIError {
+var APIErrUnsupportedContentNonVerbose = func(place, content string) *APIError {
 	msg := fmt.Sprintf("%v: %v is not yet supported", place, content)
+	return &APIError{msg, 422, "UNPROCESSABLE ENTITY"}
+}
+
+var APIErrUnsupportedContent = func(place, content string, supported string) *APIError {
+	msg := fmt.Sprintf("%v: %v is not yet supported.%v", place, content, supported)
 	return &APIError{msg, 422, "UNPROCESSABLE ENTITY"}
 }
 

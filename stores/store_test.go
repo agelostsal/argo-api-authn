@@ -295,14 +295,14 @@ func (suite *StoreTestSuite) TestDeleteBinding() {
 
 	suite.SetUpStoreTestSuite()
 
-	qBinding := QBinding{Name: "b1", ServiceUUID: "uuid1", Host: "host1", UUID:"b_uuid1",DN: "test_dn_1", OIDCToken: "", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
+	qBinding := QBinding{Name: "b1", ServiceUUID: "uuid1", Host: "host1", UUID: "b_uuid1", DN: "test_dn_1", OIDCToken: "", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
 
 	err1 := suite.Mockstore.DeleteBinding(qBinding)
 
 	// check the slice containing the bindings to see if the qBinding was removed
 	expBindings := []QBinding{
-		{Name: "b2", ServiceUUID: "uuid1", Host: "host1", UUID:"b_uuid2", DN: "test_dn_2", OIDCToken: "", UniqueKey: "unique_key_2", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""},
-		{Name: "b3", ServiceUUID: "uuid1", Host: "host2", UUID:"b_uuid3", DN: "test_dn_3", OIDCToken: "", UniqueKey: "unique_key_3", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""},
+		{Name: "b2", ServiceUUID: "uuid1", Host: "host1", UUID: "b_uuid2", DN: "test_dn_2", OIDCToken: "", UniqueKey: "unique_key_2", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""},
+		{Name: "b3", ServiceUUID: "uuid1", Host: "host2", UUID: "b_uuid3", DN: "test_dn_3", OIDCToken: "", UniqueKey: "unique_key_3", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""},
 	}
 	qBindings, _ := suite.Mockstore.QueryBindings("", "")
 
