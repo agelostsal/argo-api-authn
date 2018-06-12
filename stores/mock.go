@@ -2,6 +2,7 @@ package stores
 
 import (
 	"github.com/ARGOeu/argo-api-authn/utils"
+	"reflect"
 )
 
 type Mockstore struct {
@@ -167,6 +168,19 @@ func (mock *Mockstore) UpdateBinding(original QBinding, updated QBinding) (QBind
 	for idx, qb := range mock.Bindings {
 		if qb == original {
 			mock.Bindings[idx] = updated
+			break
+		}
+	}
+
+	return updated, nil
+}
+
+func (mock *Mockstore) UpdateServiceType(original QServiceType, updated QServiceType) (QServiceType, error) {
+
+	// find the service type in the list and replace it
+	for idx, sv := range mock.ServiceTypes {
+		if reflect.DeepEqual(original, sv) { // requires DeepEqual because structs with []string as fields can't be compared
+		mock.ServiceTypes[idx] = updated
 			break
 		}
 	}

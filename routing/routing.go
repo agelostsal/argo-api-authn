@@ -68,6 +68,7 @@ func NewRouting(routes []APIRoute, store stores.Store, config *config.Config) *A
 var ApiRoutes = []APIRoute{
 	{"serviceTypes:create", "POST", "/service-types", handlers.ServiceTypeCreate, true},
 	{"serviceTypes:ListOne", "GET", "/service-types/{service-type}", handlers.ServiceTypesListOne, true},
+	{"serviceTypes:ListOne", "PUT", "/service-types/{service-type}", handlers.ServiceTypeUpdate, true},
 	{"serviceType:ListAll", "GET", "/service-types", handlers.ServiceTypeListAll, true},
 	{"authMethod:ListOne", "GET", "/service-types/{service-type}/hosts/{host}/authM", handlers.AuthMethodListOne, true},
 	{"bindings:ListAllByServiceTypeAndHost", "GET", "/service-types/{service-type}/hosts/{host}/bindings", handlers.BindingListAllByServiceTypeAndHost, true},
