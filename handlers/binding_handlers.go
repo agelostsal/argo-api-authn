@@ -144,3 +144,44 @@ func BindingListOneByUUID(w http.ResponseWriter, r *http.Request) {
 	utils.RespondOk(w, 200, binding)
 
 }
+
+// BindingUpdate updates a binding
+func BindingUpdate(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	var originalBinding bindings.Binding
+	var updatedBinding bindings.Binding
+	var tempBinding bindings.TempUpdateBinding
+
+	//context references
+	store := context.Get(r, "stores").(stores.Store)
+
+	// url vars
+	vars := mux.Vars(r)
+
+	if originalBinding, err = bindings.FindBindingByUUID(vars["uuid"], store); err != nil {
+		utils.RespondError(w, err)
+		return
+	}
+
+	// first, fill the temporary binding with the fields of the original binding
+	if err := utils.CopyFields(originalBinding, &tempBinding); err != nil {
+		err = utils.APIGenericInternalError(err.Error())
+		utils.RespondError(w, err)
+	}
+
+	// check the validity of the JSON and updated the provided fields
+	if err = json.NewDecoder(r.Body).Decode(&tempBinding); err != nil {
+		err := utils.APIErrBadRequest(err.Error())
+		utils.RespondError(w, err)
+		return
+	}
+
+	if updatedBinding, err = bindings.UpdateBinding(originalBinding, tempBinding, store); err != nil {
+		utils.RespondError(w, err)
+		return
+	}
+
+	utils.RespondOk(w, 200, updatedBinding)
+
+}

@@ -190,3 +190,47 @@ This request retrieves the information of a binding associated with the provided
 ### Errors
 
 Please refer to section [Errors](api_errors.md) to see all possible Errors
+
+
+## [PUT] Manage Bindings - Update a Binding
+
+This request updates binding. You can specify one or more fields to update.
+The allowed to be updated fields are:
+
+`name, service_uuid, host, dn, oidc_token, unique_key`.
+
+#### Request
+
+`PUT /v1/bindings/{uuid}`
+
+##### Request Body
+
+```json
+{
+	"name": "b1_updated"
+}
+ ```
+ 
+ ### Response
+ 
+ If the request is successful, the response contains the updated binding.
+ 
+ Success Response
+ 
+ `200 OK`
+ 
+ ```json
+ {
+     "name": "b1_updated",
+     "service_uuid": "b61030d9-bef3-4768-9a03-7b1ff36e8af4cc",
+     "host": "host1",
+     "uuid": "p61020d9-bef3-4768-9a03-331ff36e8af4cc",
+     "dn": "host1",
+     "oidc_token": "token",
+     "unique_key": "key",
+     "created_on": "2018-05-24T09:58:17Z"
+ }
+  ```
+  
+### Errors
+Please refer to section [Errors](api_errors.md) to see all possible Errors

@@ -387,6 +387,57 @@ paths:
           $ref: '#/responses/404'
         500:
           $ref: "#/responses/500"
+    put:
+      summary: Updates a binding
+      description: |
+         Updates a binding
+      parameters:
+        - name: UUID
+          in: path
+          description: UUID of the binding
+          required: true
+          type: string
+        - $ref: '#/parameters/ApiKey'
+        - name: binding information
+          in: body
+          description: Required binding information. When updating, you need to provide information ONLY for the fields(s) you are updating a.You can updated one or more fields at a time.
+          required: true
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              service_uuid:
+                type: string
+              host:
+                type: string
+              dn:
+                type: string
+              oidc_token:
+                type: string
+              unique_key:
+                type: string
+      tags:
+        - Bindings
+      responses:
+        200:
+          description: Returns the updated binding
+          schema:
+            $ref: '#/definitions/Binding'
+        400:
+          $ref: "#/responses/400"
+        401:
+          $ref: "#/responses/401"
+        403:
+          $ref: "#/responses/403"
+        404:
+          $ref: '#/responses/404'
+        409:
+          $ref: '#/responses/409'
+        422:
+          $ref: '#/responses/422'
+        500:
+          $ref: "#/responses/500"
 
 parameters:
   ApiKey:
