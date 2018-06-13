@@ -73,3 +73,7 @@ Before you start, you need to issue a valid certificate.
    "verify_ssl": true
  }
  ```
+ 
+ ## Helpful Utilities
+ You can find various utility scripts to help you get up and running the service inside the
+ repo's `bin` folder.
