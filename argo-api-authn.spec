@@ -57,3 +57,4 @@ go clean
 
 %changelog
 * Thu Jun 14 2018 Themis Zamani  <themiszamani@gmail.com> - 0.1.0-1%{?dist}
+- Initial release
