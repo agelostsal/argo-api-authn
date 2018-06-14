@@ -37,7 +37,7 @@ install --directory %{buildroot}/var/www/argo-api-authn
 install --mode 755 bin/argo-api-authn %{buildroot}/var/www/argo-api-authn/argo-api-authn
 
 install --directory %{buildroot}/etc/argo-api-authn
-install --mode 644 src/github.com/ARGOeu/argo-api-authn/config.json %{buildroot}/etc/argo-api-authn/config.json
+install --mode 644 src/github.com/ARGOeu/argo-api-authn/conf/config.json %{buildroot}/etc/argo-api-authn/conf/config.json
 
 install --directory %{buildroot}/usr/lib/systemd/system
 install --mode 644 src/github.com/ARGOeu/argo-api-authn/argo-api-authn.service %{buildroot}/usr/lib/systemd/system/
@@ -52,7 +52,7 @@ go clean
 %defattr(0644,argo-api-authn,argo-api-authn)
 %attr(0750,argo-api-authn,argo-api-authn) /var/www/argo-api-authn
 %attr(0755,argo-api-authn,argo-api-authn) /var/www/argo-api-authn/argo-api-authn
-%attr(0644,argo-api-authn,argo-api-authn) /etc/argo-api-authn/config.json
+%attr(0644,argo-api-authn,argo-api-authn) /etc/argo-api-authn/conf/config.json
 %attr(0644,root,root) /usr/lib/systemd/system/argo-api-authn.service
 
 %changelog
