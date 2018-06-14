@@ -56,4 +56,4 @@ go clean
 %attr(0644,root,root) /usr/lib/systemd/system/argo-api-authn.service
 
 %changelog
-* Thu June 14 Themis Zamani  <themiszamani@gmail.com> 0.1.0-1%{?dist}
+* Thu Jun 14 2018 Themis Zamani  <themiszamani@gmail.com> - 0.1.0-1%{?dist}
