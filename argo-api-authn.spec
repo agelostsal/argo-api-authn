@@ -37,7 +37,7 @@ install --directory %{buildroot}/var/www/argo-api-authn
 install --mode 755 bin/argo-api-authn %{buildroot}/var/www/argo-api-authn/argo-api-authn
 
 install --directory %{buildroot}/etc/argo-api-authn
-install --mode 644 src/github.com/ARGOeu/argo-api-authn/conf/config_template.json %{buildroot}/etc/argo-api-authn/conf/config.json
+install --mode 644 src/github.com/ARGOeu/argo-api-authn/conf/config.json %{buildroot}/etc/argo-api-authn/conf/config.json
 
 install --directory %{buildroot}/usr/lib/systemd/system
 install --mode 644 src/github.com/ARGOeu/argo-api-authn/argo-api-authn.service %{buildroot}/usr/lib/systemd/system/
