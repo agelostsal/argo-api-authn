@@ -1,7 +1,4 @@
 # argo-api-authn
-<<<<<<< HEAD
-Authentication Server for ARGO API(s)
-=======
 
 Authentication Service for ARGO API(s)
 
