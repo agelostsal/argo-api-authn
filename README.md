@@ -1,4 +1,7 @@
 # argo-api-authn
+<<<<<<< HEAD
+Authentication Server for ARGO API(s)
+=======
 
 Authentication Service for ARGO API(s)
 
@@ -77,3 +80,4 @@ Before you start, you need to issue a valid certificate.
  ## Helpful Utilities
  You can find various utility scripts to help you get up and running the service inside the
  repo's `bin` folder.
+>>>>>>> upstream/devel
