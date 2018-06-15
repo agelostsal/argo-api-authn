@@ -100,7 +100,7 @@ func AuthMethodCreate(w http.ResponseWriter, r *http.Request) {
 
 	// check if the serviceType supports this kind of auth method
 	if serviceType.AuthMethod != typeM {
-		err = utils.APIErrUnsupportedContent("type", typeM)
+		err = utils.APIErrUnsupportedContentNonVerbose("type", typeM)
 		utils.RespondError(w, err)
 		return
 	}

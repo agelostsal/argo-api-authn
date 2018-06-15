@@ -1,6 +1,7 @@
 package servicetypes
 
 import (
+	"fmt"
 	"github.com/ARGOeu/argo-api-authn/config"
 	"github.com/ARGOeu/argo-api-authn/stores"
 	"github.com/ARGOeu/argo-api-authn/utils"
@@ -168,7 +169,7 @@ func (s *ServiceType) hasValidAuthTypes(cfg config.Config) error {
 	var flag bool
 
 	if len(s.AuthTypes) == 0 {
-		err = utils.APIErrUnsupportedContent("Authentication Type", "empty")
+		err = utils.APIErrUnsupportedContent("auth_types", "empty", fmt.Sprintf("Supported:%v", cfg.SupportedAuthTypes))
 		return err
 	}
 
@@ -181,7 +182,7 @@ func (s *ServiceType) hasValidAuthTypes(cfg config.Config) error {
 			}
 		}
 		if !flag {
-			err = utils.APIErrUnsupportedContent("Authentication Type", am)
+			err = utils.APIErrUnsupportedContent("auth_types", am, fmt.Sprintf("Supported:%v", cfg.SupportedAuthTypes))
 			return err
 		}
 	}
@@ -198,6 +199,6 @@ func (s *ServiceType) hasValidAuthMethod(cfg config.Config) error {
 		}
 	}
 
-	err = utils.APIErrUnsupportedContent("Authentication Method", s.AuthMethod)
+	err = utils.APIErrUnsupportedContent("auth_method", s.AuthMethod, fmt.Sprintf("Supported:%v", cfg.SupportedAuthMethods))
 	return err
 }

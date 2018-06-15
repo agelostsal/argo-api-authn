@@ -109,7 +109,7 @@ func (suite *ServiceTypeHandlersSuite) TestServiceTypeCreateInvalidAuthTypes() {
 
 	expRespJSON := `{
  "error": {
-  "message": "Authentication Type: unsup_type is not yet supported",
+  "message": "auth_types: unsup_type is not yet supported.Supported:[x509 oidc]",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
@@ -148,7 +148,7 @@ func (suite *ServiceTypeHandlersSuite) TestServiceTypeCreateInvalidAuthMethod() 
 
 	expRespJSON := `{
  "error": {
-  "message": "Authentication Method: unsup_method is not yet supported",
+  "message": "auth_method: unsup_method is not yet supported.Supported:[api-key x-api-token]",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
@@ -187,7 +187,7 @@ func (suite *ServiceTypeHandlersSuite) TestServiceTypeCreateEmptyAuthTypes() {
 
 	expRespJSON := `{
  "error": {
-  "message": "Authentication Type: empty is not yet supported",
+  "message": "auth_types: empty is not yet supported.Supported:[x509 oidc]",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
