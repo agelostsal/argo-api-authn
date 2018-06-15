@@ -222,3 +222,21 @@ func (mongo *MongoStore) UpdateBinding(original QBinding, updated QBinding) (QBi
 
 	return updated, err
 }
+
+// Delete binding deletes a binding from the store
+func (mongo *MongoStore) DeleteBinding(qBinding QBinding) error {
+
+	var err error
+
+	db := mongo.Session.DB(mongo.Database)
+	c := db.C("bindings")
+
+	if err := c.Remove(qBinding); err != nil {
+
+		log.Fatal("STORE", "\t", err.Error())
+		err = utils.APIErrDatabase(err.Error())
+		return err
+	}
+
+	return err
+}

@@ -438,6 +438,30 @@ paths:
           $ref: '#/responses/422'
         500:
           $ref: "#/responses/500"
+    delete:
+      summary: Deletes a binding
+      description: |
+         Deletes a binding
+      parameters:
+        - name: UUID
+          in: path
+          description: UUID of the binding
+          required: true
+          type: string
+        - $ref: '#/parameters/ApiKey'
+      tags:
+        - Bindings
+      responses:
+        204:
+          description: Empty Response
+        401:
+          $ref: "#/responses/401"
+        403:
+          $ref: "#/responses/403"
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: "#/responses/500"
 
 parameters:
   ApiKey:

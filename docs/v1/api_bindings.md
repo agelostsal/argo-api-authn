@@ -234,3 +234,21 @@ The allowed to be updated fields are:
   
 ### Errors
 Please refer to section [Errors](api_errors.md) to see all possible Errors
+
+
+## [DELETE] Manage Bindings - Delete a Binding
+
+This request deletes a binding.
+
+#### Request
+
+`DELETE /v1/bindings/{uuid}`
+
+ ### Response
+ 
+ If the request is successful, the response is empty.
+ 
+ Success Response
+ 
+ `204 No Content`
+   
