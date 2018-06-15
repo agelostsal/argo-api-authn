@@ -58,7 +58,7 @@ func CreateApiKeyAuthMethod(authM map[string]interface{}, store stores.Store) (m
 	// extra required variables
 	if _, ok = authM["access_key"]; ok == false {
 		log.Error("FindApiKeyAuthMethod", "\t", "Access key was not found in the apiKeyAuthMap")
-		err = utils.APIErrEmptyRequiredField("access_key was not found in the request body")
+		err = utils.APIErrEmptyRequiredField("api-key-auth", "access_key was not found in the request body")
 		return authM, err
 	}
 

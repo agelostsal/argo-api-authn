@@ -70,7 +70,7 @@ func (suite *ServiceTypeHandlersSuite) TestServiceTypeCreateInvalidName() {
 
 	expRespJSON := `{
  "error": {
-  "message": "servicetypes.ServiceType object with name: s1 already exists",
+  "message": "service-type object with name: s1 already exists",
   "code": 409,
   "status": "CONFLICT"
  }
@@ -263,7 +263,7 @@ func (suite *ServiceTypeHandlersSuite) TestServiceTypeCreateMissingField() {
 
 	expResJSON := `{
  "error": {
-  "message": "servicetypes.ServiceType object contains an empty value for field: Name",
+  "message": "service-type object contains empty fields. empty value for field: name",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
@@ -364,7 +364,7 @@ func (suite *ServiceTypeHandlersSuite) TestServiceTypeListOneNotFound() {
 
 	expResJSON := `{
  "error": {
-  "message": "ServiceType was not found",
+  "message": "Service-type was not found",
   "code": 404,
   "status": "NOT FOUND"
  }

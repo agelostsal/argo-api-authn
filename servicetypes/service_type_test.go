@@ -53,7 +53,7 @@ func (suite *ServiceTestSuite) TestCreateServiceType() {
 	suite.Equal(emptyService, res5)
 
 	suite.Nil(err)
-	suite.Equal("servicetypes.ServiceType object with name: s1 already exists", err2.Error())
+	suite.Equal("service-type object with name: s1 already exists", err2.Error())
 	suite.Equal("auth_types: unsup_type is not yet supported.Supported:[x509 oidc]", err3.Error())
 	suite.Equal("auth_types: empty is not yet supported.Supported:[x509 oidc]", err4.Error())
 	suite.Equal("auth_method: unsup_method is not yet supported.Supported:[api-key x-api-token]", err5.Error())
@@ -82,7 +82,7 @@ func (suite *ServiceTestSuite) TestFindServiceTypeByName() {
 	suite.Equal(expS3, ser3)
 
 	suite.Nil(err1)
-	suite.Equal("ServiceType was not found", err2.Error())
+	suite.Equal("Service-type was not found", err2.Error())
 	suite.Equal("Database Error: Multiple service-types with the same name: same_name", err3.Error())
 }
 
@@ -111,7 +111,7 @@ func (suite *ServiceTestSuite) TestFindServiceTypeByUUID() {
 	suite.Equal(expS3, ser3)
 
 	suite.Nil(err1)
-	suite.Equal("ServiceType was not found", err2.Error())
+	suite.Equal("Service-type was not found", err2.Error())
 	suite.Equal("Database Error: Multiple service-types with the same uuid: same_uuid", err3.Error())
 }
 

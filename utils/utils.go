@@ -26,7 +26,7 @@ func ValidateRequired(instance interface{}) error {
 		fieldValue := v.Field(i).Interface()
 		zeroFieldValue := reflect.Zero(reflect.TypeOf(v.Field(i).Interface())).Interface()
 		if reflect.DeepEqual(fieldValue, zeroFieldValue) {
-			return GenericEmptyRequiredField(instance, v.Type().Field(i).Name)
+			return GenericEmptyRequiredField(v.Type().Field(i).Tag.Get("json"))
 		}
 	}
 	return nil
@@ -53,7 +53,7 @@ func GetFieldValueByName(instance interface{}, fieldName string) (interface{}, e
 	zeroFieldValue := reflect.Zero(reflect.TypeOf(v.Interface())).Interface()
 
 	if reflect.DeepEqual(fieldValue, zeroFieldValue) {
-		return nil, GenericEmptyRequiredField(instance, fieldName)
+		return nil, GenericEmptyRequiredField(fieldName)
 	}
 
 	// if everything is ok, return the value of the field

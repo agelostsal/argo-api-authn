@@ -14,13 +14,13 @@ type UtilsTestSuite struct {
 }
 
 type TestStruct struct {
-	Field1 string   `required:"true"`
-	Field2 int      `required:"true"`
-	Field3 []string `required:"true"`
-	Field4 float64  `required:"true"`
-	Field5 *string  `required:"true"`
-	field6 string
-	Field7 string // will not cause an error even if it isn't filled
+	Field1 string   `json:"field_1"required:"true"`
+	Field2 int      `json:"field_2"required:"true"`
+	Field3 []string `json:"field_3"required:"true"`
+	Field4 float64  `json:"field_4"required:"true"`
+	Field5 *string  `json:"field_5"required:"true"`
+	field6 string   // will be skipped
+	Field7 string   // will not cause an error even if it isn't filled
 }
 
 func (suite *UtilsTestSuite) SetUpUtilsTestSuite() {
@@ -45,7 +45,7 @@ func (suite *UtilsTestSuite) TestCheckForNulls() {
 	suite.Nil(ValidateRequired(suite.TestStructList["ts1"]))
 
 	// tests the case of an object containing a field which is empty
-	suite.Equal(errors.New("utils.TestStruct object contains an empty value for field: Field1"), ValidateRequired(suite.TestStructList["ts2"]))
+	suite.Equal(errors.New("empty value for field: field_1"), ValidateRequired(suite.TestStructList["ts2"]))
 }
 
 func (suite *UtilsTestSuite) TestGetFieldByName() {
@@ -69,7 +69,7 @@ func (suite *UtilsTestSuite) TestGetFieldByName() {
 
 	suite.Nil(err1)
 	suite.Equal("Field: Field10 has not been declared.", err2.Error())
-	suite.Equal("utils.TestStruct object contains an empty value for field: Field1", err3.Error())
+	suite.Equal("empty value for field: Field1", err3.Error())
 	suite.Equal("you are trying to access an unexported field", err4.Error())
 
 }
