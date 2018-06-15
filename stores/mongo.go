@@ -223,6 +223,23 @@ func (mongo *MongoStore) UpdateBinding(original QBinding, updated QBinding) (QBi
 	return updated, err
 }
 
+//UpdateServiceType updates the given binding
+func (mongo *MongoStore) UpdateServiceType(original QServiceType, updated QServiceType) (QServiceType, error) {
+
+	var err error
+
+	db := mongo.Session.DB(mongo.Database)
+	c := db.C("service_types")
+
+	if err := c.Update(original, updated); err != nil {
+		log.Fatal("STORE", "\t", err.Error())
+		err = utils.APIErrDatabase(err.Error())
+		return QServiceType{}, err
+	}
+
+	return updated, err
+}
+
 // Delete binding deletes a binding from the store
 func (mongo *MongoStore) DeleteBinding(qBinding QBinding) error {
 

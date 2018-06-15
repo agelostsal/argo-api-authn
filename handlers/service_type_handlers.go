@@ -69,7 +69,7 @@ func ServiceTypesListOne(w http.ResponseWriter, r *http.Request) {
 func ServiceTypeListAll(w http.ResponseWriter, r *http.Request) {
 
 	var err error
-	var servList servicetypes.ServiceList
+	var servList servicetypes.ServiceTypesList
 
 	//context references
 	store := context.Get(r, "stores").(stores.Store)
@@ -82,4 +82,47 @@ func ServiceTypeListAll(w http.ResponseWriter, r *http.Request) {
 
 	// if everything went ok, return the service
 	utils.RespondOk(w, 200, servList)
+}
+
+// ServiceTypeUpdate updates a service type
+func ServiceTypeUpdate(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	var originalSt servicetypes.ServiceType
+	var updatedSt servicetypes.ServiceType
+	var tempST servicetypes.TempServiceType
+
+	//context references
+	store := context.Get(r, "stores").(stores.Store)
+	cfg := context.Get(r, "config").(config.Config)
+
+
+	// url vars
+	vars := mux.Vars(r)
+
+	if originalSt, err = servicetypes.FindServiceTypeByName(vars["service-type"], store); err != nil {
+		utils.RespondError(w, err)
+		return
+	}
+
+	// first, fill the temporary binding with the fields of the original binding
+	if err := utils.CopyFields(originalSt, &tempST); err != nil {
+		err = utils.APIGenericInternalError(err.Error())
+		utils.RespondError(w, err)
+	}
+
+	// check the validity of the JSON and updated the provided fields
+	if err = json.NewDecoder(r.Body).Decode(&tempST); err != nil {
+		err := utils.APIErrBadRequest(err.Error())
+		utils.RespondError(w, err)
+		return
+	}
+
+	if updatedSt, err = servicetypes.UpdateServiceType(originalSt, tempST, store, cfg); err != nil {
+		utils.RespondError(w, err)
+		return
+	}
+
+	utils.RespondOk(w, 200, updatedSt)
+
 }

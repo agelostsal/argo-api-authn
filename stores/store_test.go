@@ -291,6 +291,24 @@ func (suite *StoreTestSuite) TestUpdateBinding() {
 	suite.Nil(err1)
 }
 
+func (suite *StoreTestSuite) TestUpdateServiceType() {
+
+	suite.SetUpStoreTestSuite()
+
+	original := QServiceType{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", UUID: "uuid1", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}
+
+	updated := QServiceType{Name: "s_updated", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", UUID: "uuid1", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}
+
+
+	_, err1 := suite.Mockstore.UpdateServiceType(original, updated)
+
+	expSVTs, _ := suite.Mockstore.QueryServiceTypesByUUID("uuid1")
+	expSVT1 := expSVTs[0]
+
+	suite.Equal(expSVT1, updated)
+	suite.Nil(err1)
+}
+
 func (suite *StoreTestSuite) TestDeleteBinding() {
 
 	suite.SetUpStoreTestSuite()

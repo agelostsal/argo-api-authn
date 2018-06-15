@@ -19,8 +19,6 @@ func (suite *ServiceTestSuite) TestCreateServiceType() {
 	cfg := &config.Config{}
 	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
 
-	var emptyService ServiceType
-
 	// test the normal case
 	s1 := ServiceType{"sCr", []string{"host1", "host2"}, []string{"x509", "oidc"}, "api-key", "uuid1", "token", ""}
 	_, err := CreateServiceType(s1, mockstore, *cfg)
@@ -28,35 +26,51 @@ func (suite *ServiceTestSuite) TestCreateServiceType() {
 
 	// test the case where the name already exists
 	s2 := ServiceType{"s1", []string{"host1", "host2"}, []string{"x509", "oidc"}, "api-key", "some_uuid", "token", ""}
-	res2, err2 := CreateServiceType(s2, mockstore, *cfg)
+	_, err2 := CreateServiceType(s2, mockstore, *cfg)
 
 	// test the case of unsupported auth type
 	s3 := ServiceType{"sCr", []string{"host1", "host2"}, []string{"unsup_type", "oidc"}, "api-key", "some_uuid", "token", ""}
-	res3, err3 := CreateServiceType(s3, mockstore, *cfg)
+	_, err3 := CreateServiceType(s3, mockstore, *cfg)
 
 	// test the case of empty auth type list
 	s4 := ServiceType{"sCr", []string{"host1", "host2"}, []string{}, "api-key", "some_uuid", "token", ""}
-	res4, err4 := CreateServiceType(s4, mockstore, *cfg)
+	_, err4 := CreateServiceType(s4, mockstore, *cfg)
 
 	// test the case of unsupported auth method
 	s5 := ServiceType{"sCr", []string{"host1", "host2"}, []string{"x509", "oidc"}, "unsup_method", "some_uuid", "token", ""}
-	res5, err5 := CreateServiceType(s5, mockstore, *cfg)
+	_, err5 := CreateServiceType(s5, mockstore, *cfg)
+
+	// test the case of empty name
+	s6 := ServiceType{"", []string{"host1", "host2"}, []string{"x509", "oidc"}, "api-key", "uuid1", "token", ""}
+	_, err6 := CreateServiceType(s6, mockstore, *cfg)
+
+	// test the case of empty retrieval field
+	s7 := ServiceType{"sCr2", []string{"host1", "host2"}, []string{"x509", "oidc"}, "api-key", "uuid1", "", ""}
+	_, err7 := CreateServiceType(s7, mockstore, *cfg)
+
+	// test the case of empty auth method
+	s8 := ServiceType{"sCr", []string{"host1", "host2"}, []string{"x509", "oidc"}, "", "uuid1", "token", ""}
+	_, err8 := CreateServiceType(s8, mockstore, *cfg)
+
+	// test the case of empty hosts
+	s9 := ServiceType{"sCr", []string{}, []string{"x509", "oidc"}, "api-key", "uuid1", "token", ""}
+	_, err9 := CreateServiceType(s9, mockstore, *cfg)
 
 	suite.Equal(s1.Name, res1[0].Name)
 	suite.Equal(s1.Hosts, res1[0].Hosts)
 	suite.Equal(s1.AuthTypes, res1[0].AuthTypes)
 	suite.Equal(s1.AuthMethod, res1[0].AuthMethod)
 	suite.Equal(s1.RetrievalField, res1[0].RetrievalField)
-	suite.Equal(emptyService, res2)
-	suite.Equal(emptyService, res3)
-	suite.Equal(emptyService, res4)
-	suite.Equal(emptyService, res5)
 
 	suite.Nil(err)
 	suite.Equal("service-type object with name: s1 already exists", err2.Error())
 	suite.Equal("auth_types: unsup_type is not yet supported.Supported:[x509 oidc]", err3.Error())
 	suite.Equal("auth_types: empty is not yet supported.Supported:[x509 oidc]", err4.Error())
 	suite.Equal("auth_method: unsup_method is not yet supported.Supported:[api-key x-api-token]", err5.Error())
+	suite.Equal("service-type object contains empty fields. empty value for field: name", err6.Error())
+	suite.Equal("service-type object contains empty fields. empty value for field: retrieval_field", err7.Error())
+	suite.Equal("service-type object contains empty fields. empty value for field: auth_method", err8.Error())
+	suite.Equal("service-type object contains empty fields. empty value for field: hosts", err9.Error())
 
 }
 
@@ -127,11 +141,11 @@ func (suite *ServiceTestSuite) TestFindAllServiceTypes() {
 		{Name: "same_name"},
 		{Name: "same_name"},
 	}
-	expServList := ServiceList{expQServicesAll}
+	expServList := ServiceTypesList{expQServicesAll}
 	serAll1, err1 := FindAllServiceTypes(mockstore)
 
 	// normal case outcome - empty list
-	var empServ = ServiceList{ServiceTypes: []ServiceType{}}
+	var empServ = ServiceTypesList{ServiceTypes: []ServiceType{}}
 	mockstore.ServiceTypes = []stores.QServiceType{}
 	serAll2, err2 := FindAllServiceTypes(mockstore)
 
@@ -154,6 +168,74 @@ func (suite *ServiceTestSuite) TestServiceTypeHasHost() {
 
 	suite.Equal(true, ser.HasHost("host1"))
 	suite.Equal(false, ser.HasHost("host_unknown"))
+
+}
+
+func (suite *ServiceTestSuite) TestUpdateService() {
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	// original service type
+	qOriginal := stores.QServiceType{"sCr", []string{"host1", "host2"}, []string{"x509", "oidc"}, "api-key", "uuid1", "token", ""}
+	original := ServiceType{"sCr", []string{"host1", "host2"}, []string{"x509", "oidc"}, "api-key", "uuid1", "token", ""}
+	mockstore.ServiceTypes = append(mockstore.ServiceTypes, qOriginal)
+
+	// test the normal case
+	s1 := TempServiceType{"sCr_upd", []string{"host1", "host2"}, []string{"x509", "oidc"}, "api-key", "token"}
+	_, err := UpdateServiceType(original, s1, mockstore, *cfg)
+	res1, _ := mockstore.QueryServiceTypes("sCr_upd")
+
+	// test the case where the name already exists
+	s2 := TempServiceType{"s1", []string{"host1", "host2"}, []string{"x509", "oidc"}, "api-key", "token"}
+	_, err2 := UpdateServiceType(original, s2, mockstore, *cfg)
+
+	// test the case of unsupported auth type
+	s3 := TempServiceType{"sCr", []string{"host1", "host2"}, []string{"x509", "unsup_type"}, "api-key", "token"}
+	_, err3 := UpdateServiceType(original, s3, mockstore, *cfg)
+
+	// test the case of empty auth type list
+	s4 := TempServiceType{"sCr", []string{"host1", "host2"}, []string{}, "api-key", "token"}
+	_, err4 := UpdateServiceType(original, s4, mockstore, *cfg)
+
+	// test the case of unsupported auth method
+	s5 := TempServiceType{"sCr", []string{"host1", "host2"}, []string{"x509", "oidc"}, "unsup_method", "token"}
+	_, err5 := UpdateServiceType(original, s5, mockstore, *cfg)
+
+	// test the case of empty name
+	s6 := TempServiceType{"", []string{"host1", "host2"}, []string{"x509", "oidc"}, "api-key", "token"}
+	_, err6 := UpdateServiceType(original, s6, mockstore, *cfg)
+
+	// test the case of empty retrieval field
+	s7 := TempServiceType{"sCr", []string{"host1", "host2"}, []string{"x509", "oidc"}, "api-key", ""}
+	_, err7 := UpdateServiceType(original, s7, mockstore, *cfg)
+
+	// test the case of empty auth method
+	s8 := TempServiceType{"sCr", []string{"host1", "host2"}, []string{"x509", "oidc"}, "", "token"}
+	_, err8 := UpdateServiceType(original, s8, mockstore, *cfg)
+
+	// test the case of empty hosts
+	s9 := TempServiceType{"sCr", []string{}, []string{"x509", "oidc"}, "api-key", "token"}
+	_, err9 := UpdateServiceType(original, s9, mockstore, *cfg)
+
+	suite.Equal(s1.Name, res1[0].Name)
+	suite.Equal(s1.Hosts, res1[0].Hosts)
+	suite.Equal(s1.AuthTypes, res1[0].AuthTypes)
+	suite.Equal(s1.AuthMethod, res1[0].AuthMethod)
+	suite.Equal(s1.RetrievalField, res1[0].RetrievalField)
+
+	suite.Nil(err)
+	suite.Equal("service-type object with name: s1 already exists", err2.Error())
+	suite.Equal("auth_types: unsup_type is not yet supported.Supported:[x509 oidc]", err3.Error())
+	suite.Equal("auth_types: empty is not yet supported.Supported:[x509 oidc]", err4.Error())
+	suite.Equal("auth_method: unsup_method is not yet supported.Supported:[api-key x-api-token]", err5.Error())
+	suite.Equal("service-type object contains empty fields. empty value for field: name", err6.Error())
+	suite.Equal("service-type object contains empty fields. empty value for field: retrieval_field", err7.Error())
+	suite.Equal("service-type object contains empty fields. empty value for field: auth_method", err8.Error())
+	suite.Equal("service-type object contains empty fields. empty value for field: hosts", err9.Error())
 
 }
 

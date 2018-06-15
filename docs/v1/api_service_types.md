@@ -136,4 +136,44 @@ curl -X POST -H "Content-Type: application/json"
 ```
   Please refer to section [Errors](api_errors.md) to see all possible Errors
 
+## [PUT] Manage Service Types - Update a Service Type
 
+This request updates a service type. You can specify one or more fields to update.
+The allowed to be updated fields are:
+
+`name, hosts, auth_types, auth_method, retrieval_field`.
+
+#### Request
+
+`PUT /v1/service-type/{service-type}`
+
+##### Request Body
+
+```json
+{
+	"name": "s1_updated"
+}
+ ```
+ 
+ ### Response
+ 
+ If the request is successful, the response contains the updated service type.
+ 
+ Success Response
+ 
+ `200 OK`
+ 
+ ```json
+ {
+    	"name": "s1_updated",
+    	"hosts": ["host1", "host2"],
+    	"auth_types": ["x509", "oidc"],
+    	"auth_method": "api-key",
+    	"uuid": "da22b2d4-ba6c-43ca-b28d-400cd0a5d83e",
+    	"retrieval_field": "token",
+    	"created_on": "2018-05-05T18:04:05Z" 
+ }
+  ```
+  
+### Errors
+Please refer to section [Errors](api_errors.md) to see all possible Errors

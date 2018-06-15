@@ -96,6 +96,45 @@ func (suite *ServiceTypeHandlersSuite) TestServiceTypeCreateInvalidName() {
 
 }
 
+// TestServiceTypeCreateEmptyHosts tests the case where the service type's hosts slice is empty
+func (suite *ServiceTypeHandlersSuite) TestServiceTypeCreateEmptyHosts() {
+
+	postJSON := `{
+	"name": "s1",
+	"hosts": [],
+	"auth_types": ["x509", "oidc"],
+	"auth_method": "api-key",
+	"retrieval_field": "token"
+}`
+
+	expRespJSON := `{
+ "error": {
+  "message": "service-type object contains empty fields. empty value for field: hosts",
+  "code": 422,
+  "status": "UNPROCESSABLE ENTITY"
+ }
+}`
+
+	req, err := http.NewRequest("POST", "http://localhost:8080/service-types", bytes.NewBuffer([]byte(postJSON)))
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types", WrapConfig(ServiceTypeCreate, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(422, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+
+}
+
 // TestServiceTypeCreateInvalidAuthTypes tests the case where the service type's auth types are not yet supported
 func (suite *ServiceTypeHandlersSuite) TestServiceTypeCreateInvalidAuthTypes() {
 
@@ -495,6 +534,312 @@ func (suite *ServiceTypeHandlersSuite) TestServiceTypeListAllEmptyList() {
 	suite.Equal(200, w.Code)
 	suite.Equal(expResJSON, w.Body.String())
 
+}
+
+// TestServiceTypeUpdate tests the normal case of a updating a service type - updates the name
+func (suite *BindingHandlersSuite) TestServiceTypeUpdate() {
+
+	postJSON := `{
+	"name": "updated_name"
+}`
+
+	expRespJSON := `{
+ "name": "updated_name",
+ "hosts": [
+  "host1",
+  "host2",
+  "host3"
+ ],
+ "auth_types": [
+  "x509",
+  "oidc"
+ ],
+ "auth_method": "api-key",
+ "uuid": "uuid1",
+ "retrieval_field": "token",
+ "created_on": "2018-05-05T18:04:05Z"
+}`
+	req, err := http.NewRequest("PUT", "http://localhost:8080/service-types/s1", bytes.NewBuffer([]byte(postJSON)))
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}", WrapConfig(ServiceTypeUpdate, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(200, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestServiceTypeUpdateEmptyName tests case of updating a service type's name into an empty string
+func (suite *BindingHandlersSuite) TestServiceTypeUpdateEmptyName() {
+
+	postJSON := `{
+	"name": ""
+}`
+
+	expRespJSON := `{
+ "error": {
+  "message": "service-type object contains empty fields. empty value for field: name",
+  "code": 422,
+  "status": "UNPROCESSABLE ENTITY"
+ }
+}`
+	req, err := http.NewRequest("PUT", "http://localhost:8080/service-type/s1", bytes.NewBuffer([]byte(postJSON)))
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-type/{service-type}", WrapConfig(ServiceTypeUpdate, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(422, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestServiceTypeUpdateEmptyAuthTypes tests the case of updating a service type's auth types into an empty slice
+func (suite *BindingHandlersSuite) TestServiceTypeUpdateEmptyAuthTypes() {
+
+	postJSON := `{
+	"auth_types": []
+}`
+
+	expRespJSON := `{
+ "error": {
+  "message": "auth_types: empty is not yet supported.Supported:[x509 oidc]",
+  "code": 422,
+  "status": "UNPROCESSABLE ENTITY"
+ }
+}`
+	req, err := http.NewRequest("PUT", "http://localhost:8080/service-type/s1", bytes.NewBuffer([]byte(postJSON)))
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-type/{service-type}", WrapConfig(ServiceTypeUpdate, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(422, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestServiceTypeUpdateUnsupportedAuthType tests the case of updating a service type's auth type into something that not yet supported by the service
+func (suite *BindingHandlersSuite) TestServiceTypeUpdateUnsupportedAuthType() {
+
+	postJSON := `{
+	"auth_types": ["unsup_auth"]
+}`
+
+	expRespJSON := `{
+ "error": {
+  "message": "auth_types: unsup_auth is not yet supported.Supported:[x509 oidc]",
+  "code": 422,
+  "status": "UNPROCESSABLE ENTITY"
+ }
+}`
+	req, err := http.NewRequest("PUT", "http://localhost:8080/service-type/s1", bytes.NewBuffer([]byte(postJSON)))
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-type/{service-type}", WrapConfig(ServiceTypeUpdate, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(422, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestServiceTypeUpdateUnsupportedAuthMethod tests the case of updating the auth method into something that's not yet supported
+func (suite *BindingHandlersSuite) TestServiceTypeUpdateUnsupportedAuthMethod() {
+
+	postJSON := `{
+	"auth_method": "unsup_auth"
+}`
+
+	expRespJSON := `{
+ "error": {
+  "message": "auth_method: unsup_auth is not yet supported.Supported:[api-key x-api-token]",
+  "code": 422,
+  "status": "UNPROCESSABLE ENTITY"
+ }
+}`
+	req, err := http.NewRequest("PUT", "http://localhost:8080/service-type/s1", bytes.NewBuffer([]byte(postJSON)))
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-type/{service-type}", WrapConfig(ServiceTypeUpdate, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(422, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestServiceTypeUpdateEmptyAuthMethod tests the case of updating the auth method an empty string
+func (suite *BindingHandlersSuite) TestServiceTypeUpdateEmptyAuthMethod() {
+
+	postJSON := `{
+	"auth_method": ""
+}`
+
+	expRespJSON := `{
+ "error": {
+  "message": "service-type object contains empty fields. empty value for field: auth_method",
+  "code": 422,
+  "status": "UNPROCESSABLE ENTITY"
+ }
+}`
+	req, err := http.NewRequest("PUT", "http://localhost:8080/service-type/s1", bytes.NewBuffer([]byte(postJSON)))
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-type/{service-type}", WrapConfig(ServiceTypeUpdate, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(422, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestServiceTypeUpdateEmptyRetrievalField tests the case of updating the retrieval field an empty string
+func (suite *BindingHandlersSuite) TestServiceTypeUpdateEmptyRetrievalField() {
+
+	postJSON := `{
+	"retrieval_field": ""
+}`
+
+	expRespJSON := `{
+ "error": {
+  "message": "service-type object contains empty fields. empty value for field: retrieval_field",
+  "code": 422,
+  "status": "UNPROCESSABLE ENTITY"
+ }
+}`
+	req, err := http.NewRequest("PUT", "http://localhost:8080/service-type/s1", bytes.NewBuffer([]byte(postJSON)))
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-type/{service-type}", WrapConfig(ServiceTypeUpdate, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(422, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestServiceTypeUpdateEmptyHosts tests the case of updating the hosts into an empty slice
+func (suite *BindingHandlersSuite) TestServiceTypeUpdateEmptyHosts() {
+
+	postJSON := `{
+	"hosts": []
+}`
+
+	expRespJSON := `{
+ "error": {
+  "message": "service-type object contains empty fields. empty value for field: hosts",
+  "code": 422,
+  "status": "UNPROCESSABLE ENTITY"
+ }
+}`
+	req, err := http.NewRequest("PUT", "http://localhost:8080/service-type/s1", bytes.NewBuffer([]byte(postJSON)))
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-type/{service-type}", WrapConfig(ServiceTypeUpdate, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(422, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestServiceTypeUpdateNameAlreadyExists tests the case of updating the name into an already existing one
+func (suite *BindingHandlersSuite) TestServiceTypeUpdateNameAlreadyExists() {
+
+	postJSON := `{
+	"name": "s2"
+}`
+
+	expRespJSON := `{
+ "error": {
+  "message": "service-type object with name: s2 already exists",
+  "code": 409,
+  "status": "CONFLICT"
+ }
+}`
+	req, err := http.NewRequest("PUT", "http://localhost:8080/service-type/s1", bytes.NewBuffer([]byte(postJSON)))
+	if err != nil {
+		log.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-type/{service-type}", WrapConfig(ServiceTypeUpdate, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(409, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
 }
 
 func TestHandlersTestSuite(t *testing.T) {

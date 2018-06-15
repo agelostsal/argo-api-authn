@@ -18,34 +18,33 @@ type ServiceType struct {
 	CreatedOn      string   `json:"created_on"`
 }
 
-type ServiceList struct {
+// TempServiceType is a struct to be used as an intermediate node when updating a service type
+// containing only the `allowed to be updated fields`
+type TempServiceType struct {
+	Name           string   `json:"name"`
+	Hosts          []string `json:"hosts"`
+	AuthTypes      []string `json:"auth_types"`
+	AuthMethod     string   `json:"auth_method"`
+	RetrievalField string   `json:"retrieval_field"`
+}
+
+type ServiceTypesList struct {
 	ServiceTypes []ServiceType `json:"service_types"`
 }
 
 // CreateServiceType creates a new service type after validating the service
 func CreateServiceType(service ServiceType, store stores.Store, cfg config.Config) (ServiceType, error) {
 
-	var qServices []stores.QServiceType
 	var qService stores.QServiceType
 	var err error
 
-	// check if the authentication methods are supported
-	if err = service.hasValidAuthMethod(cfg); err != nil {
-		return ServiceType{}, err
-	}
-
-	// check if the authentication type is supported
-	if err = service.hasValidAuthTypes(cfg); err != nil {
+	// validate the service type
+	if err = service.Validate(store, cfg); err !=nil{
 		return ServiceType{}, err
 	}
 
 	// check that the name of the service type is unique
-	if qServices, err = store.QueryServiceTypes(service.Name); err != nil {
-		return ServiceType{}, err
-	}
-
-	if len(qServices) > 0 {
-		err = utils.APIErrConflict("service-type", "name", service.Name)
+	if err = ExistsWithName(service.Name, store); err != nil {
 		return ServiceType{}, err
 	}
 
@@ -64,6 +63,53 @@ func CreateServiceType(service ServiceType, store stores.Store, cfg config.Confi
 	}
 
 	return service, err
+}
+
+// Validate validates the contents of the service type's fields
+func (s *ServiceType) Validate(store stores.Store, cfg config.Config,) error {
+
+	var err error
+
+	// check if all required field have been provided
+	if err = utils.ValidateRequired(*s); err != nil {
+		err := utils.APIErrEmptyRequiredField("service-type", err.Error())
+		return err
+	}
+
+	if len(s.Hosts) == 0 {
+		err = utils.APIErrEmptyRequiredField("service-type", utils.GenericEmptyRequiredField("hosts").Error())
+		return err
+	}
+
+	// check if the authentication methods are supported
+	if err = s.hasValidAuthMethod(cfg); err != nil {
+		return err
+	}
+
+	// check if the authentication type is supported
+	if err = s.hasValidAuthTypes(cfg); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// ExistsWithName checks if a service type with the given name already exists
+func ExistsWithName(name string, store stores.Store) error {
+
+	var err error
+	var qServices []stores.QServiceType
+
+	if qServices, err = store.QueryServiceTypes(name); err != nil {
+		return err
+	}
+
+	if len(qServices) > 0 {
+		err = utils.APIErrConflict("service-type", "name", name)
+		return  err
+	}
+
+	return nil
 }
 
 // FindServiceTypeByName queries the datastore to find a service type associated with the provided argument name
@@ -125,26 +171,26 @@ func FindServiceTypeByUUID(uuid string, store stores.Store) (ServiceType, error)
 }
 
 // FindAllServiceTypes returns all the service types from the datastore
-func FindAllServiceTypes(store stores.Store) (ServiceList, error) {
+func FindAllServiceTypes(store stores.Store) (ServiceTypesList, error) {
 
 	var qServices []stores.QServiceType
 	var services = []ServiceType{}
 	var err error
 
 	if qServices, err = store.QueryServiceTypes(""); err != nil {
-		return ServiceList{ServiceTypes: services}, err
+		return ServiceTypesList{ServiceTypes: services}, err
 	}
 
 	for _, qs := range qServices {
 		_service := &ServiceType{}
 		if err := utils.CopyFields(qs, _service); err != nil {
 			err = utils.APIGenericInternalError(err.Error())
-			return ServiceList{ServiceTypes: services}, err
+			return ServiceTypesList{ServiceTypes: services}, err
 		}
 		services = append(services, *_service)
 	}
 
-	return ServiceList{ServiceTypes: services}, err
+	return ServiceTypesList{ServiceTypes: services}, err
 
 }
 
@@ -201,4 +247,56 @@ func (s *ServiceType) hasValidAuthMethod(cfg config.Config) error {
 
 	err = utils.APIErrUnsupportedContent("auth_method", s.AuthMethod, fmt.Sprintf("Supported:%v", cfg.SupportedAuthMethods))
 	return err
+}
+
+//UpdateServiceType updates a binding after validating its fields
+func UpdateServiceType(original ServiceType, tempBind TempServiceType, store stores.Store, cfg config.Config) (ServiceType, error) {
+
+	var err error
+	var updated ServiceType
+	var qOriginalSt stores.QServiceType
+	var qUpdatedSt stores.QServiceType
+
+	// created the updated service type, combining the fields from the original and the temporary
+	if err := utils.CopyFields(original, &updated); err != nil {
+		err = utils.APIGenericInternalError(err.Error())
+		return ServiceType{}, err
+	}
+
+	if err := utils.CopyFields(tempBind, &updated); err != nil {
+		err = utils.APIGenericInternalError(err.Error())
+		return ServiceType{}, err
+	}
+
+	// validate the updated service type
+	if err = updated.Validate(store, cfg); err != nil {
+		return updated, err
+	}
+
+	// if there is an update happening to the name field, check if its unique
+	if original.Name != tempBind.Name {
+		if err = ExistsWithName(tempBind.Name, store); err != nil {
+			return ServiceType{}, err
+		}
+	}
+
+	// convert the original service type to a QServiceType
+	if err := utils.CopyFields(original, &qOriginalSt); err != nil {
+		err = utils.APIGenericInternalError(err.Error())
+		return ServiceType{}, err
+	}
+
+	// convert the updated service type to a QServiceType
+	if err := utils.CopyFields(updated, &qUpdatedSt); err != nil {
+		err = utils.APIGenericInternalError(err.Error())
+		return ServiceType{}, err
+	}
+
+	// update the service type
+	if _, err = store.UpdateServiceType(qOriginalSt, qUpdatedSt); err != nil {
+		err = &utils.APIError{Status: "INTERNAL SERVER ERROR", Code: 500, Message: err.Error()}
+		return ServiceType{}, err
+	}
+
+	return updated, err
 }
