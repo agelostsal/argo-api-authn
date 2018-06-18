@@ -19,9 +19,12 @@ This request creates a new binding.
 
 #### Request
 
-`POST /v1/bindings`
+```
+POST /v1/bindings`
+```
 
 ### Example request
+
 ```
 curl -X POST -H "Content-Type: application/json"
   "https://{URL}/v1/bindings?key={key_in_the_config}"
@@ -29,7 +32,7 @@ curl -X POST -H "Content-Type: application/json"
 
 ##### Post Body
 
-```json
+```
 {
 	"name": "b1",
 	"service_uuid": "b61030d9-bef3-4768-9a03-7b1ff36e8af4cc",
@@ -38,17 +41,17 @@ curl -X POST -H "Content-Type: application/json"
 	"oidc_token": "token",
 	"unique_key": "key"
 }
- ```
+```
  
- ### Response
+### Response
  
- If the request is successful, the response contains the newly created binding.
+If the request is successful, the response contains the newly created binding.
  
- Success Response
+Success Response
  
- `201 CREATED`
+`201 CREATED`
  
- ```json
+```
  {
      "name": "b1",
      "service_uuid": "b61030d9-bef3-4768-9a03-7b1ff36e8af4cc",
@@ -59,28 +62,32 @@ curl -X POST -H "Content-Type: application/json"
      "unique_key": "key",
      "created_on": "2018-05-24T09:58:17Z"
  }
-  ```
+ 
+```
   
 ### Errors
+
 Please refer to section [Errors](api_errors.md) to see all possible Errors
   
 ## [GET] Manage Bindings - List All Bindings
 
 This request lists all bindings that are currently present in th service.
     
- ### Request
+### Request
     
- `GET /v1/bindings`
+```
+GET /v1/bindings
+```
     
-  ### Response
+### Response
      
-   If the request is successful, the response contains all the bindings in the service.
+If the request is successful, the response contains all the bindings in the service.
    
-   Success Response
+#### Success Response
      
-   `200 OK`
+`200 OK`
      
-```json
+```
   {
       "bindings": [
               {
@@ -105,29 +112,31 @@ This request lists all bindings that are currently present in th service.
               }
       ]
   }
-  ```
+```
   
-   ### Errors
+### Errors
   
-   Please refer to section [Errors](api_errors.md) to see all possible Errors
+Please refer to section [Errors](api_errors.md) to see all possible Errors
 
 ## [GET] Manage Bindings - List All Bindings By Service Type And Host
 
 This request returns all the bindings under the specified service type and host.
     
- ### Request
+### Request
+
+```
+GET /v1/service-types/{service-type}/hosts/{host}/bindings`
+```
     
- `GET /v1/service-types/{service-type}/hosts/{host}/bindings`
-    
-  ### Response
+### Response
      
-   If the request is successful, the response contains all the bindings under the given host and service.
+If the request is successful, the response contains all the bindings under the given host and service.
    
-   Success Response
+#### Success Response
      
-   `200 OK`
+`200 OK`
      
-```json
+```
   {
       "bindings": [
               {
@@ -152,7 +161,7 @@ This request returns all the bindings under the specified service type and host.
               }
       ]
   }
-  ```
+```
   
 ### Errors
 
@@ -162,19 +171,21 @@ Please refer to section [Errors](api_errors.md) to see all possible Errors
 
 This request retrieves the information of a binding associated with the provided uuid.
     
- ### Request
+### Request
     
- `GET /v1/bindings/{uuid}`
-    
-  ### Response
-     
-   If the request is successful, the response contains the binding associated with the given uuid
+```
+GET /v1/bindings/{uuid}
+```    
+
+### Response     
+
+If the request is successful, the response contains the binding associated with the given uuid
    
-   Success Response
+#### Success Response
      
-   `200 OK`
+`200 OK`
      
-```json
+```
   {
       "name": "testb",
       "service_uuid": "uuid1",
@@ -185,7 +196,7 @@ This request retrieves the information of a binding associated with the provided
       "created_on": "2018-05-23T09:25:25Z",
       "last_auth": "2018-05-23T09:25:25Z"   
   }
-  ```
+```
   
 ### Errors
 
@@ -201,25 +212,27 @@ The allowed to be updated fields are:
 
 #### Request
 
-`PUT /v1/bindings/{uuid}`
+```
+PUT /v1/bindings/{uuid}
+```
 
 ##### Request Body
 
-```json
+```
 {
 	"name": "b1_updated"
 }
- ```
+```
  
- ### Response
+### Response
  
- If the request is successful, the response contains the updated binding.
+If the request is successful, the response contains the updated binding.
  
- Success Response
+#### Success Response
  
- `200 OK`
+`200 OK`
  
- ```json
+```
  {
      "name": "b1_updated",
      "service_uuid": "b61030d9-bef3-4768-9a03-7b1ff36e8af4cc",
@@ -230,7 +243,7 @@ The allowed to be updated fields are:
      "unique_key": "key",
      "created_on": "2018-05-24T09:58:17Z"
  }
-  ```
+```
   
 ### Errors
 Please refer to section [Errors](api_errors.md) to see all possible Errors
@@ -242,13 +255,14 @@ This request deletes a binding.
 
 #### Request
 
-`DELETE /v1/bindings/{uuid}`
+```
+DELETE /v1/bindings/{uuid}`
+```
 
- ### Response
+### Response
  
- If the request is successful, the response is empty.
+If the request is successful, the response is empty.
  
- Success Response
+#### Success Response
  
- `204 No Content`
-   
+`204 No Content`

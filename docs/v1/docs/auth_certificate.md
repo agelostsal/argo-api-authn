@@ -13,16 +13,18 @@ curl -X GET -H "Content-Type: application/json"
    --cert /path/to/a/cert/file --key /path/to/the/respective/key -k
 ```
 
- ### Response
+### Response
  
  If the request is successful, the response contains the token that is associated with the provided certificate.
  
  Success Response
  
- `200 CREATED`
+ ```
+ 200 CREATED
+ ```
  
- ```json
+ ```
  {
     "token": "some-service-type-token"
  }
-  ```
+ ```
