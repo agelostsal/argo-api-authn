@@ -6,7 +6,9 @@ This request creates a new service type.
 
 #### Request
 
-`POST /v1/service-types`
+```
+POST /v1/service-types
+```
 
 `auth_types:` This field refers to the authentication types that the service type wishes to support.The provided authentication types should also be supported by the authn service. E.g. a service type wishes to use an authentication type of x509 certificate, meaning that it will enable its users to use x509 certificates as an alternative authentication mechanism.The authn service will use an internal handler to map x509 certificates to a service-types credentials, so when declaring an auth-type, it needs to be first, supported b the authn-service itself.
 
@@ -23,7 +25,7 @@ curl -X POST -H "Content-Type: application/json"
 
 ##### Post Body
 
-```json
+```
 {
  	"name": "string",
  	"hosts": ["host1", "host2"],
@@ -31,17 +33,17 @@ curl -X POST -H "Content-Type: application/json"
  	"auth_method": "api-key",
  	"retrieval_field": "token"
  }
- ```
+```
  
- ### Response
+### Response
  
- If the request is successful, the response contains the newly created service type.
+If the request is successful, the response contains the newly created service type.
  
- Success Response
+#### Success Response
  
- `201 CREATED`
+`201 CREATED`
  
- ```json
+```
  {
   	"name": "string",
   	"hosts": ["host1", "host2"],
@@ -51,27 +53,29 @@ curl -X POST -H "Content-Type: application/json"
   	"retrieval_field": "token",
   	"created_on": "2018-05-05T18:04:05Z" 
   }
-  ```
+```
   
-  ### Errors
+### Errors
 
-  Please refer to section [Errors](api_errors.md) to see all possible Errors
+Please refer to section [Errors](api_errors.md) to see all possible Errors
   
-  ## [GET] Manage Service Types - ListAllServiceTypes
+## [GET] Manage Service Types - ListAllServiceTypes
   
-  ### Request
+### Request
   
-  `GET/v1/service-types`
+```
+GET/v1/service-types
+```
   
-   ### Response
+### Response
+  
+ If the request is successful, the response contains all the service types.
    
-   If the request is successful, the response contains all the service types.
+#### Success Response
    
-   Success Response
+`200 OK`
    
-   `200 OK`
-   
-   ```json
+```
 {
     "service_types": [
         {
@@ -107,23 +111,25 @@ curl -X POST -H "Content-Type: application/json"
 }
 ```
 
- ### Errors
+### Errors
 
- Please refer to section [Errors](api_errors.md) to see all possible Errors
+Please refer to section [Errors](api_errors.md) to see all possible Errors
 
- ## [GET] Manage Service Types - ListOneServiceType
+## [GET] Manage Service Types - ListOneServiceType
   
-  ### Request
+### Request
   
-  `GET/v1/service-types/{NAME}`
+```
+GET/v1/service-types/{NAME}
+```
   
-   If the request is successful, the response contains information for the requested service type.
+If the request is successful, the response contains information for the requested service type.
    
-   Success Response
+#### Success Response
    
-   `200 OK`
+`200 OK`
    
-```json
+```
    {
     	"name": "string",
     	"hosts": ["host1", "host2"],
@@ -134,7 +140,8 @@ curl -X POST -H "Content-Type: application/json"
     	"created_on": "2018-05-05T18:04:05Z" 
     }
 ```
-  Please refer to section [Errors](api_errors.md) to see all possible Errors
+
+Please refer to section [Errors](api_errors.md) to see all possible Errors
 
 ## [PUT] Manage Service Types - Update a Service Type
 
@@ -143,27 +150,29 @@ The allowed to be updated fields are:
 
 `name, hosts, auth_types, auth_method, retrieval_field`.
 
-#### Request
+### Request
 
-`PUT /v1/service-type/{service-type}`
+```
+PUT /v1/service-type/{service-type}
+```
 
-##### Request Body
+#### Request Body
 
-```json
+```
 {
 	"name": "s1_updated"
 }
- ```
+```
  
- ### Response
+### Response
  
- If the request is successful, the response contains the updated service type.
+If the request is successful, the response contains the updated service type.
  
- Success Response
+#### Success Response
  
- `200 OK`
+`200 OK`
  
- ```json
+```
  {
     	"name": "s1_updated",
     	"hosts": ["host1", "host2"],
@@ -173,7 +182,7 @@ The allowed to be updated fields are:
     	"retrieval_field": "token",
     	"created_on": "2018-05-05T18:04:05Z" 
  }
-  ```
+```
   
 ### Errors
 Please refer to section [Errors](api_errors.md) to see all possible Errors

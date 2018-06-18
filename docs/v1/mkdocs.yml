@@ -6,17 +6,17 @@ remote_branch: devel
 copyright: Copyright © 2018 GRNET S.A.
 
 pages:
-- Basic Information:
-    - Overview and Introduction:
-    - API flow:
-    - Authentication & Authorization:
-- How to Guides:
+#- Basic Information:
+ #   - Overview and Introduction:
+ #   - API flow:
+ #   - Authentication & Authorization:
+#- How to Guides:
 - API & References:
-    - API Basic Information:
-    - API Authentication:
+#    - API Basic Information:
+#    - API Authentication:
     - API Bindings: api_bindings.md
     - API Service Types: api_service_types.md
-    - API Auth Methods: api_auth_method.md
+    - API Auth Methods: api_auth_methods.md
     - API Certificate Functionality: auth_certificate.md
     - API Error Messages: api_errors.md
 theme: readthedocs
