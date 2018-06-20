@@ -1,6 +1,6 @@
 [Unit]
 Description=ARGO Authentication Service
-#Requires=mongod
+Requires=mongod.service
 
 [Service]
 User=argo-api-authn

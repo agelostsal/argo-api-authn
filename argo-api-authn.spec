@@ -2,7 +2,7 @@
 %global debug_package %{nil}
 
 Name: argo-api-authn
-Summary: ARGO Authorization API. Map X509, OICD to token.
+Summary: ARGO Authentication API. Map X509, OICD to token.
 Version: 0.1.0
 Release: 1%{?dist}
 License: ASL 2.0
@@ -15,7 +15,7 @@ Requires(pre): /usr/sbin/useradd, /usr/bin/getent
 ExcludeArch: i386
 
 %description
-Installs the ARGO authorization API
+Installs the ARGO Authentication API
 
 %pre
 /usr/bin/getent group argo-api-authn || /usr/sbin/groupadd -r argo-api-authn
@@ -37,7 +37,7 @@ install --directory %{buildroot}/var/www/argo-api-authn
 install --mode 755 bin/argo-api-authn %{buildroot}/var/www/argo-api-authn/argo-api-authn
 
 install --directory %{buildroot}/etc/argo-api-authn
-install --mode 644 src/github.com/ARGOeu/argo-api-authn/config.json %{buildroot}/etc/argo-api-authn/config.json
+install --mode 644 src/github.com/ARGOeu/argo-api-authn/conf.d/argo-api-authn-config.json %{buildroot}/etc/argo-api-authn/conf.d/argo-api-authn-config.json
 
 install --directory %{buildroot}/usr/lib/systemd/system
 install --mode 644 src/github.com/ARGOeu/argo-api-authn/argo-api-authn.service %{buildroot}/usr/lib/systemd/system/
@@ -52,7 +52,9 @@ go clean
 %defattr(0644,argo-api-authn,argo-api-authn)
 %attr(0750,argo-api-authn,argo-api-authn) /var/www/argo-api-authn
 %attr(0755,argo-api-authn,argo-api-authn) /var/www/argo-api-authn/argo-api-authn
-%attr(0644,argo-api-authn,argo-api-authn) /etc/argo-api-authn/config.json
+%attr(0644,argo-api-authn,argo-api-authn) /etc/argo-api-authn/conf.d/argo-api-authn-config.json
+%attr(0644,argo-api-authn,argo-api-authn) /etc/grid-security/hostcert_authn.pem
+%attr(0400,argo-api-authn,argo-api-authn) /etc/grid-security/hostkey_authn.pem
 %attr(0644,root,root) /usr/lib/systemd/system/argo-api-authn.service
 
 %changelog

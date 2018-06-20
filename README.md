@@ -26,7 +26,7 @@ Before you start, you need to issue a valid certificate.
 
 3. Get the latest version
 
-      `go get github.com/ARGOeu/argo-api-authN`
+      `go get github.com/ARGOeu/argo-api-authn`
 
 4. Get dependencies(If you plan on contributing to the project else skip this step):
 
@@ -40,11 +40,11 @@ Before you start, you need to issue a valid certificate.
 
 6. To run the service use the following command:
 
-      `./argo-api-authN` (This assumes that there is a valid configuration file at `/etc/argo-api-authN/argo-api-authn-config.json`).
+      `./argo-api-authn` (This assumes that there is a valid configuration file at `/etc/argo-api-authn/conf.d/argo-api-authn-config.json`).
       
       Else
       
-      `./argo-api-authN --config /path/to/a/json/config/file`
+      `./argo-api-authn --config /path/to/a/json/config/file`
 
 7. To run the unit-tests:
 
@@ -77,4 +77,3 @@ Before you start, you need to issue a valid certificate.
  ## Helpful Utilities
  You can find various utility scripts to help you get up and running the service inside the
  repo's `bin` folder.
->>>>>>> upstream/devel
