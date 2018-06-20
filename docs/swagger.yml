@@ -1,7 +1,7 @@
 # ARGO Authentication Service expressed in swagger
 swagger: '2.0'
 info:
-  title: argo-api-authN
+  title: argo-api-authn
   description: "The purpose of the Authentication Service is to provide the ability to different services to use alternative authentication mechanisms without having to store additional user info or implement new functionalities.The AUTH service typetypeholds various information about a service’s users, hosts, API urls, etc, and leverages them to provide its function."
   version: "v1"
   contact:
