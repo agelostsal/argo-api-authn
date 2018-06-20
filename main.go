@@ -23,7 +23,7 @@ import (
 func main() {
 
 	// Retrieve configuration file location through cmd argument
-	var cfgPath = flag.String("config", "/etc/argo-api-authN/argo-api-authn-config.json", "Path for the required configuration file.")
+	var cfgPath = flag.String("config", "/etc/argo-api-authn/conf.d/argo-api-authn-config.json", "Path for the required configuration file.")
 	flag.Parse()
 
 	// initialize the config
@@ -44,7 +44,7 @@ func main() {
 	tlsConfig := &tls.Config{
 		MinVersion: tls.VersionTLS10,
 		ClientAuth: tls.VerifyClientCertIfGiven,
-		ClientCAs:  auth.Load_CAs(cfg.CertificateAuthorities),
+		ClientCAs:  auth.LoadCAs(cfg.CertificateAuthorities),
 	}
 
 	api := routing.NewRouting(routing.ApiRoutes, store, cfg)
