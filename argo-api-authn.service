@@ -1,10 +1,10 @@
 [Unit]
 Description=ARGO Authentication Service
-Requires=mongod
+#Requires=mongod
 
 [Service]
-User=argo-auth
-Group=argo-auth
+User=argo-api-authn
+Group=argo-api-authn
 WorkingDirectory=/var/www/argo-api-authn
 ExecStart=/bin/bash -c '/var/www/argo-api-authn/argo-api-authn'
 
