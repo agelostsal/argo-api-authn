@@ -11,6 +11,7 @@ import (
 	"github.com/ARGOeu/argo-api-authn/utils"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
+	"github.com/ARGOeu/argo-api-authn/auth"
 )
 
 // AuthViaCert accepts a request containing a certificate and handlers the mapping of a certificate dn to a service type's token
@@ -49,7 +50,7 @@ func AuthViaCert(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Find the binding associated with the provided certificate
-	if binding, err = bindings.FindBindingByDN(r.TLS.PeerCertificates[0].Subject.ToRDNSequence().String(), serviceType.UUID, vars["host"], store); err != nil {
+	if binding, err = bindings.FindBindingByDN(auth.ExtractEnhancedRDNSequenceToString(r.TLS.PeerCertificates[0]), serviceType.UUID, vars["host"], store); err != nil {
 		utils.RespondError(w, err)
 		return
 	}

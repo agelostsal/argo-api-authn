@@ -10,8 +10,12 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
+var ExtraAttributeNames = map[string]string{
+	"0.9.2342.19200300.100.1.25": "DC",
+}
+
 // load_CAs reads the root certificates from a directory within the filesystem, and creates the trusted root CA chain
-func Load_CAs(dir string) (roots *x509.CertPool) {
+func LoadCAs(dir string) (roots *x509.CertPool) {
 	log.Info("Building the root CA chain...")
 	pattern := "*.pem"
 	roots = x509.NewCertPool()
@@ -39,5 +43,27 @@ func Load_CAs(dir string) (roots *x509.CertPool) {
 	}
 
 	return
+
+}
+
+// ExtractEnhancedRDNSequenceToString extracts a certificate's RDNs to a string using what's provided in the standard library
+// and then adding extra attribute names that we have defined
+func ExtractEnhancedRDNSequenceToString(cert *x509.Certificate) string {
+
+	var ers string
+
+	ers = cert.Subject.ToRDNSequence().String()
+
+	// we loop the extra attributes in reverse order since certificates from goc db have the RDNs reversed
+
+	for i := len(cert.Subject.Names); i > 0; i-- {
+		atv := cert.Subject.Names[i-1]
+		if value, ok := ExtraAttributeNames[atv.Type.String()]; ok {
+			ers += "," + value + "=" + atv.Value.(string)
+		}
+
+	}
+
+	return ers
 
 }
