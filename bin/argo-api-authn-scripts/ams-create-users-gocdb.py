@@ -109,7 +109,7 @@ def create_users(config, logger, verify):
 
         # modify the acl for each topic , to add all associated users
         authorized_users = services[srv_type]
-        requests.post("https://"+ams_host+"/v1/projects/"+ams_project+"/topics/"+service_type+":modifyAcl?key="+ams_token, data=json.dumps({'authorized_users': authorized_users}), verify=verify)
+        requests.post("https://"+ams_host+"/v1/projects/"+ams_project+"/topics/"+srv_type+":modifyAcl?key="+ams_token, data=json.dumps({'authorized_users': authorized_users}), verify=verify)
 
         logger.critical("\nService Type: " + srv_type)
 
@@ -158,7 +158,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Create ams users and their respective bindings using data imported from goc db")
     parser.add_argument(
-        "-c", "--ConfigPath", type=str, help="Path for the config file", required=True)
+        "-c", "--ConfigPath", type=str, help="Path for the config file")
     parser.add_argument(
         "-verify", "--Verify", help="SSL verification for requests",  action="store_true")
 
