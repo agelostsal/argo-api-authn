@@ -15,6 +15,7 @@ finally creates the binding for each user, using the dn from goc db.
 `-c : Path to an appropriate config file.If not specified
 it will first look at /etc/argo-api-authn/conf.d/ams-users-create-gocdb.cfg
 and then will look at projects conf folder`
+
 `-verify: If specified all the requests will check the validity of the ssl certificate`
 ##### Configuration
 Use the `ams-create-users-gocdb.template` to produce your conf file.
@@ -53,3 +54,21 @@ syslog_socket:
 
 ## Requirements
 There is a requirements.txt file inside the repo's `bin` folder that specifies which dependencies are needed.
+
+If you don't want to manually handle the dependencies, you can use the setup.py script in the root folder of the repo.
+
+`python setup.py install`  
+
+OR
+
+`pip install git+https://github.com/ARGOeu/argo-api-authn.git@devel` for the latest release
+
+`pip install git+https://github.com/ARGOeu/argo-api-authn.git` for the stable release
+
+
+After installing the script's package, you can find them in the `/usr/bin` or if you are using a virtualenv in the `bin` folder of the virtualenv.
+
+In addition, if you want to use them in other scripts, you will can import them:
+```python
+import argo_api_authn_scripts   
+```

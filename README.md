@@ -76,4 +76,4 @@ Before you start, you need to issue a valid certificate.
  
  ## Helpful Utilities
  You can find various utility scripts to help you get up and running the service inside the
- repo's `bin` folder.
+ repo's `bin` folder. You can also find the respective documentation for the scripts inside the `docs` folder.
