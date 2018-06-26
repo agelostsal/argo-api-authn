@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"github.com/ARGOeu/argo-api-authn/config"
 	"github.com/ARGOeu/argo-api-authn/stores"
-	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/suite"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	LOGGER "github.com/sirupsen/logrus"
 )
 
 type AuthMethodHandlersTestSuite struct {
@@ -30,7 +30,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListOne() {
 
 	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/s1/hosts/host1/authM", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -60,7 +60,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListOneUndeclaredAccessK
 
 	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/s1/hosts/host2/authM", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -91,7 +91,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListOneUndeclaredPath() 
 
 	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/s2/hosts/host3/authM", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -122,7 +122,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListOneUndeclaredPort() 
 
 	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/s2/hosts/host4/authM", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -153,7 +153,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListOneUnknownServiceTyp
 
 	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/unknown_service/hosts/host4/authM", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -184,7 +184,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListOneUnknownHost() {
 
 	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/s1/hosts/host_unknown/authM", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -240,7 +240,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListAll() {
 }`
 	req, err := http.NewRequest("GET", "http://localhost:8080/authM", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -265,7 +265,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListAllEmptyList() {
 }`
 	req, err := http.NewRequest("GET", "http://localhost:8080/authM", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -308,7 +308,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreate() {
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/authM", bytes.NewBuffer([]byte(postBody)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -348,7 +348,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateInvalidJSON() {
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/authM", bytes.NewBuffer([]byte(postBody)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -380,7 +380,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateEmptyReqBody() {
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/authM", bytes.NewBuffer([]byte(postBody)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -417,7 +417,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateMissingTypeField()
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/authM", bytes.NewBuffer([]byte(postBody)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -455,7 +455,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateUnsupportedAuthMet
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/authM", bytes.NewBuffer([]byte(postBody)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -492,7 +492,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateMissingServiceFiel
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/authM", bytes.NewBuffer([]byte(postBody)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -529,7 +529,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateMissingHostField()
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/authM", bytes.NewBuffer([]byte(postBody)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -566,7 +566,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateMissingPortField()
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/authM", bytes.NewBuffer([]byte(postBody)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -603,7 +603,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateMissingPathField()
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/authM", bytes.NewBuffer([]byte(postBody)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -640,7 +640,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateMissingAccessKeyFi
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/authM", bytes.NewBuffer([]byte(postBody)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -678,7 +678,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateUnknownService() {
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/authM", bytes.NewBuffer([]byte(postBody)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -716,7 +716,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateUnknownHost() {
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/authM", bytes.NewBuffer([]byte(postBody)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -754,7 +754,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateUnknownAuthMethod(
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/authM", bytes.NewBuffer([]byte(postBody)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -792,7 +792,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateInvalidPathContent
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/authM", bytes.NewBuffer([]byte(postBody)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -830,7 +830,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateInvalidPathContent
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/authM", bytes.NewBuffer([]byte(postBody)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -868,7 +868,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateAlreadyExists() {
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/authM", bytes.NewBuffer([]byte(postBody)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -890,7 +890,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodDelete() {
 
 	req, err := http.NewRequest("DELETE", "http://localhost:8080/service-types/s1/hosts/host1/authM", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -919,7 +919,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodDeleteUnknownServiceType
 
 	req, err := http.NewRequest("DELETE", "http://localhost:8080/service-types/unknown/hosts/host1/authM", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -949,7 +949,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodDeleteUnknownHost() {
 
 	req, err := http.NewRequest("DELETE", "http://localhost:8080/service-types/s1/hosts/unknown/authM", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -979,7 +979,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodDeleteInternalConflict()
 
 	req, err := http.NewRequest("DELETE", "http://localhost:8080/service-types/s1/hosts/host1/authM", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -1012,7 +1012,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodDeleteUnknownAuthMethod(
 
 	req, err := http.NewRequest("DELETE", "http://localhost:8080/service-types/s_test/hosts/host_test/authM", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}

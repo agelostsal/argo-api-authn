@@ -3,13 +3,13 @@ package routing
 import (
 	"net/http"
 
-	log "github.com/Sirupsen/logrus"
 
 	"github.com/ARGOeu/argo-api-authn/config"
 	"github.com/ARGOeu/argo-api-authn/handlers"
 	"github.com/ARGOeu/argo-api-authn/stores"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
+	LOGGER "github.com/sirupsen/logrus"
 )
 
 // API Object that holds routing information and the router itself
@@ -59,7 +59,7 @@ func NewRouting(routes []APIRoute, store stores.Store, config *config.Config) *A
 			Handler(context.ClearHandler(handler))
 	}
 
-	log.Info("API", "\t", "API Router initialized! Ready to start listening...")
+	LOGGER.Info("API", "\t", "API Router initialized! Ready to start listening...")
 
 	// Return reference to the API object
 	return &ar

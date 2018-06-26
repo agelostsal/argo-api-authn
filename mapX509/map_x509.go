@@ -5,7 +5,6 @@ import (
 	"github.com/ARGOeu/argo-api-authn/bindings"
 	"github.com/ARGOeu/argo-api-authn/servicetypes"
 	"github.com/ARGOeu/argo-api-authn/stores"
-
 	"bytes"
 	"encoding/json"
 	"fmt"

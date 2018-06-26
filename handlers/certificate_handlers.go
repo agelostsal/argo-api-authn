@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/ARGOeu/argo-api-authn/auth"
 	"github.com/ARGOeu/argo-api-authn/bindings"
 	"github.com/ARGOeu/argo-api-authn/config"
 	"github.com/ARGOeu/argo-api-authn/mapX509"
@@ -11,7 +12,6 @@ import (
 	"github.com/ARGOeu/argo-api-authn/utils"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
-	"github.com/ARGOeu/argo-api-authn/auth"
 )
 
 // AuthViaCert accepts a request containing a certificate and handlers the mapping of a certificate dn to a service type's token

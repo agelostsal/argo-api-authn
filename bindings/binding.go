@@ -4,7 +4,6 @@ import (
 	"github.com/ARGOeu/argo-api-authn/servicetypes"
 	"github.com/ARGOeu/argo-api-authn/stores"
 	"github.com/ARGOeu/argo-api-authn/utils"
-	log "github.com/Sirupsen/logrus"
 	uuid2 "github.com/satori/go.uuid"
 )
 
@@ -107,7 +106,6 @@ func ExistsWithDN(dn string, serviceUUID string, host string, store stores.Store
 	// check if the given dn doesn't already exist under the given service type and host
 	// first check for all the other errors regrading bindings
 	if _, err = FindBindingByDN(dn, serviceUUID, host, store); err != nil {
-		log.Info(err)
 		if err.Error() != "Binding was not found" {
 			return err
 		}
@@ -136,7 +134,6 @@ func FindBindingByDN(dn string, serviceUUID string, host string, store stores.St
 	}
 
 	if len(qBindings) > 1 {
-		log.Warning("STORE", "\t", "More than 1 Bindings found under the host: "+host+" using the same DN: "+dn)
 		err = utils.APIErrDatabase("More than 1 bindings found under the service type: " + serviceUUID + " and host: " + host + " using the same DN: " + dn)
 		return Binding{}, err
 	}
@@ -219,7 +216,6 @@ func FindBindingByUUID(uuid string, store stores.Store) (Binding, error) {
 	}
 
 	if len(qBindings) > 1 {
-		log.Warning("STORE", "\t", "More than 1 Bindings found with the same UUID: "+uuid)
 		err = utils.APIErrDatabase("More than 1 Bindings found with the same UUID: " + uuid)
 		return Binding{}, err
 	}
@@ -258,7 +254,6 @@ func UpdateBinding(original Binding, tempBind TempUpdateBinding, store stores.St
 
 	// validate the updated binding
 	if err = updated.Validate(store); err != nil {
-		log.Infof("\nERR:\n%v\n", err)
 		return updated, err
 	}
 

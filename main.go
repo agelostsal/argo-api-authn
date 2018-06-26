@@ -5,8 +5,6 @@ import (
 
 	"github.com/gorilla/handlers"
 
-	"fmt"
-
 	"flag"
 
 	"crypto/tls"
@@ -17,8 +15,19 @@ import (
 	"github.com/ARGOeu/argo-api-authn/config"
 	"github.com/ARGOeu/argo-api-authn/routing"
 	"github.com/ARGOeu/argo-api-authn/stores"
-	log "github.com/Sirupsen/logrus"
+	"log/syslog"
+	LOGGER "github.com/sirupsen/logrus"
+	lSyslog "github.com/sirupsen/logrus/hooks/syslog"
 )
+
+
+func init() {
+	LOGGER.SetFormatter(&LOGGER.TextFormatter{FullTimestamp: true, DisableColors: true})
+		hook, err := lSyslog.NewSyslogHook("", "", syslog.LOG_INFO, "")
+		if err == nil {
+				LOGGER.AddHook(hook)
+			}
+	}
 
 func main() {
 
@@ -29,7 +38,7 @@ func main() {
 	// initialize the config
 	var cfg = &config.Config{}
 	if err := cfg.ConfigSetUp(*cfgPath); err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 		panic(err.Error())
 	}
 
@@ -49,7 +58,6 @@ func main() {
 
 	api := routing.NewRouting(routing.ApiRoutes, store, cfg)
 
-	log.Info(fmt.Sprintf("%+v", cfg))
 	xReqWithConType := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-AuthModel"})
 	allowVerbs := handlers.AllowedMethods([]string{"OPTIONS", "POST", "GET", "PUT", "DELETE", "HEAD"})
 
@@ -62,6 +70,6 @@ func main() {
 	//Start the server
 	err := server.ListenAndServeTLS(cfg.Certificate, cfg.CertificateKey)
 	if err != nil {
-		log.Fatal("API", "\t", "ListenAndServe:", err)
+		LOGGER.Fatal("API", "\t", "ListenAndServe:", err)
 	}
 }

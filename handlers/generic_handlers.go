@@ -4,9 +4,9 @@ import (
 	"github.com/ARGOeu/argo-api-authn/config"
 	"github.com/ARGOeu/argo-api-authn/stores"
 	"github.com/ARGOeu/argo-api-authn/utils"
-	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/context"
 	"net/http"
+	LOGGER "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -45,7 +45,7 @@ func WrapLog(hfn http.Handler, name string) http.HandlerFunc {
 
 		hfn.ServeHTTP(w, r)
 
-		log.Info(
+		LOGGER.Info(
 			"ACCESS", "\t",
 			r.Method, "\t",
 			r.RequestURI, "\t",

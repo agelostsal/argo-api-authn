@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-
-	log "github.com/Sirupsen/logrus"
+	LOGGER "github.com/sirupsen/logrus"
 )
+
 
 const (
 	ContentType = "application/json"
@@ -55,7 +55,7 @@ func RespondError(w http.ResponseWriter, err error) {
 	w.WriteHeader(apiErr.Code)
 
 	//log the APIError
-	log.Error(apiErr.Code, "\t", apiErr.Status, "\t", apiErr.Message)
+	LOGGER.Error(apiErr.Code, "\t", apiErr.Status, "\t", apiErr.Message)
 
 	// Write the response
 	errData, _ := json.MarshalIndent(errResp, "", " ")

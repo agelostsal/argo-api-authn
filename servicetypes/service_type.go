@@ -39,7 +39,7 @@ func CreateServiceType(service ServiceType, store stores.Store, cfg config.Confi
 	var err error
 
 	// validate the service type
-	if err = service.Validate(store, cfg); err !=nil{
+	if err = service.Validate(store, cfg); err != nil {
 		return ServiceType{}, err
 	}
 
@@ -66,7 +66,7 @@ func CreateServiceType(service ServiceType, store stores.Store, cfg config.Confi
 }
 
 // Validate validates the contents of the service type's fields
-func (s *ServiceType) Validate(store stores.Store, cfg config.Config,) error {
+func (s *ServiceType) Validate(store stores.Store, cfg config.Config) error {
 
 	var err error
 
@@ -106,7 +106,7 @@ func ExistsWithName(name string, store stores.Store) error {
 
 	if len(qServices) > 0 {
 		err = utils.APIErrConflict("service-type", "name", name)
-		return  err
+		return err
 	}
 
 	return nil

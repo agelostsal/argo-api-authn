@@ -179,7 +179,7 @@ func AuthMethodListAll(w http.ResponseWriter, r *http.Request) {
 	utils.RespondOk(w, 200, authMList)
 }
 
-func AuthMethodDelete( w http.ResponseWriter, r *http.Request) {
+func AuthMethodDelete(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	var serviceType servicetypes.ServiceType
