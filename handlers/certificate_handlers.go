@@ -36,6 +36,12 @@ func AuthViaCert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// check if the certificate is revoked
+	if err = auth.CRLCheckRevokedCert(r.TLS.PeerCertificates[0]); err != nil {
+		utils.RespondError(w, err)
+		return
+	}
+
 	// Find information regarding the requested serviceType
 	if serviceType, err = servicetypes.FindServiceTypeByName(vars["service-type"], store); err != nil {
 		utils.RespondError(w, err)
