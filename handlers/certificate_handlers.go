@@ -36,6 +36,12 @@ func AuthViaCert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// check if the certificate has expired
+	if err = auth.CertHasExpired(r.TLS.PeerCertificates[0]); err != nil {
+		utils.RespondError(w, err)
+		return
+	}
+
 	// check if the certificate is revoked
 	if err = auth.CRLCheckRevokedCert(r.TLS.PeerCertificates[0]); err != nil {
 		utils.RespondError(w, err)
