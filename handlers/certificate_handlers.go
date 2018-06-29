@@ -12,6 +12,7 @@ import (
 	"github.com/ARGOeu/argo-api-authn/utils"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
+	LOGGER "github.com/sirupsen/logrus"
 )
 
 // AuthViaCert accepts a request containing a certificate and handlers the mapping of a certificate dn to a service type's token
@@ -36,14 +37,10 @@ func AuthViaCert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// check if the certificate has expired
-	if err = auth.CertHasExpired(r.TLS.PeerCertificates[0]); err != nil {
-		utils.RespondError(w, err)
-		return
-	}
+	LOGGER.Infof("\nCERT: %v\n", r.TLS.PeerCertificates[0].Subject.ToRDNSequence().String())
 
-	// check if the certificate is revoked
-	if err = auth.CRLCheckRevokedCert(r.TLS.PeerCertificates[0]); err != nil {
+	// validate the certificate
+	if err = auth.ValidateClientCertificate(r.TLS.PeerCertificates[0], r.RemoteAddr); err != nil {
 		utils.RespondError(w, err)
 		return
 	}
