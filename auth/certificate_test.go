@@ -1,13 +1,14 @@
 package auth
 
 import (
-	"github.com/stretchr/testify/suite"
 	"crypto/x509"
-	"encoding/pem"
-	log "github.com/Sirupsen/logrus"
-	"testing"
 	"crypto/x509/pkix"
 	"encoding/asn1"
+	"encoding/pem"
+	"github.com/stretchr/testify/suite"
+	"testing"
+	LOGGER "github.com/sirupsen/logrus"
+
 )
 
 type CertificateTestSuite struct {
@@ -47,19 +48,18 @@ SoPmZKiBeb+2OQ2n7+FI8ftkqxWw6zjh651brAoy/0zqLTRPh+c=
 	}
 
 	if crt, err = x509.ParseCertificate(block.Bytes); err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	ers := ExtractEnhancedRDNSequenceToString(crt)
 
 	// add some extra attribute names to the certificate
-	obj := asn1.ObjectIdentifier{0,9,2342,19200300,100,1,25}
-	extraAttributeValue1 := pkix.AttributeTypeAndValue{Type:obj, Value:"v1"}
-	extraAttributeValue2 := pkix.AttributeTypeAndValue{Type:obj, Value:"v2"}
+	obj := asn1.ObjectIdentifier{0, 9, 2342, 19200300, 100, 1, 25}
+	extraAttributeValue1 := pkix.AttributeTypeAndValue{Type: obj, Value: "v1"}
+	extraAttributeValue2 := pkix.AttributeTypeAndValue{Type: obj, Value: "v2"}
 	enhancedCert := crt
 	enhancedCert.Subject.Names = append(enhancedCert.Subject.Names, extraAttributeValue1, extraAttributeValue2)
 	ers2 := ExtractEnhancedRDNSequenceToString(enhancedCert)
-
 
 	suite.Equal("O=COMPANY,L=CITY,ST=TN,C=TC", ers)
 	suite.Equal("O=COMPANY,L=CITY,ST=TN,C=TC,DC=v2,DC=v1", ers2)

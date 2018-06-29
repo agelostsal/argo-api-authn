@@ -299,7 +299,6 @@ func (suite *StoreTestSuite) TestUpdateServiceType() {
 
 	updated := QServiceType{Name: "s_updated", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", UUID: "uuid1", RetrievalField: "token", CreatedOn: "2018-05-05T18:04:05Z"}
 
-
 	_, err1 := suite.Mockstore.UpdateServiceType(original, updated)
 
 	expSVTs, _ := suite.Mockstore.QueryServiceTypesByUUID("uuid1")
@@ -346,7 +345,6 @@ func (suite *StoreTestSuite) TestDeleteAuthMethod() {
 
 	suite.Nil(err1)
 }
-
 
 func TestStoreTestSuite(t *testing.T) {
 	suite.Run(t, new(StoreTestSuite))

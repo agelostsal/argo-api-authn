@@ -3,10 +3,10 @@ package handlers
 import (
 	"bytes"
 	"github.com/ARGOeu/argo-api-authn/stores"
-	log "github.com/Sirupsen/logrus"
 	"github.com/stretchr/testify/suite"
 	"net/http"
 	"testing"
+	LOGGER "github.com/sirupsen/logrus"
 
 	"encoding/json"
 	"github.com/ARGOeu/argo-api-authn/bindings"
@@ -33,7 +33,7 @@ func (suite *BindingHandlersSuite) TestBindingCreate() {
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/bindings", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -80,7 +80,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldName() {
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/bindings", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -119,7 +119,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateInvalidJSON() {
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/bindings", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -158,7 +158,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldServiceUUID() {
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/bindings", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -197,7 +197,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldHost() {
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/bindings", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -235,7 +235,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldDNAndOIDC() {
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/bindings", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -274,7 +274,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldUniqueKey() {
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/bindings", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -313,7 +313,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateUnknownService() {
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/bindings", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -352,7 +352,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateUnknownHost() {
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/bindings", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -391,7 +391,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateDNAlreadyExists() {
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/bindings", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -444,7 +444,7 @@ func (suite *BindingHandlersSuite) TestBindingListAll() {
 }`
 	req, err := http.NewRequest("GET", "http://localhost:8080/bindings", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -488,7 +488,7 @@ func (suite *BindingHandlersSuite) TestBindingListAllByServiceTypeAndHost() {
 }`
 	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/s1/hosts/host1/bindings", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -513,7 +513,7 @@ func (suite *BindingHandlersSuite) TestBindingListAllEmpty() {
 }`
 	req, err := http.NewRequest("GET", "http://localhost:8080/bindings", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -541,7 +541,7 @@ func (suite *BindingHandlersSuite) TestBindingListAllByServiceTypeAndHostEmpty()
 }`
 	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/s1/hosts/host1/bindings", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -574,7 +574,7 @@ func (suite *BindingHandlersSuite) TestBindingListAllByServiceTypeAndHostUnknown
 
 	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/unknown_service/hosts/host1/bindings", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -604,7 +604,7 @@ func (suite *BindingHandlersSuite) TestBindingListAllByServiceTypeAndHostUnknown
 
 	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/s1/hosts/unknown_host/bindings", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -636,7 +636,7 @@ func (suite *BindingHandlersSuite) TestBindingListOneByDN() {
 
 	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/s1/hosts/host1/bindings/test_dn_1", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -666,7 +666,7 @@ func (suite *BindingHandlersSuite) TestBindingListOneByDNMultipleEntries() {
 
 	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/s1/hosts/host1/bindings/test_dn_1", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -700,7 +700,7 @@ func (suite *BindingHandlersSuite) TestBindingListOneByDnUnknownServiceType() {
 
 	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/unknown_service/hosts/host1/bindings/test_dn_1", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -730,7 +730,7 @@ func (suite *BindingHandlersSuite) TestBindingListOneByDnUnknownHost() {
 
 	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/s1/hosts/unknown_host/bindings/test_dn_1", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -760,7 +760,7 @@ func (suite *BindingHandlersSuite) TestBindingListOneByDnUnknownDN() {
 
 	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/s1/hosts/host1/bindings/unknown_dn", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -792,7 +792,7 @@ func (suite *BindingHandlersSuite) TestBindingListOneByUUID() {
 
 	req, err := http.NewRequest("GET", "http://localhost:8080/bindings/b_uuid1", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -821,7 +821,7 @@ func (suite *BindingHandlersSuite) TestBindingListOneByUUIDUnknownUUID() {
 }`
 	req, err := http.NewRequest("GET", "http://localhost:8080/bindings/unknown_uuid", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -850,7 +850,7 @@ func (suite *BindingHandlersSuite) TestBindingListOneByUUIDMultipleEntries() {
 }`
 	req, err := http.NewRequest("GET", "http://localhost:8080/bindings/b_uuid1", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -889,7 +889,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdate() {
 }`
 	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -922,7 +922,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateServiceUUIDEmpty() {
 }`
 	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -955,7 +955,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateHostEmpty() {
 }`
 	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -988,7 +988,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateUniqueKeyEmpty() {
 }`
 	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -1021,7 +1021,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateDNEmpty() {
 }`
 	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -1054,7 +1054,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateUnknownHost() {
 }`
 	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -1087,7 +1087,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateUnknownServiceUUID() {
 }`
 	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -1120,7 +1120,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateInvalidJSON() {
 }`
 	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -1153,7 +1153,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateDNAlreadyExists() {
 }`
 	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -1183,7 +1183,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateUnknownUUID() {
 
 	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/unknown", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -1205,7 +1205,7 @@ func (suite *BindingHandlersSuite) TestBindingDelete() {
 
 	req, err := http.NewRequest("DELETE", "http://localhost:8080/bindings/b_uuid1", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -1234,7 +1234,7 @@ func (suite *BindingHandlersSuite) TestBindingDeleteUnknownDN() {
 
 	req, err := http.NewRequest("DELETE", "http://localhost:8080/bindings/unknown", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}

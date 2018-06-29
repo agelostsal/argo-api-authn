@@ -2,9 +2,9 @@ package stores
 
 import (
 	"github.com/ARGOeu/argo-api-authn/utils"
-	log "github.com/Sirupsen/logrus"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	LOGGER "github.com/sirupsen/logrus"
 )
 
 type MongoStore struct {
@@ -16,14 +16,18 @@ type MongoStore struct {
 // Initialize initializes the mongo stores struct
 func (mongo *MongoStore) SetUp() {
 
-	session, err := mgo.Dial(mongo.Server)
-	if err != nil {
-		log.Fatal("STORE", "\t", err.Error())
-	}
+	var err error
+	var session = &mgo.Session{}
 
+	session, err = mgo.Dial(mongo.Server)
 	mongo.Session = session
 
-	log.Info("STORE", "\t", "Connected to Mongo: ", mongo.Server)
+	if err != nil {
+		LOGGER.Error("STORE", "\t", err.Error())
+		return
+	}
+
+	LOGGER.Info("STORE", "\t", "Connected to Mongo: ", mongo.Server)
 
 }
 
@@ -46,7 +50,7 @@ func (mongo *MongoStore) QueryServiceTypes(name string) ([]QServiceType, error) 
 	err = c.Find(query).All(&qServices)
 
 	if err != nil {
-		log.Fatal("STORE", "\t", err.Error())
+		LOGGER.Error("STORE", "\t", err.Error())
 		err = utils.APIErrDatabase(err.Error())
 		return []QServiceType{}, err
 	}
@@ -64,7 +68,7 @@ func (mongo *MongoStore) QueryServiceTypesByUUID(uuid string) ([]QServiceType, e
 	err = c.Find(bson.M{"uuid": uuid}).All(&qServices)
 
 	if err != nil {
-		log.Fatal("STORE", "\t", err.Error())
+		LOGGER.Error("STORE", "\t", err.Error())
 		err = utils.APIErrDatabase(err.Error())
 		return []QServiceType{}, err
 	}
@@ -87,12 +91,12 @@ func (mongo *MongoStore) QueryAuthMethods(serviceUUID string, host string, typeN
 	err = c.Find(query).All(&qAuthMethods)
 
 	if err != nil {
-		log.Error("STORE", "\t", err.Error())
+		LOGGER.Error("STORE", "\t", err.Error())
 		err = utils.APIErrDatabase(err.Error())
 		return qAuthMethods, err
 	}
 
-	log.Info(qAuthMethods)
+	LOGGER.Info(qAuthMethods)
 
 	return qAuthMethods, err
 }
@@ -106,7 +110,7 @@ func (mongo *MongoStore) QueryBindingsByDN(dn string, serviceUUID string, host s
 	err = c.Find(bson.M{"dn": dn, "service_uuid": serviceUUID, "host": host}).All(&qBindings)
 
 	if err != nil {
-		log.Fatal("STORE", "\t", err.Error())
+		LOGGER.Error("STORE", "\t", err.Error())
 		err = utils.APIErrDatabase(err.Error())
 		return []QBinding{}, err
 	}
@@ -123,7 +127,7 @@ func (mongo *MongoStore) QueryBindingsByUUID(uuid string) ([]QBinding, error) {
 	err = c.Find(bson.M{"uuid": uuid}).All(&qBindings)
 
 	if err != nil {
-		log.Fatal("STORE", "\t", err.Error())
+		LOGGER.Error("STORE", "\t", err.Error())
 		err = utils.APIErrDatabase(err.Error())
 		return []QBinding{}, err
 	}
@@ -145,6 +149,7 @@ func (mongo *MongoStore) QueryBindings(serviceUUID string, host string) ([]QBind
 	}
 
 	if err = c.Find(query).All(&qBindings); err != nil {
+		LOGGER.Error("STORE", "\t", err.Error())
 		err = utils.APIErrDatabase(err.Error())
 		return qBindings, err
 	}
@@ -162,7 +167,7 @@ func (mongo *MongoStore) InsertServiceType(name string, hosts []string, authType
 	c := db.C("service_types")
 
 	if err := c.Insert(qService); err != nil {
-		log.Fatal("STORE", "\t", err.Error())
+		LOGGER.Error("STORE", "\t", err.Error())
 		err = utils.APIErrDatabase(err.Error())
 		return QServiceType{}, nil
 	}
@@ -179,7 +184,7 @@ func (mongo *MongoStore) InsertAuthMethod(authM map[string]interface{}) error {
 	c := db.C("auth_methods")
 
 	if err := c.Insert(authM); err != nil {
-		log.Error("STORE", "\t", err.Error())
+		LOGGER.Error("STORE", "\t", err.Error())
 		err = utils.APIErrDatabase(err.Error())
 		return err
 	}
@@ -198,7 +203,7 @@ func (mongo *MongoStore) InsertBinding(name string, serviceUUID string, host str
 	c := db.C("bindings")
 
 	if err := c.Insert(qBinding); err != nil {
-		log.Error("STORE", "\t", err.Error())
+		LOGGER.Error("STORE", "\t", err.Error())
 		err = utils.APIErrDatabase(err.Error())
 		return QBinding{}, nil
 	}
@@ -215,7 +220,7 @@ func (mongo *MongoStore) UpdateBinding(original QBinding, updated QBinding) (QBi
 	c := db.C("bindings")
 
 	if err := c.Update(original, updated); err != nil {
-		log.Fatal("STORE", "\t", err.Error())
+		LOGGER.Error("STORE", "\t", err.Error())
 		err = utils.APIErrDatabase(err.Error())
 		return QBinding{}, err
 	}
@@ -232,7 +237,7 @@ func (mongo *MongoStore) UpdateServiceType(original QServiceType, updated QServi
 	c := db.C("service_types")
 
 	if err := c.Update(original, updated); err != nil {
-		log.Fatal("STORE", "\t", err.Error())
+		LOGGER.Error("STORE", "\t", err.Error())
 		err = utils.APIErrDatabase(err.Error())
 		return QServiceType{}, err
 	}
@@ -249,8 +254,7 @@ func (mongo *MongoStore) DeleteBinding(qBinding QBinding) error {
 	c := db.C("bindings")
 
 	if err := c.Remove(qBinding); err != nil {
-
-		log.Fatal("STORE", "\t", err.Error())
+		LOGGER.Error("STORE", "\t", err.Error())
 		err = utils.APIErrDatabase(err.Error())
 		return err
 	}
@@ -267,8 +271,7 @@ func (mongo *MongoStore) DeleteAuthMethod(authM map[string]interface{}) error {
 	c := db.C("auth_methods")
 
 	if err := c.Remove(authM); err != nil {
-
-		log.Error("STORE", "\t", err.Error())
+		LOGGER.Error("STORE", "\t", err.Error())
 		err = utils.APIErrDatabase(err.Error())
 		return err
 	}

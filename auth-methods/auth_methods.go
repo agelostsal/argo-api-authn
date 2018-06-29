@@ -3,9 +3,8 @@ package auth_methods
 import (
 	"github.com/ARGOeu/argo-api-authn/config"
 	"github.com/ARGOeu/argo-api-authn/stores"
-	"net/http"
 	"github.com/ARGOeu/argo-api-authn/utils"
-	log "github.com/Sirupsen/logrus"
+	"net/http"
 )
 
 type AuthMethod struct{}
@@ -63,8 +62,7 @@ func DeleteAuthMethod(serviceUUID string, host string, typeName string, store st
 
 	// check if there is an internal conflict
 	if len(authMs) > 1 {
-		log.Warning("STORE", "\t", "More than 1 auth methods found under the service type: " + serviceUUID + " and host: " + host )
-		err = utils.APIErrDatabase("More than 1 auth methods found under the service type: " + serviceUUID + " and host: " + host )
+		err = utils.APIErrDatabase("More than 1 auth methods found under the service type: " + serviceUUID + " and host: " + host)
 		return err
 	}
 

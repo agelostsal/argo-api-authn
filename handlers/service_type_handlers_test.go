@@ -5,12 +5,12 @@ import (
 	"github.com/stretchr/testify/suite"
 	"net/http"
 	"testing"
+	LOGGER "github.com/sirupsen/logrus"
 
 	"encoding/json"
 	"github.com/ARGOeu/argo-api-authn/config"
 	"github.com/ARGOeu/argo-api-authn/servicetypes"
 	"github.com/ARGOeu/argo-api-authn/stores"
-	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
 	"net/http/httptest"
 )
@@ -32,7 +32,7 @@ func (suite *ServiceTypeHandlersSuite) TestServiceTypeCreate() {
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/service-types", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -78,7 +78,7 @@ func (suite *ServiceTypeHandlersSuite) TestServiceTypeCreateInvalidName() {
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/service-types", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -117,7 +117,7 @@ func (suite *ServiceTypeHandlersSuite) TestServiceTypeCreateEmptyHosts() {
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/service-types", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -156,7 +156,7 @@ func (suite *ServiceTypeHandlersSuite) TestServiceTypeCreateInvalidAuthTypes() {
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/service-types", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -195,7 +195,7 @@ func (suite *ServiceTypeHandlersSuite) TestServiceTypeCreateInvalidAuthMethod() 
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/service-types", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -234,7 +234,7 @@ func (suite *ServiceTypeHandlersSuite) TestServiceTypeCreateEmptyAuthTypes() {
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/service-types", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -273,7 +273,7 @@ func (suite *ServiceTypeHandlersSuite) TestServiceTypeCreateInvalidJSON() {
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/service-types", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -310,7 +310,7 @@ func (suite *ServiceTypeHandlersSuite) TestServiceTypeCreateMissingField() {
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/service-types", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -349,7 +349,7 @@ func (suite *ServiceTypeHandlersSuite) TestServiceTypeListOne() {
 
 	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/s1", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -380,7 +380,7 @@ func (suite *ServiceTypeHandlersSuite) TestServiceTypeListOneNameCollision() {
 
 	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/same_name", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -411,7 +411,7 @@ func (suite *ServiceTypeHandlersSuite) TestServiceTypeListOneNotFound() {
 
 	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/not_found", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -488,7 +488,7 @@ func (suite *ServiceTypeHandlersSuite) TestServiceTypeListAll() {
 	req, err := http.NewRequest("GET", "http://localhost:8080/service-types", nil)
 
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -515,7 +515,7 @@ func (suite *ServiceTypeHandlersSuite) TestServiceTypeListAllEmptyList() {
 
 	req, err := http.NewRequest("GET", "http://localhost:8080/service-types", nil)
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -561,7 +561,7 @@ func (suite *BindingHandlersSuite) TestServiceTypeUpdate() {
 }`
 	req, err := http.NewRequest("PUT", "http://localhost:8080/service-types/s1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -594,7 +594,7 @@ func (suite *BindingHandlersSuite) TestServiceTypeUpdateEmptyName() {
 }`
 	req, err := http.NewRequest("PUT", "http://localhost:8080/service-type/s1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -627,7 +627,7 @@ func (suite *BindingHandlersSuite) TestServiceTypeUpdateEmptyAuthTypes() {
 }`
 	req, err := http.NewRequest("PUT", "http://localhost:8080/service-type/s1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -660,7 +660,7 @@ func (suite *BindingHandlersSuite) TestServiceTypeUpdateUnsupportedAuthType() {
 }`
 	req, err := http.NewRequest("PUT", "http://localhost:8080/service-type/s1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -693,7 +693,7 @@ func (suite *BindingHandlersSuite) TestServiceTypeUpdateUnsupportedAuthMethod() 
 }`
 	req, err := http.NewRequest("PUT", "http://localhost:8080/service-type/s1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -726,7 +726,7 @@ func (suite *BindingHandlersSuite) TestServiceTypeUpdateEmptyAuthMethod() {
 }`
 	req, err := http.NewRequest("PUT", "http://localhost:8080/service-type/s1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -759,7 +759,7 @@ func (suite *BindingHandlersSuite) TestServiceTypeUpdateEmptyRetrievalField() {
 }`
 	req, err := http.NewRequest("PUT", "http://localhost:8080/service-type/s1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -792,7 +792,7 @@ func (suite *BindingHandlersSuite) TestServiceTypeUpdateEmptyHosts() {
 }`
 	req, err := http.NewRequest("PUT", "http://localhost:8080/service-type/s1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -825,7 +825,7 @@ func (suite *BindingHandlersSuite) TestServiceTypeUpdateNameAlreadyExists() {
 }`
 	req, err := http.NewRequest("PUT", "http://localhost:8080/service-type/s1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}

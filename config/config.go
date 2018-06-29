@@ -3,11 +3,10 @@ package config
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
-
+	LOGGER "github.com/sirupsen/logrus"
 	"github.com/ARGOeu/argo-api-authn/utils"
-	log "github.com/Sirupsen/logrus"
+	"reflect"
 )
 
 type Config struct {
@@ -37,10 +36,17 @@ func (cfg *Config) ConfigSetUp(path string) error {
 		return errors.New("Something went wrong while marshaling the json data. Error: " + err.Error())
 	}
 
-	log.Info(fmt.Sprintf("%+v", cfg))
-
 	if err = utils.ValidateRequired(*cfg); err != nil {
 		return utils.StructGenericEmptyRequiredField("config", err.Error())
 	}
-	return nil
+
+	rvc := reflect.ValueOf(*cfg)
+
+	for i := 0; i < rvc.NumField(); i++ {
+
+		fl := rvc.Type().Field(i)
+
+		LOGGER.Infof("Config Field: `%v` has been successfully initialized with value: %v", fl.Name, rvc.Field(i).Interface() )
+	}
+		return nil
 }

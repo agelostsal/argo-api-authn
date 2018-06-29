@@ -5,7 +5,6 @@ import (
 	"github.com/ARGOeu/argo-api-authn/config"
 	"github.com/ARGOeu/argo-api-authn/stores"
 	"github.com/ARGOeu/argo-api-authn/utils"
-	log "github.com/Sirupsen/logrus"
 	"net/http"
 	"strconv"
 	"strings"
@@ -30,19 +29,16 @@ func FindApiKeyAuthMethod(serviceUUID string, host string, store stores.Store) (
 
 	// required variables
 	if _, ok = apiKeyAuthMaps[0]["path"]; ok == false {
-		log.Error("FindApiKeyAuthMethod", "\t", "Path was not found in the apiKeyAuthMap")
 		err = utils.APIErrDatabase("Path was not found in the ApiKeyAuth object")
 		return apiKeyAuthMap, err
 	}
 
 	if _, ok = apiKeyAuthMaps[0]["port"]; ok == false {
-		log.Error("FindApiKeyAuthMethod", "\t", "Port was not found in the apiKeyAuthMap")
 		err = utils.APIErrDatabase("Port was not found in the ApiKeyAuth object")
 		return apiKeyAuthMap, err
 	}
 
 	if _, ok = apiKeyAuthMaps[0]["access_key"]; ok == false {
-		log.Error("FindApiKeyAuthMethod", "\t", "Access key was not found in the apiKeyAuthMap")
 		err = utils.APIErrDatabase("Access Key was not found in the ApiKeyAuth object")
 		return apiKeyAuthMap, err
 	}
@@ -57,7 +53,6 @@ func CreateApiKeyAuthMethod(authM map[string]interface{}, store stores.Store) (m
 
 	// extra required variables
 	if _, ok = authM["access_key"]; ok == false {
-		log.Error("FindApiKeyAuthMethod", "\t", "Access key was not found in the apiKeyAuthMap")
 		err = utils.APIErrEmptyRequiredField("api-key-auth", "access_key was not found in the request body")
 		return authM, err
 	}

@@ -6,11 +6,11 @@ import (
 	"github.com/ARGOeu/argo-api-authn/config"
 	"github.com/ARGOeu/argo-api-authn/servicetypes"
 	"github.com/ARGOeu/argo-api-authn/stores"
-	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/suite"
 	"net/http"
 	"net/http/httptest"
+	LOGGER "github.com/sirupsen/logrus"
 	"testing"
 )
 
@@ -56,7 +56,7 @@ func (suite *MapX509Suite) TestMapX509ToAuthItem() {
 
 			// mock the request that will take place against the given service type
 			if req2, err = http.NewRequest("GET", "http://localhost:8080/some_endpoint", nil); err != nil {
-				log.Error(err.Error())
+				LOGGER.Error(err.Error())
 			}
 			router := mux.NewRouter().StrictSlash(true)
 			w := httptest.NewRecorder()
@@ -83,7 +83,7 @@ func (suite *MapX509Suite) TestMapX509ToAuthItem() {
 
 			// mock the request that will take place against the given service type
 			if req2, err = http.NewRequest("GET", "http://localhost:8080/some_endpoint", nil); err != nil {
-				log.Error(err.Error())
+				LOGGER.Error(err.Error())
 			}
 			router := mux.NewRouter().StrictSlash(true)
 			w := httptest.NewRecorder()

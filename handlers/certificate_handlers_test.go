@@ -7,12 +7,13 @@ import (
 	"github.com/ARGOeu/argo-api-authn/auth-methods"
 	"github.com/ARGOeu/argo-api-authn/config"
 	"github.com/ARGOeu/argo-api-authn/stores"
-	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/suite"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	LOGGER "github.com/sirupsen/logrus"
+
 )
 
 type CertificateHandlerSuite struct {
@@ -59,7 +60,7 @@ SoPmZKiBeb+2OQ2n7+FI8ftkqxWw6zjh651brAoy/0zqLTRPh+c=
 	}
 
 	if crt, err = x509.ParseCertificate(block.Bytes); err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 		return req, mockstore, cfg, err
 	}
 
@@ -96,7 +97,7 @@ SoPmZKiBeb+2OQ2n7+FI8ftkqxWw6zjh651brAoy/0zqLTRPh+c=
 
 			// mock the request that will take place against the given service type
 			if req2, err = http.NewRequest("GET", "http://localhost:8080/some_endpoint", nil); err != nil {
-				log.Error(err.Error())
+				LOGGER.Error(err.Error())
 			}
 			router := mux.NewRouter().StrictSlash(true)
 			w := httptest.NewRecorder()
@@ -121,7 +122,7 @@ func (suite *CertificateHandlerSuite) TestAuthViaCert() {
 }`
 
 	if req, mockstore, cfg, err = AuthViaCertSetUp("http://localhost:8080/service-types/s_auth_cert/hosts/h1_auth_cert:authX509"); err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	router := mux.NewRouter().StrictSlash(true)
@@ -149,7 +150,7 @@ func (suite *CertificateHandlerSuite) TestAuthViaCertIncorrectRetrievalField() {
 }`
 
 	if req, mockstore, cfg, err = AuthViaCertSetUp("http://localhost:8080/service-types/s_auth_cert_incorrect/hosts/h1_auth_cert:authX509"); err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	router := mux.NewRouter().StrictSlash(true)
@@ -177,7 +178,7 @@ func (suite *CertificateHandlerSuite) TestAuthViaCertUnknownServiceType() {
 }`
 
 	if req, mockstore, cfg, err = AuthViaCertSetUp("http://localhost:8080/service-types/unknown/hosts/h1_auth_cert:authX509"); err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	router := mux.NewRouter().StrictSlash(true)
@@ -205,7 +206,7 @@ func (suite *CertificateHandlerSuite) TestAuthViaCertUnknownHost() {
 }`
 
 	if req, mockstore, cfg, err = AuthViaCertSetUp("http://localhost:8080/service-types/s_auth_cert/hosts/unknown:authX509"); err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	router := mux.NewRouter().StrictSlash(true)
@@ -233,7 +234,7 @@ func (suite *CertificateHandlerSuite) TestAuthViaCertUnknownDN() {
 }`
 
 	if req, mockstore, cfg, err = AuthViaCertSetUp("http://localhost:8080/service-types/s_auth_cert/hosts/h1_auth_cert:authX509"); err != nil {
-		log.Error(err.Error())
+		LOGGER.Error(err.Error())
 	}
 
 	// empty the mockstore, so no dn will match

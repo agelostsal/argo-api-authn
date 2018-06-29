@@ -96,7 +96,6 @@ func ServiceTypeUpdate(w http.ResponseWriter, r *http.Request) {
 	store := context.Get(r, "stores").(stores.Store)
 	cfg := context.Get(r, "config").(config.Config)
 
-
 	// url vars
 	vars := mux.Vars(r)
 

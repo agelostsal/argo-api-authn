@@ -179,7 +179,7 @@ func (mock *Mockstore) UpdateServiceType(original QServiceType, updated QService
 	// find the service type in the list and replace it
 	for idx, sv := range mock.ServiceTypes {
 		if reflect.DeepEqual(original, sv) { // requires DeepEqual because structs with []string as fields can't be compared
-		mock.ServiceTypes[idx] = updated
+			mock.ServiceTypes[idx] = updated
 			break
 		}
 	}

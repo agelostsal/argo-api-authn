@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	log "github.com/Sirupsen/logrus"
+	LOGGER "github.com/sirupsen/logrus"
 )
 
 var ExtraAttributeNames = map[string]string{
@@ -16,12 +16,12 @@ var ExtraAttributeNames = map[string]string{
 
 // load_CAs reads the root certificates from a directory within the filesystem, and creates the trusted root CA chain
 func LoadCAs(dir string) (roots *x509.CertPool) {
-	log.Info("Building the root CA chain...")
+	LOGGER.Info("Building the root CA chain...")
 	pattern := "*.pem"
 	roots = x509.NewCertPool()
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			log.Fatalf("Prevent panic by handling failure accessing a path %q: %v\n", dir, err)
+			LOGGER.Errorf("Prevent panic by handling failure accessing a path %q: %v\n", dir, err)
 			return err
 		}
 		if ok, _ := filepath.Match(pattern, info.Name()); ok {
@@ -31,15 +31,15 @@ func LoadCAs(dir string) (roots *x509.CertPool) {
 			}
 		}
 		// if info.IsDir() {
-		// 	log.Infof("Skipping a dir without errors: %+v \n", info.Name())
+		// 	LOGGER.Infof("Skipping a dir without errors: %+v \n", info.Name())
 		// }
 		return nil
 	})
 
 	if err != nil {
-		log.Fatalf("error walking the path %q: %v\n", dir, err)
+		LOGGER.Errorf("error walking the path %q: %v\n", dir, err)
 	} else {
-		log.Info("API", "\t", "All certificates parsed successfully.")
+		LOGGER.Info("API", "\t", "All certificates parsed successfully.")
 	}
 
 	return
