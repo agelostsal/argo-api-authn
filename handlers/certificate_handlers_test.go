@@ -153,7 +153,7 @@ func (suite *CertificateHandlerSuite) TestAuthViaCert() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(AuthViaCert, mockstore, cfg))
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(DeprecatedAuthViaCert, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(200, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -184,7 +184,7 @@ func (suite *CertificateHandlerSuite) TestAuthViaCertNoCRLDPs() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(AuthViaCert, mockstore, cfg))
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(DeprecatedAuthViaCert, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(403, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -260,7 +260,7 @@ jeBHq7OnpWm+ccTOPCE6H4ZN4wWVS7biEBUdop/8HgXBPQHWAdjL
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(AuthViaCert, mockstore, cfg))
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(DeprecatedAuthViaCert, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(403, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -291,7 +291,7 @@ func (suite *CertificateHandlerSuite) TestAuthViaCertExpired() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(AuthViaCert, mockstore, cfg))
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(DeprecatedAuthViaCert, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(403, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -322,7 +322,7 @@ func (suite *CertificateHandlerSuite) TestAuthViaCertNotActiveYet() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(AuthViaCert, mockstore, cfg))
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(DeprecatedAuthViaCert, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(403, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -356,7 +356,7 @@ func (suite *CertificateHandlerSuite) TestAuthViaCertInvalidDNSNames() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(AuthViaCert, mockstore, cfg))
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(DeprecatedAuthViaCert, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(403, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -387,7 +387,7 @@ func (suite *CertificateHandlerSuite) TestAuthViaCertInvalidHost() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(AuthViaCert, mockstore, cfg))
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(DeprecatedAuthViaCert, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(403, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -417,7 +417,7 @@ func (suite *CertificateHandlerSuite) TestAuthViaCertNoNames() {
 	req.TLS.PeerCertificates[0].Subject.CommonName = ""
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(AuthViaCert, mockstore, cfg))
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(DeprecatedAuthViaCert, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(403, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -443,7 +443,7 @@ func (suite *CertificateHandlerSuite) TestAuthViaCertValidSubjectCommonName() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(AuthViaCert, mockstore, cfg))
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(DeprecatedAuthViaCert, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(200, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -472,7 +472,7 @@ func (suite *CertificateHandlerSuite) TestAuthViaCertIncorrectRetrievalField() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(AuthViaCert, mockstore, cfg))
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(DeprecatedAuthViaCert, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(500, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -500,7 +500,7 @@ func (suite *CertificateHandlerSuite) TestAuthViaCertUnknownServiceType() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(AuthViaCert, mockstore, cfg))
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(DeprecatedAuthViaCert, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(404, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -528,7 +528,7 @@ func (suite *CertificateHandlerSuite) TestAuthViaCertUnknownHost() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(AuthViaCert, mockstore, cfg))
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(DeprecatedAuthViaCert, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(404, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -559,7 +559,7 @@ func (suite *CertificateHandlerSuite) TestAuthViaCertUnknownDN() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(AuthViaCert, mockstore, cfg))
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(DeprecatedAuthViaCert, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(404, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())

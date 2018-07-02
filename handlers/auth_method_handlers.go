@@ -13,7 +13,8 @@ import (
 	"net/http"
 )
 
-func AuthMethodCreate(w http.ResponseWriter, r *http.Request) {
+// Deprecated:
+func DeprecatedAuthMethodCreate(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	var authM map[string]interface{}
@@ -126,7 +127,8 @@ func AuthMethodCreate(w http.ResponseWriter, r *http.Request) {
 	utils.RespondOk(w, 201, authM)
 }
 
-func AuthMethodListOne(w http.ResponseWriter, r *http.Request) {
+// Deprecated:
+func DeprecatedAuthMethodListOne(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	var authM map[string]interface{}
@@ -163,7 +165,8 @@ func AuthMethodListOne(w http.ResponseWriter, r *http.Request) {
 	utils.RespondOk(w, 200, authM)
 }
 
-func AuthMethodListAll(w http.ResponseWriter, r *http.Request) {
+// Deprecated:
+func DeprecatedAuthMethodListAll(w http.ResponseWriter, r *http.Request) {
 
 	var authMList auth_methods.AuthMethodsList
 	var err error
@@ -179,7 +182,8 @@ func AuthMethodListAll(w http.ResponseWriter, r *http.Request) {
 	utils.RespondOk(w, 200, authMList)
 }
 
-func AuthMethodDelete(w http.ResponseWriter, r *http.Request) {
+// Deprecated: //
+func DeprecatedAuthMethodDelete(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	var serviceType servicetypes.ServiceType
