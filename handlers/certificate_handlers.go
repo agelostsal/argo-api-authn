@@ -37,10 +37,10 @@ func AuthViaCert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	LOGGER.Infof("\nCERT: %v\n", r.TLS.PeerCertificates[0].Subject.ToRDNSequence().String())
+	LOGGER.Infof("Certificate request: %v from Host: %v with IP: %v", r.TLS.PeerCertificates[0].Subject.ToRDNSequence().String(), r.Host, r.RemoteAddr)
 
 	// validate the certificate
-	if err = auth.ValidateClientCertificate(r.TLS.PeerCertificates[0], r.RemoteAddr); err != nil {
+	if err = auth.ValidateClientCertificate(r.TLS.PeerCertificates[0], r.Host); err != nil {
 		utils.RespondError(w, err)
 		return
 	}
