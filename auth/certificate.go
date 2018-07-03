@@ -8,8 +8,9 @@ import (
 	"path/filepath"
 
 	LOGGER "github.com/sirupsen/logrus"
-	"time"
+	"net"
 	"github.com/ARGOeu/argo-api-authn/utils"
+	"time"
 )
 
 var ExtraAttributeNames = map[string]string{
@@ -68,6 +69,36 @@ func ExtractEnhancedRDNSequenceToString(cert *x509.Certificate) string {
 
 	return ers
 
+}
+
+// ValidateClientCertificate performs a number of different checks to ensure the provided certificate is valid
+func ValidateClientCertificate(cert *x509.Certificate, clientIP string) error {
+
+	var err error
+	var host string
+
+	if host, _, err = net.SplitHostPort(clientIP); err != nil {
+		err := &utils.APIError{Code:403, Message:err.Error(), Status:"ACCESS_FORBIDDEN"}
+		return err
+	}
+
+	// check if the clientIP is included in the cert's SAN's
+	if err = cert.VerifyHostname(host);  err != nil {
+		err := &utils.APIError{Code:403, Message:err.Error(), Status:"ACCESS_FORBIDDEN"}
+		return err
+	}
+
+	// check if the certificate has expired
+	if err = CertHasExpired(cert); err != nil {
+		return err
+	}
+
+	// check if the certificate is revoked
+	if err = CRLCheckRevokedCert(cert); err != nil {
+		return err
+	}
+
+	return err
 }
 
 func CertHasExpired(cert *x509.Certificate) error {
