@@ -75,17 +75,34 @@ func ExtractEnhancedRDNSequenceToString(cert *x509.Certificate) string {
 func ValidateClientCertificate(cert *x509.Certificate, clientIP string) error {
 
 	var err error
-	var host string
+	var hosts []string
+	var ip string
 
-	if host, _, err = net.SplitHostPort(clientIP); err != nil {
+	if ip, _, err = net.SplitHostPort(clientIP); err != nil {
 		err := &utils.APIError{Code:403, Message:err.Error(), Status:"ACCESS_FORBIDDEN"}
 		return err
 	}
 
-	// check if the clientIP is included in the cert's SAN's
-	if err = cert.VerifyHostname(host);  err != nil {
-		err := &utils.APIError{Code:403, Message:err.Error(), Status:"ACCESS_FORBIDDEN"}
+	if hosts, err = net.LookupAddr(ip); err != nil {
+		err = &utils.APIError{Message: err.Error(), Code: 400, Status: "BAD REQUEST"}
 		return err
+	}
+
+	LOGGER.Infof("Certificate request: %v from Host: %v with IP: %v", cert.Subject.ToRDNSequence().String(), hosts, clientIP)
+
+	// loop through hosts and check if any of them matches with the one specified in the certificate
+	var tmpErr error
+	for _, h := range hosts {
+		if err = cert.VerifyHostname(h); err != nil {
+			tmpErr = &utils.APIError{Code: 403, Message: err.Error(), Status: "ACCESS_FORBIDDEN"}
+		} else {
+			tmpErr = nil
+			break
+		}
+	}
+
+	if tmpErr != nil {
+		return tmpErr
 	}
 
 	// check if the certificate has expired

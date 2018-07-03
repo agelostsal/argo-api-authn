@@ -95,8 +95,8 @@ lBlGGSW4gNfL1IYoakRwJiNiqZ+Gb7+6kHDSVneFeO/qJakXzlByjAA6quPbYzSf
 
 	req.TLS = &tls.ConnectionState{}
 	req.TLS.PeerCertificates = append(req.TLS.PeerCertificates, crt)
-	req.RemoteAddr = "192.168.62.20:8080"
-	req.Host = "COMODO RSA Domain Validation Secure Server CA:8080"
+	req.RemoteAddr = "127.0.0.1:8080"
+	req.TLS.PeerCertificates[0].Subject.CommonName = "localhost"
 
 	// set up the mockstore
 	mockstore = &stores.Mockstore{Server: "localhost", Database: "test_db"}
@@ -106,8 +106,8 @@ lBlGGSW4gNfL1IYoakRwJiNiqZ+Gb7+6kHDSVneFeO/qJakXzlByjAA6quPbYzSf
 	qSt2 := stores.QServiceType{Name: "s_auth_cert_incorrect", Hosts: []string{"h1_auth_cert"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "mock-api-key", UUID: "uuid_auth_cert_incorrect", RetrievalField: "incorrect_field", CreatedOn: "2018-05-05T18:04:05Z"}
 	mockstore.ServiceTypes = append(mockstore.ServiceTypes, qSt, qSt2)
 	// append a binding to be used only in auth via cert tests
-	qB := stores.QBinding{Name: "b_auth_cert", ServiceUUID: "uuid_auth_cert", Host: "h1_auth_cert", DN: "CN=COMODO RSA Domain Validation Secure Server CA,O=COMODO CA Limited,L=Salford,ST=Greater Manchester,C=GB", OIDCToken: "", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
-	qB2 := stores.QBinding{Name: "b_auth_cert_incorrect", ServiceUUID: "uuid_auth_cert_incorrect", Host: "h1_auth_cert", DN: "CN=COMODO RSA Domain Validation Secure Server CA,O=COMODO CA Limited,L=Salford,ST=Greater Manchester,C=GB", OIDCToken: "", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
+	qB := stores.QBinding{Name: "b_auth_cert", ServiceUUID: "uuid_auth_cert", Host: "h1_auth_cert", DN: "CN=localhost,O=COMODO CA Limited,L=Salford,ST=Greater Manchester,C=GB", OIDCToken: "", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
+	qB2 := stores.QBinding{Name: "b_auth_cert_incorrect", ServiceUUID: "uuid_auth_cert_incorrect", Host: "h1_auth_cert", DN: "CN=localhost,O=COMODO CA Limited,L=Salford,ST=Greater Manchester,C=GB", OIDCToken: "", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
 	mockstore.Bindings = append(mockstore.Bindings, qB, qB2)
 
 	// set up cfg
@@ -240,6 +240,7 @@ jeBHq7OnpWm+ccTOPCE6H4ZN4wWVS7biEBUdop/8HgXBPQHWAdjL
 	// avoid expiration
 	crt.NotAfter = time.Now().Add(time.Hour * 24)
 	crt.IPAddresses = append(crt.IPAddresses, net.ParseIP("192.168.62.20"))
+	crt.Subject.CommonName = "localhost"
 
 	expRespJSON := `{
  "error": {
@@ -327,102 +328,6 @@ func (suite *CertificateHandlerSuite) TestAuthViaCertNotActiveYet() {
 	suite.Equal(expRespJSON, w.Body.String())
 }
 
-// TestAuthViaCertNoIpsNoDNSNames tests the case of a certificate without any ipsaddresss or dnsnames registered
-func (suite *CertificateHandlerSuite) TestAuthViaCertNoIpsNoDNSNames() {
-
-	var err error
-	var mockstore *stores.Mockstore
-	var cfg *config.Config
-	var req *http.Request
-
-	expRespJSON := `{
- "error": {
-  "message": "x509: certificate is not valid for any names, but wanted to match COMODO RSA Domain Validation Secure Server CA",
-  "code": 403,
-  "status": "ACCESS_FORBIDDEN"
- }
-}`
-
-	if req, mockstore, cfg, err = AuthViaCertSetUp("http://localhost:8080/service-types/s_auth_cert/hosts/h1_auth_cert:authX509"); err != nil {
-		LOGGER.Error(err.Error())
-	}
-
-	req.TLS.PeerCertificates[0].Subject.CommonName = ""
-
-	req.TLS.PeerCertificates[0].IPAddresses = []net.IP{}
-	req.TLS.PeerCertificates[0].DNSNames = []string{}
-	req.TLS.PeerCertificates[0].Extensions = []pkix.Extension{}
-
-	router := mux.NewRouter().StrictSlash(true)
-	w := httptest.NewRecorder()
-	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(AuthViaCert, mockstore, cfg))
-	router.ServeHTTP(w, req)
-	suite.Equal(403, w.Code)
-	suite.Equal(expRespJSON, w.Body.String())
-}
-
-// TestAuthViaCertInvalidIp tests the case where the certificate contains no ip sans
-func (suite *CertificateHandlerSuite) TestAuthViaCertNoIps() {
-
-	var err error
-	var mockstore *stores.Mockstore
-	var cfg *config.Config
-	var req *http.Request
-
-	expRespJSON := `{
- "error": {
-  "message": "x509: cannot validate certificate for 255.255.255.0 because it doesn't contain any IP SANs",
-  "code": 403,
-  "status": "ACCESS_FORBIDDEN"
- }
-}`
-
-	if req, mockstore, cfg, err = AuthViaCertSetUp("http://localhost:8080/service-types/s_auth_cert/hosts/h1_auth_cert:authX509"); err != nil {
-		LOGGER.Error(err.Error())
-	}
-
-	req.Host= "255.255.255.0:8080"
-	req.TLS.PeerCertificates[0].IPAddresses = []net.IP{}
-	req.TLS.PeerCertificates[0].Subject.CommonName = ""
-
-	router := mux.NewRouter().StrictSlash(true)
-	w := httptest.NewRecorder()
-	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(AuthViaCert, mockstore, cfg))
-	router.ServeHTTP(w, req)
-	suite.Equal(403, w.Code)
-	suite.Equal(expRespJSON, w.Body.String())
-}
-
-// TestAuthViaCertInvalidIp tests the case where the request's ip doesn't match the cert's ip addresses
-func (suite *CertificateHandlerSuite) TestAuthViaCertInvalidIp() {
-
-	var err error
-	var mockstore *stores.Mockstore
-	var cfg *config.Config
-	var req *http.Request
-
-	expRespJSON := `{
- "error": {
-  "message": "x509: certificate is valid for 192.168.62.20, not 255.255.255.0",
-  "code": 403,
-  "status": "ACCESS_FORBIDDEN"
- }
-}`
-
-	if req, mockstore, cfg, err = AuthViaCertSetUp("http://localhost:8080/service-types/s_auth_cert/hosts/h1_auth_cert:authX509"); err != nil {
-		LOGGER.Error(err.Error())
-	}
-
-	req.Host= "255.255.255.0:8080"
-
-	router := mux.NewRouter().StrictSlash(true)
-	w := httptest.NewRecorder()
-	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(AuthViaCert, mockstore, cfg))
-	router.ServeHTTP(w, req)
-	suite.Equal(403, w.Code)
-	suite.Equal(expRespJSON, w.Body.String())
-}
-
 // TestAuthViaCertInvalidIp tests the case where the request's dns name doesn't match the cert's  dnsnames
 func (suite *CertificateHandlerSuite) TestAuthViaCertInvalidDNSNames() {
 
@@ -433,7 +338,7 @@ func (suite *CertificateHandlerSuite) TestAuthViaCertInvalidDNSNames() {
 
 	expRespJSON := `{
  "error": {
-  "message": "x509: certificate is valid for COMODO RSA Domain Validation Secure Server CA, not some.domain2",
+  "message": "x509: certificate is valid for COMODO RSA Domain Validation Secure Server CA, not localhost",
   "code": 403,
   "status": "ACCESS_FORBIDDEN"
  }
@@ -443,9 +348,7 @@ func (suite *CertificateHandlerSuite) TestAuthViaCertInvalidDNSNames() {
 		LOGGER.Error(err.Error())
 	}
 
-	req.Host= "some.domain2:8080"
 
-	req.TLS.PeerCertificates[0].IPAddresses = []net.IP{}
 	req.TLS.PeerCertificates[0].DNSNames = []string{"COMODO RSA Domain Validation Secure Server CA"}
 	obj := asn1.ObjectIdentifier{2 ,5 ,29, 17}
 	e1 := pkix.Extension{Id:obj, Critical:false, Value:[]byte("")}
@@ -459,8 +362,8 @@ func (suite *CertificateHandlerSuite) TestAuthViaCertInvalidDNSNames() {
 	suite.Equal(expRespJSON, w.Body.String())
 }
 
-// TestAuthViaCertValidIp tests the case where the request's dns name  match the cert's  dnsnames
-func (suite *CertificateHandlerSuite) TestAuthViaCertValidDNSNames() {
+// TestAuthViaCertInvalidIp tests the case where the request's host doesn't match the certificate's CN
+func (suite *CertificateHandlerSuite) TestAuthViaCertInvalidHost() {
 
 	var err error
 	var mockstore *stores.Mockstore
@@ -468,26 +371,55 @@ func (suite *CertificateHandlerSuite) TestAuthViaCertValidDNSNames() {
 	var req *http.Request
 
 	expRespJSON := `{
- "token": "some-value"
+ "error": {
+  "message": "x509: certificate is valid for COMODO RSA Domain Validation Secure Server CA, not localhost",
+  "code": 403,
+  "status": "ACCESS_FORBIDDEN"
+ }
 }`
 
 	if req, mockstore, cfg, err = AuthViaCertSetUp("http://localhost:8080/service-types/s_auth_cert/hosts/h1_auth_cert:authX509"); err != nil {
 		LOGGER.Error(err.Error())
 	}
 
-	req.RemoteAddr= "some.domain:8080"
 
-	req.TLS.PeerCertificates[0].IPAddresses = []net.IP{}
-	req.TLS.PeerCertificates[0].DNSNames = []string{"COMODO RSA Domain Validation Secure Server CA"}
-	obj := asn1.ObjectIdentifier{2 ,5 ,29, 17}
-	e1 := pkix.Extension{Id:obj, Critical:false, Value:[]byte("")}
-	req.TLS.PeerCertificates[0].Extensions =  append(req.TLS.PeerCertificates[0].Extensions, e1)
+	req.TLS.PeerCertificates[0].Subject.CommonName = "COMODO RSA Domain Validation Secure Server CA"
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
 	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(AuthViaCert, mockstore, cfg))
 	router.ServeHTTP(w, req)
-	suite.Equal(200, w.Code)
+	suite.Equal(403, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestAuthViaCertNoNames
+func (suite *CertificateHandlerSuite) TestAuthViaCertNoNames() {
+
+	var err error
+	var mockstore *stores.Mockstore
+	var cfg *config.Config
+	var req *http.Request
+
+	expRespJSON := `{
+ "error": {
+  "message": "x509: certificate is not valid for any names, but wanted to match localhost",
+  "code": 403,
+  "status": "ACCESS_FORBIDDEN"
+ }
+}`
+
+	if req, mockstore, cfg, err = AuthViaCertSetUp("http://localhost:8080/service-types/s_auth_cert/hosts/h1_auth_cert:authX509"); err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+
+	req.TLS.PeerCertificates[0].Subject.CommonName = ""
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(AuthViaCert, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(403, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
 }
 
@@ -506,8 +438,6 @@ func (suite *CertificateHandlerSuite) TestAuthViaCertValidSubjectCommonName() {
 	if req, mockstore, cfg, err = AuthViaCertSetUp("http://localhost:8080/service-types/s_auth_cert/hosts/h1_auth_cert:authX509"); err != nil {
 		LOGGER.Error(err.Error())
 	}
-
-	req.RemoteAddr= "COMODO RSA Domain Validation Secure Server CA:8080"
 
 	req.TLS.PeerCertificates[0].IPAddresses = []net.IP{}
 
