@@ -14,6 +14,7 @@ import (
 	"testing"
 	LOGGER "github.com/sirupsen/logrus"
 
+	"time"
 )
 
 type CertificateHandlerSuite struct {
@@ -79,6 +80,9 @@ lBlGGSW4gNfL1IYoakRwJiNiqZ+Gb7+6kHDSVneFeO/qJakXzlByjAA6quPbYzSf
 		LOGGER.Error(err.Error())
 		return req, mockstore, cfg, err
 	}
+
+	// avoid expiration
+	crt.NotAfter = time.Now().Add(time.Hour * 24)
 
 	// create a new request and add the created certificate
 	if req, err = http.NewRequest("GET", reqPath, nil); err != nil {
@@ -227,6 +231,9 @@ jeBHq7OnpWm+ccTOPCE6H4ZN4wWVS7biEBUdop/8HgXBPQHWAdjL
 
 	}
 
+	// avoid expiration
+	crt.NotAfter = time.Now().Add(time.Hour * 24)
+
 	expRespJSON := `{
  "error": {
   "message": "Your certificate has been revoked",
@@ -241,6 +248,68 @@ jeBHq7OnpWm+ccTOPCE6H4ZN4wWVS7biEBUdop/8HgXBPQHWAdjL
 
 	// add to the request the revoked cert
 	req.TLS.PeerCertificates[0] = crt
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(AuthViaCert, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(403, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestAuthViaCertExpired tests case of an expired certificate
+func (suite *CertificateHandlerSuite) TestAuthViaCertExpired() {
+
+	var err error
+	var mockstore *stores.Mockstore
+	var cfg *config.Config
+	var req *http.Request
+
+	expRespJSON := `{
+ "error": {
+  "message": "Your certificate has expired",
+  "code": 403,
+  "status": "ACCESS_FORBIDDEN"
+ }
+}`
+
+	if req, mockstore, cfg, err = AuthViaCertSetUp("http://localhost:8080/service-types/s_auth_cert/hosts/h1_auth_cert:authX509"); err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	// modify expiration time to be exactly right now so it fails in the future test
+	req.TLS.PeerCertificates[0].NotAfter = time.Now()
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authX509", WrapConfig(AuthViaCert, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(403, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestAuthViaCertNotActiveYet tests the case of an inactive certificate
+func (suite *CertificateHandlerSuite) TestAuthViaCertNotActiveYet() {
+
+	var err error
+	var mockstore *stores.Mockstore
+	var cfg *config.Config
+	var req *http.Request
+
+	expRespJSON := `{
+ "error": {
+  "message": "Your certificate is not active yet",
+  "code": 403,
+  "status": "ACCESS_FORBIDDEN"
+ }
+}`
+
+	if req, mockstore, cfg, err = AuthViaCertSetUp("http://localhost:8080/service-types/s_auth_cert/hosts/h1_auth_cert:authX509"); err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	// modify date to be in the next day so it fails the shortly after check
+	req.TLS.PeerCertificates[0].NotBefore = time.Now().Add(time.Hour * 24)
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
