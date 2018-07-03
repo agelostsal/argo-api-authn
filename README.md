@@ -76,6 +76,35 @@ Before you start, you need to issue a valid certificate.
  }
  ```
  
+ ## Important Notes
+It is important to notice that since we need to verify the provided certificate’s hostname, 
+the client has to make sure that both Forward and  Reverse DNS lookup on the client is correctly setup 
+and that the hostname  corresponds to the certificate used.  For both IPv4 and IPv6  (if used) 
+ 
+ ### Common errors
+ - Executing a request using IPv6 without having a properly configured reverse DNS.
+ ```json
+ {
+ "error": {
+  "message": "lookup *.*.*.*.*.*..... .ip6.arpa. on <ip from where the client executed the request>: no such host",
+  "code": 400,
+  "status": "BAD REQUEST"
+   }
+ }
+```
+- Executing a request from a host that is not registered on the certificate.
+
+A common case for this error is to have the FQDN registered on the certificate 
+but a reverse dns look up returns another hostname for the client from where the request was executed. 
+```json
+{
+ "error": {
+  "message": "x509: certificate is valid for host1, host2, not host3.",
+  "code": 403,
+  "status": "ACCESS_FORBIDDEN"
+ }
+}
+```
  ## Helpful Utilities
  You can find various utility scripts to help you get up and running the service inside the
  repo's `bin` folder. You can also find the respective documentation for the scripts inside the `docs` folder.
