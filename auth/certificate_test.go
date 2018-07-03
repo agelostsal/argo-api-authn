@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/suite"
 	"testing"
 	"time"
-	"net"
 )
 
 type CertificateTestSuite struct {
@@ -141,62 +140,35 @@ lBlGGSW4gNfL1IYoakRwJiNiqZ+Gb7+6kHDSVneFeO/qJakXzlByjAA6quPbYzSf
 +AZxAeKCINT+b72x
 -----END CERTIFICATE-----`
 
-	// tests the case where the certificate contains ip addresses but the one that the request is coming from isn't present
 	var crt *x509.Certificate
 
+	// normal case
 	crt = ParseCert(commonCert)
-	crt.IPAddresses = append(crt.IPAddresses, net.ParseIP("192.65.68.02"))
+	crt.Subject.CommonName = "localhost"
 
-	err1 := ValidateClientCertificate(crt, "192.65.68.01:8080")
+	err1 := ValidateClientCertificate(crt, "127.0.0.1:8080")
 
-	suite.Equal("x509: certificate is valid for 192.65.68.2, not 192.65.68.01", err1.Error())
+	suite.Nil(err1)
 
-	// tests the case where the certificate has no domain names or ip addresses registered
+	// mismatch
 	crt = ParseCert(commonCert)
+	err2 := ValidateClientCertificate(crt, "127.0.0.1:8080")
+	suite.Equal("x509: certificate is valid for COMODO RSA Domain Validation Secure Server CA, not localhost", err2.Error())
 
-	err2 := ValidateClientCertificate(crt, "192.65.68.01:8080")
-
-	suite.Equal("x509: cannot validate certificate for 192.65.68.01 because it doesn't contain any IP SANs", err2.Error())
-
-	// tests the case where the certificate has no domain names or ip addresses registered
+	// mismatch
 	crt = ParseCert(commonCert)
 	crt.Subject.CommonName = ""
-	crt.IPAddresses = []net.IP{}
-	crt.DNSNames = []string{}
-	crt.Extensions = []pkix.Extension{}
-	err3 := ValidateClientCertificate(crt, "some.domain:8080")
-	suite.Equal("x509: certificate is not valid for any names, but wanted to match some.domain", err3.Error())
+	err3 := ValidateClientCertificate(crt, "127.0.0.1:8080")
+	suite.Equal("x509: certificate is not valid for any names, but wanted to match localhost", err3.Error())
 
-	// registered ip address
+	//mismatch
 	crt = ParseCert(commonCert)
-	crt.IPAddresses = append(crt.IPAddresses, net.ParseIP("192.65.68.02"))
-
-	err4 := ValidateClientCertificate(crt, "192.65.68.02:8080")
-	suite.Nil(err4)
-
-	// registered common name
-	crt = ParseCert(commonCert)
-	crt.Subject.CommonName = "some.domain"
-	err5 := ValidateClientCertificate(crt, "some.domain:8080")
-
-	suite.Nil(err5)
-
-	// registered extensions in order to check DNSNames
-	crt = ParseCert(commonCert)
+	crt.DNSNames = []string{"COMODO RSA Domain Validation Secure Server CA"}
 	obj := asn1.ObjectIdentifier{2 ,5 ,29, 17}
 	e1 := pkix.Extension{Id:obj, Critical:false, Value:[]byte("")}
-	crt.Extensions = append(crt.Extensions, e1)
-	crt.DNSNames = append(crt.DNSNames, "some.domain")
-	err6 := ValidateClientCertificate(crt, "some.domain:8080")
-
-	suite.Nil(err6)
-
-	// test the case where the certificate's subject common name doesn't match
-	crt = ParseCert(commonCert)
-	crt.Subject.CommonName = "some.domain"
-	err7 := ValidateClientCertificate(crt, "some.domain2:8080")
-
-	suite.Equal("x509: certificate is valid for some.domain, not some.domain2", err7.Error())
+	crt.Extensions =  append(crt.Extensions, e1)
+	err4 := ValidateClientCertificate(crt, "127.0.0.1:8080")
+	suite.Equal("x509: certificate is valid for COMODO RSA Domain Validation Secure Server CA, not localhost", err4.Error())
 
 }
 
