@@ -46,7 +46,7 @@ func (cfg *Config) ConfigSetUp(path string) error {
 
 		fl := rvc.Type().Field(i)
 
-		LOGGER.Infof("Config Field: `%v` has been successfully initialized with value: %v", fl.Name, rvc.Field(i).Interface() )
+		LOGGER.Infof("Config Field: `%v` has been successfully initialized with value: %v", fl.Name, rvc.Field(i).Interface())
 	}
-		return nil
+	return nil
 }

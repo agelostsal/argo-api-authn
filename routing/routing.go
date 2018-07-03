@@ -3,7 +3,6 @@ package routing
 import (
 	"net/http"
 
-
 	"github.com/ARGOeu/argo-api-authn/config"
 	"github.com/ARGOeu/argo-api-authn/handlers"
 	"github.com/ARGOeu/argo-api-authn/stores"
