@@ -52,7 +52,7 @@ func (suite *StoreTestSuite) TestSetUp() {
 		{"path": "test_path_1", "access_key": "key1", "type": "api-key", "service_uuid": "uuid2", "host": "host4"}}
 
 	// Populate AuthMethods
-	amb1 := QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "test_path_1", UUID: "am_uuid_1", CreatedOn: ""}
+	amb1 := QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "test_path_1", Type: "api-key", UUID: "am_uuid_1", CreatedOn: ""}
 	am1 := &QApiKeyAuthMethod{AccessKey: "access_key"}
 	am1.QBasicAuthMethod = amb1
 	qAuthms = append(qAuthms, am1)
@@ -138,7 +138,7 @@ func (suite *StoreTestSuite) TestQueryApiKeyAuthMethods() {
 
 	// normal case
 	var expApiAms []QApiKeyAuthMethod
-	amb1 := QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "test_path_1", UUID: "am_uuid_1", CreatedOn: ""}
+	amb1 := QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "test_path_1", Type: "api-key", UUID: "am_uuid_1", CreatedOn: ""}
 	qapi := QApiKeyAuthMethod{amb1, "access_key"}
 	expApiAms = append(expApiAms, qapi)
 	apiAms, err1 := suite.Mockstore.QueryApiKeyAuthMethods("uuid1", "host1")
@@ -400,14 +400,14 @@ func (suite *StoreTestSuite) TestDeleteAuthMethod() {
 	var expAMS []QAuthMethod
 
 	// add a temporary auth method
-	amb1 := QBasicAuthMethod{ServiceUUID: "ins_uuid", Host: "ins_host", Port: 9000, Path: "test_path_1", UUID: "am_uuid_1", CreatedOn: ""}
+	amb1 := QBasicAuthMethod{ServiceUUID: "ins_uuid", Host: "ins_host", Port: 9000, Path: "test_path_1", Type: "api-key", UUID: "am_uuid_1", CreatedOn: ""}
 	am1 := QApiKeyAuthMethod{AccessKey: "access_key"}
 	am1.QBasicAuthMethod = amb1
 	suite.Mockstore.AuthMethods = append(suite.Mockstore.AuthMethods, &am1)
 
 	err1 := suite.Mockstore.DeleteAuthMethod(&am1)
 
-	amb := QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "test_path_1", UUID: "am_uuid_1", CreatedOn: ""}
+	amb := QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "test_path_1", Type: "api-key", UUID: "am_uuid_1", CreatedOn: ""}
 	expApiAms := &QApiKeyAuthMethod{amb, "access_key"}
 	expAMS = append(expAMS, expApiAms)
 
