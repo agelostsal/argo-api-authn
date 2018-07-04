@@ -3,6 +3,7 @@ Description=ARGO Authentication Service
 Requires=mongod.service
 
 [Service]
+SyslogIdentifier=argo_api_authn
 User=argo-api-authn
 Group=argo-api-authn
 WorkingDirectory=/var/www/argo-api-authn
