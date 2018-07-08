@@ -446,7 +446,6 @@ func (suite *CertificateHandlerSuite) TestAuthViaCertValidSubjectCommonName() {
 	suite.Equal(expRespJSON, w.Body.String())
 }
 
-
 // TestAuthViaCertUnknownServiceType tests the case where the provided service type is unknown
 func (suite *CertificateHandlerSuite) TestAuthViaCertUnknownServiceType() {
 

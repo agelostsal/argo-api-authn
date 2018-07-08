@@ -95,7 +95,7 @@ func (mongo *MongoStore) QueryApiKeyAuthMethods(serviceUUID string, host string)
 	return qAuthms, err
 }
 
-func(mongo *MongoStore)InsertAuthMethod(am QAuthMethod) (error) {
+func (mongo *MongoStore) InsertAuthMethod(am QAuthMethod) error {
 
 	var err error
 
@@ -298,7 +298,7 @@ func (mongo *MongoStore) DeleteBinding(qBinding QBinding) error {
 	return err
 }
 
-func(mongo *MongoStore) DeleteAuthMethod(am QAuthMethod) error {
+func (mongo *MongoStore) DeleteAuthMethod(am QAuthMethod) error {
 
 	var err error
 
