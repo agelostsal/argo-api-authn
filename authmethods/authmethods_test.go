@@ -150,6 +150,23 @@ func (suite *AuthMethodsTestSuite) TestAuthMethodFIndAll() {
 	suite.Nil(err2)
 }
 
+func (suite *AuthMethodsTestSuite) TestAuthMethodDelete() {
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	// test the normal case
+	amb1 := BasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "test_path_1", Type: "api-key", UUID: "am_uuid_1", CreatedOn: ""}
+	am1 := &ApiKeyAuthMethod{AccessKey: "access_key"}
+	am1.BasicAuthMethod = amb1
+
+	err1 := AuthMethodDelete(am1, mockstore)
+
+	suite.Equal(0, len(mockstore.AuthMethods))
+
+	suite.Nil(err1)
+}
+
 func TestAuthMethodTestSuite(t *testing.T) {
 	suite.Run(t, new(AuthMethodsTestSuite))
 }

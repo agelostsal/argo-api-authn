@@ -236,3 +236,28 @@ func AuthMethodFindAll(store stores.Store) (AuthMethodsList, error) {
 	return amList, err
 
 }
+
+// AuthMethodDelete deletes the given auth method from the data store
+func AuthMethodDelete(am AuthMethod, store stores.Store) error {
+
+	var err error
+	var qam stores.QAuthMethod
+	var iType interface{}
+
+	// grab the type of the provided auth method
+	if iType, err = utils.GetFieldValueByName(am, "Type"); err != nil {
+		return err
+	}
+
+	// convert the auth method to its respective query model
+	if qam, err = AuthMethodConvertToQueryModel(am, iType.(string)); err != nil {
+		return err
+	}
+
+	// delete the query auth method
+	if err = store.DeleteAuthMethod(qam); err != nil {
+		return err
+	}
+
+	return err
+}
