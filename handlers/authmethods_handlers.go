@@ -71,3 +71,57 @@ func AuthMethodCreate(w http.ResponseWriter, r *http.Request) {
 	// if everything went ok, return the newly created auth method
 	utils.RespondOk(w, 201, authM)
 }
+
+func AuthMethodListOne(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	var ok bool
+	var serviceType servicetypes.ServiceType
+	var authm authmethods.AuthMethod
+
+	//context references
+	store := context.Get(r, "stores").(stores.Store)
+
+	// url vars
+	vars := mux.Vars(r)
+
+	// check if the service type exists
+	if serviceType, err = servicetypes.FindServiceTypeByName(vars["service-type"], store); err != nil {
+		utils.RespondError(w, err)
+		return
+	}
+
+	// check if the host is associated with the service type
+	if ok = serviceType.HasHost(vars["host"]); !ok {
+		err = utils.APIErrNotFound("Host")
+		utils.RespondError(w, err)
+		return
+	}
+
+	if authm, err = authmethods.AuthMethodFinder(serviceType.UUID, vars["host"], serviceType.AuthMethod, store); err != nil {
+		utils.RespondError(w, err)
+		return
+	}
+
+	// if everything went ok return the auth method
+	utils.RespondOk(w, 200, authm)
+
+}
+
+func AuthMethodListAll(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	var amList authmethods.AuthMethodsList
+
+	//context references
+	store := context.Get(r, "stores").(stores.Store)
+
+	if amList, err = authmethods.AuthMethodFindAll(store); err != nil {
+		utils.RespondError(w, err)
+		return
+	}
+
+	// if everything went ok, return the list
+	utils.RespondOk(w, 200, amList)
+
+}

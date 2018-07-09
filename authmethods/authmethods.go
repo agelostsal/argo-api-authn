@@ -34,6 +34,10 @@ type AuthMethod interface {
 	SetDefaults(tp string) error
 }
 
+type AuthMethodsList struct {
+	AuthMethods []AuthMethod `json:"auth_methods"`
+}
+
 // AuthMethodConvertToQueryModel converts an auth method to a query auth method
 func AuthMethodConvertToQueryModel(fromAM AuthMethod, toType string) (stores.QAuthMethod, error) {
 
@@ -200,4 +204,35 @@ func AuthMethodCreate(am AuthMethod, store stores.Store, typeOfAuthMethod string
 	}
 
 	return err
+}
+
+// AuthMethodFindAll finds and returns all the registered auth methods
+func AuthMethodFindAll(store stores.Store) (AuthMethodsList, error) {
+
+	var err error
+	var am AuthMethod
+	var qams []stores.QAuthMethod
+
+	var amList = AuthMethodsList{AuthMethods: []AuthMethod{}}
+
+	// loop through all the finders and aggregate their results
+	for amType, finderFunc := range QueryAuthMethodFinders {
+		if qams, err = finderFunc("", "", store); err != nil {
+			return amList, err
+		}
+
+		// if there is no error convert the query auth methods to auth methods
+		for _, qam := range qams {
+
+			// convert the query model to an auth method
+			if am, err = QueryModelConvertToAuthMethod(qam, amType); err != nil {
+				return amList, err
+			}
+			// if there is no error, append the converted auth method to the slice
+			amList.AuthMethods = append(amList.AuthMethods, am)
+		}
+	}
+
+	return amList, err
+
 }

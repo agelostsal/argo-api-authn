@@ -88,6 +88,15 @@ func (mock *Mockstore) QueryApiKeyAuthMethods(serviceUUID string, host string) (
 	var ok bool
 	var qAuthm *QApiKeyAuthMethod
 
+	if serviceUUID == "" && host == "" {
+		for _, am := range mock.AuthMethods {
+			if qAuthm, ok = am.(*QApiKeyAuthMethod); ok {
+				qAuthms = append(qAuthms, *qAuthm)
+			}
+		}
+		return qAuthms, nil
+	}
+
 	for _, am := range mock.AuthMethods {
 		if qAuthm, ok = am.(*QApiKeyAuthMethod); ok {
 			if qAuthm.ServiceUUID == serviceUUID && qAuthm.Host == host {

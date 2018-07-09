@@ -81,7 +81,12 @@ func (mongo *MongoStore) QueryApiKeyAuthMethods(serviceUUID string, host string)
 	var err error
 	var qAuthms []QApiKeyAuthMethod
 
-	query := bson.M{"service_uuid": serviceUUID, "host": host, "type": "api-key"}
+	var query = bson.M{"service_uuid": serviceUUID, "host": host, "type": "api-key"}
+
+	// if there is no serviceUUID and host provided, return all api key auth methods
+	if serviceUUID == "" && host == "" {
+		query = bson.M{"type": "api-key"}
+	}
 
 	c := mongo.Session.DB(mongo.Database).C("auth_methods")
 	err = c.Find(query).All(&qAuthms)

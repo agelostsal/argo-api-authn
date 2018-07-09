@@ -146,11 +146,16 @@ func (suite *StoreTestSuite) TestQueryApiKeyAuthMethods() {
 	// not found - empty list
 	apiAms2, err2 := suite.Mockstore.QueryApiKeyAuthMethods("unknown", "unknown")
 
+	// query all
+	apiAms3, err3 := suite.Mockstore.QueryApiKeyAuthMethods("", "")
+
 	suite.Equal(expApiAms, apiAms)
 	suite.Equal(0, len(apiAms2))
+	suite.Equal(expApiAms, apiAms3)
 
 	suite.Nil(err1)
 	suite.Nil(err2)
+	suite.Nil(err3)
 }
 
 func (suite *StoreTestSuite) TestDeprecatedQueryAuthMethods() {

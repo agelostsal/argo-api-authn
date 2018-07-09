@@ -580,6 +580,195 @@ func (suite *AuthMethodsHandlersTestSuite) TestAuthMethodCreateEmptyPort() {
 	suite.Equal(expRespJSON, w.Body.String())
 }
 
+// TestAuthMethodListOne tests the normal case of finding the auth method associated with the given service type and host
+func (suite *AuthMethodsHandlersTestSuite) TestAuthMethodListOne() {
+
+	expRespJSON := `{
+ "service_uuid": "uuid1",
+ "port": 9000,
+ "host": "host1",
+ "retrieval_field": "",
+ "path": "test_path_1",
+ "type": "api-key",
+ "uuid": "am_uuid_1",
+ "created_on": "",
+ "access_key": "access_key"
+}`
+
+	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/s1/hosts/host1/authm", nil)
+	if err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authm", WrapConfig(AuthMethodListOne, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(200, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestAuthMethodListOneUnknownServiceType tests the case where the provided service type is unknown
+func (suite *AuthMethodsHandlersTestSuite) TestAuthMethodListOneUnknownServiceType() {
+
+	expRespJSON := `{
+ "error": {
+  "message": "Service-type was not found",
+  "code": 404,
+  "status": "NOT FOUND"
+ }
+}`
+
+	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/unknown/hosts/host1/authm", nil)
+	if err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authm", WrapConfig(AuthMethodListOne, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(404, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestAuthMethodListOneUnknownHost tests the case where the provided host is not associated with the given service-type
+func (suite *AuthMethodsHandlersTestSuite) TestAuthMethodListOneUnknownHost() {
+
+	expRespJSON := `{
+ "error": {
+  "message": "Host was not found",
+  "code": 404,
+  "status": "NOT FOUND"
+ }
+}`
+
+	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/s1/hosts/unknown/authm", nil)
+	if err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authm", WrapConfig(AuthMethodListOne, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(404, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestAuthMethodListOneNotFound tests the case where there is no registered auth method under the given service-type and host
+func (suite *AuthMethodsHandlersTestSuite) TestAuthMethodListOneNotFound() {
+
+	expRespJSON := `{
+ "error": {
+  "message": "Auth method was not found",
+  "code": 404,
+  "status": "NOT FOUND"
+ }
+}`
+
+	req, err := http.NewRequest("GET", "http://localhost:8080/service-types/s1/hosts/host3/authm", nil)
+	if err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authm", WrapConfig(AuthMethodListOne, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(404, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestAuthMethodListAll tests the normal case and returns all auth methods in the service type
+func (suite *AuthMethodsHandlersTestSuite) TestAuthMethodListAll() {
+
+	expRespJSON := `{
+ "auth_methods": [
+  {
+   "service_uuid": "uuid1",
+   "port": 9000,
+   "host": "host1",
+   "retrieval_field": "",
+   "path": "test_path_1",
+   "type": "api-key",
+   "uuid": "am_uuid_1",
+   "created_on": "",
+   "access_key": "access_key"
+  }
+ ]
+}`
+	req, err := http.NewRequest("GET", "http://localhost:8080/authm", nil)
+	if err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/authm", WrapConfig(AuthMethodListAll, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(200, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestAuthMethodListAllEmptyList tests the normal case where there are no auth methods in the service yet
+func (suite *AuthMethodsHandlersTestSuite) TestAuthMethodListAllEmptyList() {
+
+	expRespJSON := `{
+ "auth_methods": []
+}`
+	req, err := http.NewRequest("GET", "http://localhost:8080/authm", nil)
+	if err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	// empty the mockstore
+	mockstore.AuthMethods = []stores.QAuthMethod{}
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/authm", WrapConfig(AuthMethodListAll, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(200, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
 func TestAuthMethodsHandlersTestSuite(t *testing.T) {
 	suite.Run(t, new(AuthMethodsHandlersTestSuite))
 }
