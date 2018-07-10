@@ -286,6 +286,23 @@ func (mongo *MongoStore) UpdateServiceType(original QServiceType, updated QServi
 	return updated, err
 }
 
+// UpdateAuthMethod updates the given auth method
+func (mongo *MongoStore) UpdateAuthMethod(original QAuthMethod, updated QAuthMethod) (QAuthMethod, error) {
+
+	var err error
+
+	db := mongo.Session.DB(mongo.Database)
+	c := db.C("auth_methods")
+
+	if err := c.Update(original, updated); err != nil {
+		LOGGER.Error("STORE", "\t", err.Error())
+		err = utils.APIErrDatabase(err.Error())
+		return nil, err
+	}
+
+	return updated, err
+}
+
 // Delete binding deletes a binding from the store
 func (mongo *MongoStore) DeleteBinding(qBinding QBinding) error {
 

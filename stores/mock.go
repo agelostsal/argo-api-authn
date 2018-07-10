@@ -41,7 +41,7 @@ func (mock *Mockstore) SetUp() {
 		{"path": "test_path_1", "access_key": "key1", "type": "api-key", "service_uuid": "uuid2", "host": "host4"}}
 
 	// Populate AuthMethods
-	amb1 := QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "test_path_1", Type: "api-key", UUID: "am_uuid_1", CreatedOn: ""}
+	amb1 := QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "/path/{{identifier}}?key={{access_key}}", Type: "api-key", UUID: "am_uuid_1", CreatedOn: "", RetrievalField: "token"}
 	am1 := &QApiKeyAuthMethod{AccessKey: "access_key"}
 	am1.QBasicAuthMethod = amb1
 	mock.AuthMethods = append(mock.AuthMethods, am1)
@@ -225,6 +225,19 @@ func (mock *Mockstore) UpdateServiceType(original QServiceType, updated QService
 	for idx, sv := range mock.ServiceTypes {
 		if reflect.DeepEqual(original, sv) { // requires DeepEqual because structs with []string as fields can't be compared
 			mock.ServiceTypes[idx] = updated
+			break
+		}
+	}
+
+	return updated, nil
+}
+
+func (mock *Mockstore) UpdateAuthMethod(original QAuthMethod, updated QAuthMethod) (QAuthMethod, error) {
+
+	// find the auth method in the list and replace it
+	for idx, sv := range mock.AuthMethods {
+		if reflect.DeepEqual(original, sv) {
+			mock.AuthMethods[idx] = updated
 			break
 		}
 	}

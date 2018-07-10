@@ -587,8 +587,8 @@ func (suite *AuthMethodsHandlersTestSuite) TestAuthMethodListOne() {
  "service_uuid": "uuid1",
  "port": 9000,
  "host": "host1",
- "retrieval_field": "",
- "path": "test_path_1",
+ "retrieval_field": "token",
+ "path": "/path/{{identifier}}?key={{access_key}}",
  "type": "api-key",
  "uuid": "am_uuid_1",
  "created_on": "",
@@ -713,8 +713,8 @@ func (suite *AuthMethodsHandlersTestSuite) TestAuthMethodListAll() {
    "service_uuid": "uuid1",
    "port": 9000,
    "host": "host1",
-   "retrieval_field": "",
-   "path": "test_path_1",
+   "retrieval_field": "token",
+   "path": "/path/{{identifier}}?key={{access_key}}",
    "type": "api-key",
    "uuid": "am_uuid_1",
    "created_on": "",
@@ -876,6 +876,592 @@ func (suite *AuthMethodsHandlersTestSuite) TestAuthMethodDeleteNotFound() {
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
 	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authm", WrapConfig(AuthMethodDeleteOne, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(404, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestAuthMethodUpdateOne tests the default case of updating an auth method of type api-key and service type of ams
+func (suite *AuthMethodsHandlersTestSuite) TestAuthMethodUpdateOne() {
+
+	reqBody := `{
+ "access_key": "key1",
+ "retrieval_field": "some_token",
+ "port": 9000
+}`
+
+	expRespJSON := `{
+ "service_uuid": "uuid1",
+ "port": 9000,
+ "host": "host1",
+ "retrieval_field": "some_token",
+ "path": "/path/{{identifier}}?key={{access_key}}",
+ "type": "api-key",
+ "uuid": "am_uuid_1",
+ "created_on": "",
+ "access_key": "key1"
+}`
+
+	req, err := http.NewRequest("POST", "http://localhost:8080/service-types/s1/hosts/host1/authm", bytes.NewBuffer([]byte(reqBody)))
+	if err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authm", WrapConfig(AuthMethodUpdateOne, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(200, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestAuthMethodUpdateOneIllegalFields tests the default case of updating an auth method of type api-key and service type of ams with values to fields that aren't supposed to change
+func (suite *AuthMethodsHandlersTestSuite) TestAuthMethodUpdateOneIllegalFields() {
+
+	reqBody := `{
+ "created_on": "some_time",
+ "uuid": "some_uuid",
+ "type": "some_type"
+}`
+
+	expRespJSON := `{
+ "service_uuid": "uuid1",
+ "port": 9000,
+ "host": "host1",
+ "retrieval_field": "token",
+ "path": "/path/{{identifier}}?key={{access_key}}",
+ "type": "api-key",
+ "uuid": "am_uuid_1",
+ "created_on": "",
+ "access_key": "access_key"
+}`
+
+	req, err := http.NewRequest("POST", "http://localhost:8080/service-types/s1/hosts/host1/authm", bytes.NewBuffer([]byte(reqBody)))
+	if err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authm", WrapConfig(AuthMethodUpdateOne, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(200, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestAuthMethodUpdateOneInvalidJSON tests the default case of updating an auth method of type api-key and service type of ams while the host and service type already have a registered auth method
+func (suite *AuthMethodsHandlersTestSuite) TestAuthMethodUpdateOneAlreadyExists() {
+
+	reqBody := `{
+ "service_uuid": "uuid2",
+ "host": "host3"
+}`
+
+	expRespJSON := `{
+ "error": {
+  "message": "Auth method object with host: host3 already exists",
+  "code": 409,
+  "status": "CONFLICT"
+ }
+}`
+
+	req, err := http.NewRequest("POST", "http://localhost:8080/service-types/s1/hosts/host1/authm", bytes.NewBuffer([]byte(reqBody)))
+	if err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	amb1 := stores.QBasicAuthMethod{ServiceUUID: "uuid2", Host: "host3", Port: 9000, Path: "/path/{{identifier}}?key={{access_key}}", Type: "api-key", UUID: "am_uuid_1", CreatedOn: "", RetrievalField: "token"}
+	am1 := &stores.QApiKeyAuthMethod{AccessKey: "access_key"}
+	am1.QBasicAuthMethod = amb1
+	mockstore.AuthMethods = append(mockstore.AuthMethods, am1)
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authm", WrapConfig(AuthMethodUpdateOne, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(409, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestAuthMethodUpdateOneInvalidJSON tests the default case of updating an auth method of type api-key and service type of ams while providing an invalid request body
+func (suite *AuthMethodsHandlersTestSuite) TestAuthMethodUpdateOneInvalidJSON() {
+
+	reqBody := `{
+ "access_key": "key1",
+ "retrieval_field": "some_token",
+ "port": 9000
+` // no closing bracket
+
+	expRespJSON := `{
+ "error": {
+  "message": "Poorly formatted JSON. unexpected EOF",
+  "code": 400,
+  "status": "BAD REQUEST"
+ }
+}`
+
+	req, err := http.NewRequest("POST", "http://localhost:8080/service-types/s1/hosts/host1/authm", bytes.NewBuffer([]byte(reqBody)))
+	if err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authm", WrapConfig(AuthMethodUpdateOne, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(400, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestAuthMethodUpdateOneEmptyHost  tests the default case of updating an auth method of type api-key and service type of ams while providing an empty host
+func (suite *AuthMethodsHandlersTestSuite) TestAuthMethodUpdateOneEmptyHost() {
+
+	reqBody := `{
+ "host": ""
+}`
+
+	expRespJSON := `{
+ "error": {
+  "message": "auth method object contains empty fields. empty value for field: host",
+  "code": 422,
+  "status": "UNPROCESSABLE ENTITY"
+ }
+}`
+
+	req, err := http.NewRequest("POST", "http://localhost:8080/service-types/s1/hosts/host1/authm", bytes.NewBuffer([]byte(reqBody)))
+	if err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authm", WrapConfig(AuthMethodUpdateOne, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(422, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestAuthMethodUpdateOneEmptyServiceUUID tests the default case of updating an auth method of type api-key and service type of ams while providing an empty service uuid
+func (suite *AuthMethodsHandlersTestSuite) TestAuthMethodUpdateOneEmptyServiceUUID() {
+
+	reqBody := `{
+ "service_uuid": ""
+}`
+
+	expRespJSON := `{
+ "error": {
+  "message": "auth method object contains empty fields. empty value for field: service_uuid",
+  "code": 422,
+  "status": "UNPROCESSABLE ENTITY"
+ }
+}`
+
+	req, err := http.NewRequest("POST", "http://localhost:8080/service-types/s1/hosts/host1/authm", bytes.NewBuffer([]byte(reqBody)))
+	if err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authm", WrapConfig(AuthMethodUpdateOne, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(422, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestAuthMethodUpdateOneEmptyPort tests the default case of updating an auth method of type api-key and service type of ams while providing an empty port
+func (suite *AuthMethodsHandlersTestSuite) TestAuthMethodUpdateOneEmptyPort() {
+
+	reqBody := `{
+ "port": 0
+}`
+
+	expRespJSON := `{
+ "error": {
+  "message": "auth method object contains empty fields. empty value for field: port",
+  "code": 422,
+  "status": "UNPROCESSABLE ENTITY"
+ }
+}`
+
+	req, err := http.NewRequest("POST", "http://localhost:8080/service-types/s1/hosts/host1/authm", bytes.NewBuffer([]byte(reqBody)))
+	if err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authm", WrapConfig(AuthMethodUpdateOne, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(422, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestAuthMethodUpdateOneEmptyAccessKey tests the default case of updating an auth method of type api-key and service type of ams while providing an empty access key
+func (suite *AuthMethodsHandlersTestSuite) TestAuthMethodUpdateOneEmptyAccessKey() {
+
+	reqBody := `{
+"access_key": ""
+}`
+
+	expRespJSON := `{
+ "error": {
+  "message": "auth method object contains empty fields. empty value for field: access_key",
+  "code": 422,
+  "status": "UNPROCESSABLE ENTITY"
+ }
+}`
+
+	req, err := http.NewRequest("POST", "http://localhost:8080/service-types/s1/hosts/host1/authm", bytes.NewBuffer([]byte(reqBody)))
+	if err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authm", WrapConfig(AuthMethodUpdateOne, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(422, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestAuthMethodUpdateOneEmptyPath tests the default case of updating an auth method of type api-key and service type of ams while providing an empty path
+func (suite *AuthMethodsHandlersTestSuite) TestAuthMethodUpdateOneEmptyPath() {
+
+	reqBody := `{
+"path": ""
+}`
+
+	expRespJSON := `{
+ "error": {
+  "message": "auth method object contains empty fields. empty value for field: path",
+  "code": 422,
+  "status": "UNPROCESSABLE ENTITY"
+ }
+}`
+
+	req, err := http.NewRequest("POST", "http://localhost:8080/service-types/s1/hosts/host1/authm", bytes.NewBuffer([]byte(reqBody)))
+	if err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authm", WrapConfig(AuthMethodUpdateOne, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(422, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestAuthMethodUpdateOneRetrievalField tests the default case of updating an auth method of type api-key and service type of ams while providing an empty retrieval field
+func (suite *AuthMethodsHandlersTestSuite) TestAuthMethodUpdateOneRetrievalField() {
+
+	reqBody := `{
+"retrieval_field": ""
+}`
+
+	expRespJSON := `{
+ "error": {
+  "message": "auth method object contains empty fields. empty value for field: retrieval_field",
+  "code": 422,
+  "status": "UNPROCESSABLE ENTITY"
+ }
+}`
+
+	req, err := http.NewRequest("POST", "http://localhost:8080/service-types/s1/hosts/host1/authm", bytes.NewBuffer([]byte(reqBody)))
+	if err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authm", WrapConfig(AuthMethodUpdateOne, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(422, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestAuthMethodUpdateOneInvalidFieldType tests the default case of updating an auth method of type api-key and service type of ams while providing a wrong value for field regarding its type
+func (suite *AuthMethodsHandlersTestSuite) TestAuthMethodUpdateOneInvalidFieldType() {
+
+	reqBody := `{
+"port": "9000"
+}`
+
+	expRespJSON := `{
+ "error": {
+  "message": "Poorly formatted JSON. json: cannot unmarshal string into Go struct field TempApiKeyAuthMethod.port of type int",
+  "code": 400,
+  "status": "BAD REQUEST"
+ }
+}`
+
+	req, err := http.NewRequest("POST", "http://localhost:8080/service-types/s1/hosts/host1/authm", bytes.NewBuffer([]byte(reqBody)))
+	if err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authm", WrapConfig(AuthMethodUpdateOne, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(400, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestAuthMethodUpdateOneInvalidURL tests the default case of updating an auth method of type api-key and service type of ams while providing an invalid path
+func (suite *AuthMethodsHandlersTestSuite) TestAuthMethodUpdateOneInvalidURL() {
+
+	reqBody := `{
+"path": "some/:path"
+}`
+
+	expRespJSON := `{
+ "error": {
+  "message": "The url to access resources in invalid. URL: https://host1:9000some/:path",
+  "code": 422,
+  "status": "UNPROCESSABLE ENTITY"
+ }
+}`
+
+	req, err := http.NewRequest("POST", "http://localhost:8080/service-types/s1/hosts/host1/authm", bytes.NewBuffer([]byte(reqBody)))
+	if err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authm", WrapConfig(AuthMethodUpdateOne, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(422, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestAuthMethodUpdateOneInvalidPathIdentifierMissing tests the default case of updating an auth method of type api-key and service type of ams while providing an invalid path
+func (suite *AuthMethodsHandlersTestSuite) TestAuthMethodUpdateOneInvalidPathIdentifierMissing() {
+
+	reqBody := `{
+"path": "/some/path"
+}`
+
+	expRespJSON := `{
+ "error": {
+  "message": "Field: path contains invalid data. Missing {{identifier}} interpolation",
+  "code": 422,
+  "status": "UNPROCESSABLE ENTITY"
+ }
+}`
+
+	req, err := http.NewRequest("POST", "http://localhost:8080/service-types/s1/hosts/host1/authm", bytes.NewBuffer([]byte(reqBody)))
+	if err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authm", WrapConfig(AuthMethodUpdateOne, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(422, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestAuthMethodUpdateOneInvalidPathAccessKeyMissing tests the default case of updating an auth method of type api-key and service type of ams while providing an invalid path
+func (suite *AuthMethodsHandlersTestSuite) TestAuthMethodUpdateOneInvalidPathAccessKeyMissing() {
+
+	reqBody := `{
+"path": "/some/path/{{identifier}}"
+}`
+
+	expRespJSON := `{
+ "error": {
+  "message": "Field: path contains invalid data. Missing {{access_key}} interpolation",
+  "code": 422,
+  "status": "UNPROCESSABLE ENTITY"
+ }
+}`
+
+	req, err := http.NewRequest("POST", "http://localhost:8080/service-types/s1/hosts/host1/authm", bytes.NewBuffer([]byte(reqBody)))
+	if err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authm", WrapConfig(AuthMethodUpdateOne, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(422, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestAuthMethodUpdateOneUnknownServiceType tests the case where the provided service type is unknown
+func (suite *AuthMethodsHandlersTestSuite) TestAuthMethodUpdateOneUnknownServiceType() {
+
+	expRespJSON := `{
+ "error": {
+  "message": "Service-type was not found",
+  "code": 404,
+  "status": "NOT FOUND"
+ }
+}`
+
+	req, err := http.NewRequest("PUT", "http://localhost:8080/service-types/unknown/hosts/host1/authm", nil)
+	if err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authm", WrapConfig(AuthMethodUpdateOne, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(404, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestAuthMethodDUpdateOneUnknownHost tests the case where the provided host is not associated with the given service-type
+func (suite *AuthMethodsHandlersTestSuite) TestAuthMethodDUpdateOneUnknownHost() {
+
+	expRespJSON := `{
+ "error": {
+  "message": "Host was not found",
+  "code": 404,
+  "status": "NOT FOUND"
+ }
+}`
+
+	req, err := http.NewRequest("PUT", "http://localhost:8080/service-types/s1/hosts/unknown/authm", nil)
+	if err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authm", WrapConfig(AuthMethodUpdateOne, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(404, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestAuthMethodUpdateOneNotFound tests the case where there is no registered auth method under the given service-type and host
+func (suite *AuthMethodsHandlersTestSuite) TestAuthMethodUpdateOneNotFound() {
+
+	expRespJSON := `{
+ "error": {
+  "message": "Auth method was not found",
+  "code": 404,
+  "status": "NOT FOUND"
+ }
+}`
+
+	req, err := http.NewRequest("PUT", "http://localhost:8080/service-types/s1/hosts/host3/authm", nil)
+	if err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authm", WrapConfig(AuthMethodUpdateOne, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(404, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())

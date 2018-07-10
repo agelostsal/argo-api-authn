@@ -1,13 +1,27 @@
 package authmethods
 
 import (
+	"bytes"
+	"encoding/json"
 	"github.com/ARGOeu/argo-api-authn/stores"
 	"github.com/stretchr/testify/suite"
+	"io"
+	"io/ioutil"
 	"testing"
 )
 
 type AuthMethodsTestSuite struct {
 	suite.Suite
+}
+
+func ConvertAuthMethodToReadCloser(am AuthMethod) io.ReadCloser {
+
+	bb, _ := json.Marshal(am)
+
+	reader := bytes.NewReader(bb)
+
+	return ioutil.NopCloser(reader)
+
 }
 
 func (suite *AuthMethodsTestSuite) TestAuthMethodConvertToQueryModel() {
@@ -57,7 +71,7 @@ func (suite *AuthMethodsTestSuite) TestAuthMethodFinder() {
 	mockstore.SetUp()
 
 	// normal case
-	ba1 := BasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "test_path_1", UUID: "am_uuid_1", Type: "api-key"}
+	ba1 := BasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "/path/{{identifier}}?key={{access_key}}", UUID: "am_uuid_1", Type: "api-key", RetrievalField: "token"}
 	expectedApk1 := &ApiKeyAuthMethod{ba1, "access_key"}
 
 	apk1, err1 := AuthMethodFinder("uuid1", "host1", "api-key", mockstore)
@@ -132,7 +146,7 @@ func (suite *AuthMethodsTestSuite) TestAuthMethodFIndAll() {
 	var expAmList AuthMethodsList
 
 	// test the normal case
-	amb1 := BasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "test_path_1", Type: "api-key", UUID: "am_uuid_1", CreatedOn: ""}
+	amb1 := BasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "/path/{{identifier}}?key={{access_key}}", Type: "api-key", UUID: "am_uuid_1", CreatedOn: "", RetrievalField: "token"}
 	am1 := &ApiKeyAuthMethod{AccessKey: "access_key"}
 	am1.BasicAuthMethod = amb1
 	expAmList.AuthMethods = append(expAmList.AuthMethods, am1)
@@ -156,7 +170,7 @@ func (suite *AuthMethodsTestSuite) TestAuthMethodDelete() {
 	mockstore.SetUp()
 
 	// test the normal case
-	amb1 := BasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "test_path_1", Type: "api-key", UUID: "am_uuid_1", CreatedOn: ""}
+	amb1 := BasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "/path/{{identifier}}?key={{access_key}}", Type: "api-key", UUID: "am_uuid_1", CreatedOn: "", RetrievalField: "token"}
 	am1 := &ApiKeyAuthMethod{AccessKey: "access_key"}
 	am1.BasicAuthMethod = amb1
 
@@ -165,6 +179,120 @@ func (suite *AuthMethodsTestSuite) TestAuthMethodDelete() {
 	suite.Equal(0, len(mockstore.AuthMethods))
 
 	suite.Nil(err1)
+}
+
+func (suite *AuthMethodsTestSuite) TestAuthMethodUpdate() {
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	amb1 := BasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "/path/{{identifier}}?key={{access_key}}", Type: "api-key", UUID: "am_uuid_1", CreatedOn: "", RetrievalField: "token"}
+	am1 := &ApiKeyAuthMethod{AccessKey: "access_key"}
+	am1.BasicAuthMethod = amb1
+
+	// normal case - update some fields (with updated service uuid and host)
+	ambU1 := BasicAuthMethod{ServiceUUID: "uuid2", Host: "host4", Port: 9090, Path: "/some/path/{{identifier}}?key={{access_key}}", Type: "api-key", UUID: "am_uuid_1", CreatedOn: "", RetrievalField: "some_token"}
+	amU1 := &ApiKeyAuthMethod{AccessKey: "access_key"}
+	amU1.BasicAuthMethod = ambU1
+	r1 := ConvertAuthMethodToReadCloser(amU1)
+	a1, err1 := AuthMethodUpdate(am1, r1, mockstore)
+
+	// normal case - update fields that can't be updated
+	ambU2 := BasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "/path/{{identifier}}?key={{access_key}}", Type: "some_api-key", UUID: "some_am_uuid_1", CreatedOn: "some_time", RetrievalField: "token"}
+	amU2 := &ApiKeyAuthMethod{AccessKey: "access_key"}
+	amU2.BasicAuthMethod = ambU2
+	r2 := ConvertAuthMethodToReadCloser(amU2)
+	a2, err2 := AuthMethodUpdate(am1, r2, mockstore)
+
+	// unknown service uuid
+	ambU3 := BasicAuthMethod{ServiceUUID: "unknown", Host: "host1", Port: 9000, Path: "/path/{{identifier}}?key={{access_key}}", Type: "api-key", UUID: "am_uuid_1", CreatedOn: "", RetrievalField: "token"}
+	amU3 := &ApiKeyAuthMethod{AccessKey: "access_key"}
+	amU3.BasicAuthMethod = ambU3
+	r3 := ConvertAuthMethodToReadCloser(amU3)
+	a3, err3 := AuthMethodUpdate(am1, r3, mockstore)
+
+	// unknown host
+	ambU4 := BasicAuthMethod{ServiceUUID: "uuid1", Host: "unknown", Port: 9000, Path: "/path/{{identifier}}?key={{access_key}}", Type: "api-key", UUID: "am_uuid_1", CreatedOn: "", RetrievalField: "token"}
+	amU4 := &ApiKeyAuthMethod{AccessKey: "access_key"}
+	amU4.BasicAuthMethod = ambU4
+	r4 := ConvertAuthMethodToReadCloser(amU4)
+	a4, err4 := AuthMethodUpdate(am1, r4, mockstore)
+
+	// invalid path
+	ambU5 := BasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "some/path/", Type: "api-key", UUID: "am_uuid_1", CreatedOn: "", RetrievalField: "token"}
+	amU5 := &ApiKeyAuthMethod{AccessKey: "access_key"}
+	amU5.BasicAuthMethod = ambU5
+	r5 := ConvertAuthMethodToReadCloser(amU5)
+	a5, err5 := AuthMethodUpdate(am1, r5, mockstore)
+
+	// empty service uuid
+	ambU6 := BasicAuthMethod{ServiceUUID: "", Host: "host1", Port: 9000, Path: "/path/{{identifier}}?key={{access_key}}", Type: "api-key", UUID: "am_uuid_1", CreatedOn: "", RetrievalField: "token"}
+	amU6 := &ApiKeyAuthMethod{AccessKey: "access_key"}
+	amU6.BasicAuthMethod = ambU6
+	r6 := ConvertAuthMethodToReadCloser(amU6)
+	a6, err6 := AuthMethodUpdate(am1, r6, mockstore)
+
+	// empty host
+	ambU7 := BasicAuthMethod{ServiceUUID: "uuid1", Host: "", Port: 9000, Path: "/path/{{identifier}}?key={{access_key}}", Type: "api-key", UUID: "am_uuid_1", CreatedOn: "", RetrievalField: "token"}
+	amU7 := &ApiKeyAuthMethod{AccessKey: "access_key"}
+	amU7.BasicAuthMethod = ambU7
+	r7 := ConvertAuthMethodToReadCloser(amU7)
+	a7, err7 := AuthMethodUpdate(am1, r7, mockstore)
+
+	// empty port
+	ambU8 := BasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 0, Path: "/path/{{identifier}}?key={{access_key}}", Type: "api-key", UUID: "am_uuid_1", CreatedOn: "", RetrievalField: "token"}
+	amU8 := &ApiKeyAuthMethod{AccessKey: "access_key"}
+	amU8.BasicAuthMethod = ambU8
+	r8 := ConvertAuthMethodToReadCloser(amU8)
+	a8, err8 := AuthMethodUpdate(am1, r8, mockstore)
+
+	// empty path
+	ambU9 := BasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "", Type: "api-key", UUID: "am_uuid_1", CreatedOn: "", RetrievalField: "token"}
+	amU9 := &ApiKeyAuthMethod{AccessKey: "access_key"}
+	amU9.BasicAuthMethod = ambU9
+	r9 := ConvertAuthMethodToReadCloser(amU9)
+	a9, err9 := AuthMethodUpdate(am1, r9, mockstore)
+
+	// empty access key
+	ambU10 := BasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 10000, Path: "/path/{{identifier}}?key={{access_key}}", Type: "api-key", UUID: "am_uuid_1", CreatedOn: "", RetrievalField: "token"}
+	amU10 := &ApiKeyAuthMethod{AccessKey: ""}
+	amU10.BasicAuthMethod = ambU10
+	r10 := ConvertAuthMethodToReadCloser(amU10)
+	a10, err10 := AuthMethodUpdate(am1, r10, mockstore)
+
+	amb2 := BasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "/path/{{identifier}}?key={{access_key}}", Type: "api-key", UUID: "am_uuid_1", CreatedOn: "", RetrievalField: "token"}
+	am2 := &ApiKeyAuthMethod{AccessKey: "access_key"}
+	am2.BasicAuthMethod = amb2
+	ambU11 := BasicAuthMethod{ServiceUUID: "uuid2", Host: "host4", Port: 11000, Path: "/path/{{identifier}}?key={{access_key}}", Type: "api-key", UUID: "am_uuid_1", CreatedOn: "", RetrievalField: "token"}
+	amU11 := &ApiKeyAuthMethod{AccessKey: "access_key"}
+	amU11.BasicAuthMethod = ambU11
+	r11 := ConvertAuthMethodToReadCloser(amU11)
+	a11, err11 := AuthMethodUpdate(am2, r11, mockstore)
+
+	suite.Equal(a1, amU1)
+	suite.Equal(a2, am1)
+	suite.Equal(a3, amU3)
+	suite.Equal(a4, amU4)
+	suite.Equal(a5, amU5)
+	suite.Equal(a6, amU6)
+	suite.Equal(a7, amU7)
+	suite.Equal(a8, amU8)
+	suite.Equal(a9, amU9)
+	suite.Equal(a10, amU10)
+	suite.Equal(a11, amU11)
+
+	suite.Nil(err1)
+	suite.Nil(err2)
+	suite.Equal("Service-type was not found", err3.Error())
+	suite.Equal("Host was not found", err4.Error())
+	suite.Equal("The url to access resources in invalid. URL: https://host1:9000some/path/", err5.Error())
+	suite.Equal("auth method object contains empty fields. empty value for field: service_uuid", err6.Error())
+	suite.Equal("auth method object contains empty fields. empty value for field: host", err7.Error())
+	suite.Equal("auth method object contains empty fields. empty value for field: port", err8.Error())
+	suite.Equal("auth method object contains empty fields. empty value for field: path", err9.Error())
+	suite.Equal("auth method object contains empty fields. empty value for field: access_key", err10.Error())
+	suite.Equal("Auth method object with host: host4 already exists", err11.Error())
+
 }
 
 func TestAuthMethodTestSuite(t *testing.T) {
