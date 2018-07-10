@@ -14,8 +14,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// AuthViaCert accepts a request containing a certificate and handlers the mapping of a certificate dn to a service type's token
-func AuthViaCert(w http.ResponseWriter, r *http.Request) {
+// Deprecated: DeprecatedAuthViaCert accepts a request containing a certificate and handlers the mapping of a certificate dn to a service type's token
+func DeprecatedAuthViaCert(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	var ok bool
@@ -62,7 +62,7 @@ func AuthViaCert(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// retrieve the resource from the serviceType type
-	if dataRes, err = mapX509.MapX509ToAuthItem(serviceType, binding, vars["host"], store, &cfg); err != nil {
+	if dataRes, err = mapX509.DeprecatedMapX509ToAuthItem(serviceType, binding, vars["host"], store, &cfg); err != nil {
 		utils.RespondError(w, err)
 		return
 	}

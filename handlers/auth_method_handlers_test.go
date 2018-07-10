@@ -41,7 +41,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListOne() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/service-types/{service}/hosts/{host}/authM", WrapConfig(AuthMethodListOne, mockstore, cfg))
+	router.HandleFunc("/service-types/{service}/hosts/{host}/authM", WrapConfig(DeprecatedAuthMethodListOne, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(200, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -71,7 +71,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListOneUndeclaredAccessK
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/service-types/{service}/hosts/{host}/authM", WrapConfig(AuthMethodListOne, mockstore, cfg))
+	router.HandleFunc("/service-types/{service}/hosts/{host}/authM", WrapConfig(DeprecatedAuthMethodListOne, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(500, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -102,7 +102,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListOneUndeclaredPath() 
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/service-types/{service}/hosts/{host}/authM", WrapConfig(AuthMethodListOne, mockstore, cfg))
+	router.HandleFunc("/service-types/{service}/hosts/{host}/authM", WrapConfig(DeprecatedAuthMethodListOne, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(500, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -133,7 +133,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListOneUndeclaredPort() 
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/service-types/{service}/hosts/{host}/authM", WrapConfig(AuthMethodListOne, mockstore, cfg))
+	router.HandleFunc("/service-types/{service}/hosts/{host}/authM", WrapConfig(DeprecatedAuthMethodListOne, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(500, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -164,7 +164,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListOneUnknownServiceTyp
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/service-types/{service}/hosts/{host}/authM", WrapConfig(AuthMethodListOne, mockstore, cfg))
+	router.HandleFunc("/service-types/{service}/hosts/{host}/authM", WrapConfig(DeprecatedAuthMethodListOne, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(404, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -195,7 +195,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListOneUnknownHost() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/service-types/{service}/hosts/{host}/authM", WrapConfig(AuthMethodListOne, mockstore, cfg))
+	router.HandleFunc("/service-types/{service}/hosts/{host}/authM", WrapConfig(DeprecatedAuthMethodListOne, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(404, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -251,7 +251,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListAll() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/authM", WrapConfig(AuthMethodListAll, mockstore, cfg))
+	router.HandleFunc("/authM", WrapConfig(DeprecatedAuthMethodListAll, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(200, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -275,11 +275,11 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListAllEmptyList() {
 	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
 
 	// empty the store
-	mockstore.AuthMethods = []map[string]interface{}{}
+	mockstore.DeprecatedAuthMethods = []map[string]interface{}{}
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/authM", WrapConfig(AuthMethodListAll, mockstore, cfg))
+	router.HandleFunc("/authM", WrapConfig(DeprecatedAuthMethodListAll, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(200, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -319,7 +319,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreate() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/authM", WrapConfig(AuthMethodCreate, mockstore, cfg))
+	router.HandleFunc("/authM", WrapConfig(DeprecatedAuthMethodCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(201, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -359,7 +359,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateInvalidJSON() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/authM", WrapConfig(AuthMethodCreate, mockstore, cfg))
+	router.HandleFunc("/authM", WrapConfig(DeprecatedAuthMethodCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(400, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -391,7 +391,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateEmptyReqBody() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/authM", WrapConfig(AuthMethodCreate, mockstore, cfg))
+	router.HandleFunc("/authM", WrapConfig(DeprecatedAuthMethodCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(422, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -428,7 +428,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateMissingTypeField()
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/authM", WrapConfig(AuthMethodCreate, mockstore, cfg))
+	router.HandleFunc("/authM", WrapConfig(DeprecatedAuthMethodCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(422, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -466,7 +466,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateUnsupportedAuthMet
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/authM", WrapConfig(AuthMethodCreate, mockstore, cfg))
+	router.HandleFunc("/authM", WrapConfig(DeprecatedAuthMethodCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(422, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -503,7 +503,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateMissingServiceFiel
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/authM", WrapConfig(AuthMethodCreate, mockstore, cfg))
+	router.HandleFunc("/authM", WrapConfig(DeprecatedAuthMethodCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(422, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -540,7 +540,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateMissingHostField()
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/authM", WrapConfig(AuthMethodCreate, mockstore, cfg))
+	router.HandleFunc("/authM", WrapConfig(DeprecatedAuthMethodCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(422, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -577,7 +577,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateMissingPortField()
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/authM", WrapConfig(AuthMethodCreate, mockstore, cfg))
+	router.HandleFunc("/authM", WrapConfig(DeprecatedAuthMethodCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(422, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -614,7 +614,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateMissingPathField()
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/authM", WrapConfig(AuthMethodCreate, mockstore, cfg))
+	router.HandleFunc("/authM", WrapConfig(DeprecatedAuthMethodCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(422, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -651,7 +651,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateMissingAccessKeyFi
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/authM", WrapConfig(AuthMethodCreate, mockstore, cfg))
+	router.HandleFunc("/authM", WrapConfig(DeprecatedAuthMethodCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(422, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -689,7 +689,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateUnknownService() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/authM", WrapConfig(AuthMethodCreate, mockstore, cfg))
+	router.HandleFunc("/authM", WrapConfig(DeprecatedAuthMethodCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(404, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -727,7 +727,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateUnknownHost() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/authM", WrapConfig(AuthMethodCreate, mockstore, cfg))
+	router.HandleFunc("/authM", WrapConfig(DeprecatedAuthMethodCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(404, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -765,7 +765,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateUnknownAuthMethod(
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/authM", WrapConfig(AuthMethodCreate, mockstore, cfg))
+	router.HandleFunc("/authM", WrapConfig(DeprecatedAuthMethodCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(422, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -803,7 +803,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateInvalidPathContent
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/authM", WrapConfig(AuthMethodCreate, mockstore, cfg))
+	router.HandleFunc("/authM", WrapConfig(DeprecatedAuthMethodCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(422, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -841,7 +841,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateInvalidPathContent
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/authM", WrapConfig(AuthMethodCreate, mockstore, cfg))
+	router.HandleFunc("/authM", WrapConfig(DeprecatedAuthMethodCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(422, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -879,7 +879,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodCreateAlreadyExists() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/authM", WrapConfig(AuthMethodCreate, mockstore, cfg))
+	router.HandleFunc("/authM", WrapConfig(DeprecatedAuthMethodCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(409, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -901,7 +901,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodDelete() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authM", WrapConfig(AuthMethodDelete, mockstore, cfg))
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authM", WrapConfig(DeprecatedAuthMethodDelete, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(204, w.Code)
 }
@@ -930,7 +930,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodDeleteUnknownServiceType
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authM", WrapConfig(AuthMethodDelete, mockstore, cfg))
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authM", WrapConfig(DeprecatedAuthMethodDelete, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(404, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -960,7 +960,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodDeleteUnknownHost() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authM", WrapConfig(AuthMethodDelete, mockstore, cfg))
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authM", WrapConfig(DeprecatedAuthMethodDelete, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(404, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -989,11 +989,11 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodDeleteInternalConflict()
 	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
 
 	// insert one more auth method under the same service type and host
-	mockstore.AuthMethods = append(mockstore.AuthMethods, map[string]interface{}{"service_uuid": "uuid1", "host": "host1", "port": 9000.0, "path": "test_path_1", "access_key": "key1", "type": "api-key"})
+	mockstore.DeprecatedAuthMethods = append(mockstore.DeprecatedAuthMethods, map[string]interface{}{"service_uuid": "uuid1", "host": "host1", "port": 9000.0, "path": "test_path_1", "access_key": "key1", "type": "api-key"})
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authM", WrapConfig(AuthMethodDelete, mockstore, cfg))
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authM", WrapConfig(DeprecatedAuthMethodDelete, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(500, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -1026,7 +1026,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodDeleteUnknownAuthMethod(
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authM", WrapConfig(AuthMethodDelete, mockstore, cfg))
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/authM", WrapConfig(DeprecatedAuthMethodDelete, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(404, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
