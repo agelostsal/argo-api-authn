@@ -3,8 +3,8 @@ package config
 import (
 	"testing"
 
-	"github.com/stretchr/testify/suite"
 	"crypto/tls"
+	"github.com/stretchr/testify/suite"
 )
 
 type ConfigTestSuite struct {
@@ -47,10 +47,10 @@ func (suite *ConfigTestSuite) TestConfigSetUp() {
 func (suite *ConfigTestSuite) TestClientAuthPolicy() {
 
 	// trust unknown cas
-	cfg1 := &Config{TrustUnknownCAs:true}
+	cfg1 := &Config{TrustUnknownCAs: true}
 
 	// don't trust unknown cas
-	cfg2 := &Config{TrustUnknownCAs:false}
+	cfg2 := &Config{TrustUnknownCAs: false}
 
 	suite.Equal(tls.RequestClientCert, cfg1.ClientAuthPolicy())
 	suite.Equal(tls.VerifyClientCertIfGiven, cfg2.ClientAuthPolicy())

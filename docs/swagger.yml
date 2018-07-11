@@ -396,7 +396,7 @@ paths:
         500:
           $ref: "#/responses/500"
 
-  /service-types/{Name}/hosts/{Host}:authX509:
+  /service-types/{Name}/hosts/{Host}:authx509:
     get:
       summary: Use an x509 ceritficate to retrieve a token from the given service type
       description: |

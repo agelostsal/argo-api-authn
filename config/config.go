@@ -1,13 +1,13 @@
 package config
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"github.com/ARGOeu/argo-api-authn/utils"
 	LOGGER "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"reflect"
-	"crypto/tls"
 )
 
 type Config struct {

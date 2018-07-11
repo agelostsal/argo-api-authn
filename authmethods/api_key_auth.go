@@ -1,12 +1,19 @@
 package authmethods
 
 import (
+	"bytes"
+	"crypto/tls"
 	"encoding/json"
+	"fmt"
+	"github.com/ARGOeu/argo-api-authn/config"
 	"github.com/ARGOeu/argo-api-authn/stores"
 	"github.com/ARGOeu/argo-api-authn/utils"
 	LOGGER "github.com/sirupsen/logrus"
 	"io"
+	"net/http"
+	"strconv"
 	"strings"
+	"time"
 )
 
 type ApiKeyAuthMethod struct {
@@ -133,6 +140,66 @@ func (m *ApiKeyAuthMethod) Update(r io.ReadCloser) (AuthMethod, error) {
 	}
 
 	return updatedAM, err
+}
+
+func (m *ApiKeyAuthMethod) RetrieveAuthResource(data map[string]interface{}, cfg *config.Config) (map[string]interface{}, error) {
+
+	var externalResp map[string]interface{}
+	var err error
+	var ok bool
+	var resp *http.Response
+	var authResource interface{}
+	var bindingInfo interface{}
+
+	if bindingInfo, ok = data["binding-identifier"]; !ok {
+		LOGGER.Errorf("Binding-identifier was not found in the provided map: %v", data)
+		err = utils.APIGenericInternalError("Backend error")
+		return externalResp, err
+	}
+
+	// build the path that identifies the resource we are going to request
+	resourcePath := fmt.Sprintf("https://%v:%v%v", m.Host, strconv.Itoa(m.Port), m.Path)
+	resourcePath = strings.Replace(resourcePath, "{{identifier}}", bindingInfo.(string), 1)
+	resourcePath = strings.Replace(resourcePath, "{{access_key}}", m.AccessKey, 1)
+
+	// build the client and execute the request
+	transCfg := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: !cfg.VerifySSL},
+	}
+
+	client := &http.Client{Transport: transCfg, Timeout: time.Duration(30 * time.Second)}
+
+	if resp, err = client.Get(resourcePath); err != nil {
+		err = utils.APIGenericInternalError(err.Error())
+		return externalResp, err
+	}
+
+	// evaluate the response
+	if resp.StatusCode >= 400 {
+		// convert the entire response body into a string and include into a genericAPIError
+		buf := bytes.Buffer{}
+		buf.ReadFrom(resp.Body)
+		err = utils.APIGenericInternalError(buf.String())
+		return externalResp, err
+	}
+
+	// get the response from the service type
+	if err = json.NewDecoder(resp.Body).Decode(&externalResp); err != nil {
+		err = utils.APIGenericInternalError(err.Error())
+		return externalResp, err
+	}
+
+	defer resp.Body.Close()
+
+	// check if the retrieval field that we need is present in the response
+	if authResource, ok = externalResp[m.RetrievalField]; !ok {
+		err = utils.APIGenericInternalError(fmt.Sprintf("The specified retrieval field: `%v` was not found in the response body of the service type", m.RetrievalField))
+		return externalResp, err
+	}
+
+	// if everything went ok, return the appropriate response field
+	return map[string]interface{}{"token": authResource}, err
+
 }
 
 func ApiKeyAuthFinder(serviceUUID string, host string, store stores.Store) ([]stores.QAuthMethod, error) {
