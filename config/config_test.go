@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
+	"crypto/tls"
 )
 
 type ConfigTestSuite struct {
@@ -19,7 +20,7 @@ func (suite *ConfigTestSuite) TestConfigSetUp() {
 	// tests the case of a normal setup
 	cfg2 := &Config{}
 	err2 := cfg2.ConfigSetUp("./configuration-test-files/test-conf.json")
-	expCfg2 := &Config{9000, "test_mongo_host", "test_mongo_db", "/path/to/cas", "/path/to/cert", "/path/to/key", "token", []string{"x509", "oidc"}, []string{"api-key", "x-api-token"}, []string{"ams", "web-api", "custom"}, false}
+	expCfg2 := &Config{9000, "test_mongo_host", "test_mongo_db", "/path/to/cas", "/path/to/cert", "/path/to/key", "token", []string{"x509", "oidc"}, []string{"api-key", "x-api-token"}, []string{"ams", "web-api", "custom"}, false, false, true}
 
 	//tests the case of a malformed json
 	cfg3 := &Config{}
@@ -41,6 +42,18 @@ func (suite *ConfigTestSuite) TestConfigSetUp() {
 	suite.Equal("config object contains empty fields. empty value for field: service_port", err4.Error())
 	suite.Equal("config object contains empty fields. empty value for field: mongo_host", err5.Error())
 
+}
+
+func (suite *ConfigTestSuite) TestClientAuthPolicy() {
+
+	// trust unknown cas
+	cfg1 := &Config{TrustUnknownCAs:true}
+
+	// don't trust unknown cas
+	cfg2 := &Config{TrustUnknownCAs:false}
+
+	suite.Equal(tls.RequestClientCert, cfg1.ClientAuthPolicy())
+	suite.Equal(tls.VerifyClientCertIfGiven, cfg2.ClientAuthPolicy())
 }
 
 func TestConfigTestSuite(t *testing.T) {

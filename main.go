@@ -51,7 +51,7 @@ func main() {
 	// configure the TLS config for the server
 	tlsConfig := &tls.Config{
 		MinVersion: tls.VersionTLS10,
-		ClientAuth: tls.VerifyClientCertIfGiven,
+		ClientAuth: cfg.ClientAuthPolicy(),
 		ClientCAs:  auth.LoadCAs(cfg.CertificateAuthorities),
 	}
 

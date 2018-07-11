@@ -8,6 +8,8 @@
   "service_token": "agelos",
   "supported_auth_types": ["x509", "oidc"],
   "supported_auth_methods": ["api-key", "x-api-token"],
+  "supported_service_types": ["ams", "web-api", "custom"],
   "verify_ssl": false,
-  "supported_service_types": ["ams", "web-api", "custom"]
+  "trust_unknown_cas": true,
+  "verify_certificate": true
 }
