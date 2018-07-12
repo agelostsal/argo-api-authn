@@ -46,8 +46,8 @@ func DeprecatedMapX509ToAuthItem(serviceType servicetypes.ServiceType, binding b
 	defer resp.Body.Close()
 
 	// check if the retrieval field that we need is present in the response
-	if rf, ok = dataRes["token"]; !ok {
-		err = utils.APIGenericInternalError(fmt.Sprintf(`The specified retrieval field: %v was not found in the response body of the service type`, "token"))
+	if rf, ok = dataRes[serviceType.RetrievalField]; !ok {
+		err = utils.APIGenericInternalError(fmt.Sprintf(`The specified retrieval field: %v was not found in the response body of the service type`, serviceType.RetrievalField))
 		return dataRes, err
 	}
 

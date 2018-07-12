@@ -7,7 +7,7 @@ Authentication Service for ARGO API(s)
 
 ## Description
 
-The purpose of the Authentication Service is to provide the ability to different services to use alternative authentication mechanisms without having to store additional user info or implement new functionalities.The AUTH service holds various information about a service’s users, hosts, API urls, etc, and leverages them to provide its functionality.
+The purpose of the Authentication Service is to provide the ability to different services to use alternative authentication mechanisms without having to store additional user info or implement new functionalities.The AUTH service holds various information about a service’s users, hosts, API urls, etc, and leverages them to provide its functionality. 
 
 ## Perquisites
 
@@ -19,9 +19,9 @@ Before you start, you need to issue a valid certificate.
 2. Create a new work space:
 
       `mkdir ~/go-workspace`
-
+      
       `export GOPATH=~/go-workspace`
-
+      
       `export PATH=$PATH:$GOPATH/bin`
 
      You may add the last `export` line into the `~/.bashrc`, `/.zshrc` or the `~/.bash_profile` file to have `GOPATH` environment variable properly setup upon every login.
@@ -33,7 +33,7 @@ Before you start, you need to issue a valid certificate.
 4. Get dependencies(If you plan on contributing to the project else skip this step):
 
    Argo-api-authN uses the dep tool for dependency handling.
-
+    
     - Install the dep tool. You can find instructions depending on your platform at [Dep](https://github.com/golang/dep).
 
 5. To build the service use the following command:
@@ -43,9 +43,9 @@ Before you start, you need to issue a valid certificate.
 6. To run the service use the following command:
 
       `./argo-api-authn` (This assumes that there is a valid configuration file at `/etc/argo-api-authn/conf.d/argo-api-authn-config.json`).
-
+      
       Else
-
+      
       `./argo-api-authn --config /path/to/a/json/config/file`
 
 7. To run the unit-tests:
@@ -53,14 +53,14 @@ Before you start, you need to issue a valid certificate.
     Inside the project's folder issue the command:
 
       `go test $(go list ./... | grep -v /vendor/)`
-
+ 
  8. Install mongoDB
-
-
+ 
+ 
  ## Configuration
-
+ 
  The service depends on a configuration file in order to be able to run.This file contains the following information:
-
+ 
  ```json
  {
    "service_port":8080,
@@ -76,12 +76,12 @@ Before you start, you need to issue a valid certificate.
    "verify_ssl": true
  }
  ```
-
+ 
  ## Important Notes
-It is important to notice that since we need to verify the provided certificate’s hostname,
-the client has to make sure that both Forward and  Reverse DNS lookup on the client is correctly setup
-and that the hostname  corresponds to the certificate used.  For both IPv4 and IPv6  (if used)
-
+It is important to notice that since we need to verify the provided certificate’s hostname, 
+the client has to make sure that both Forward and  Reverse DNS lookup on the client is correctly setup 
+and that the hostname  corresponds to the certificate used.  For both IPv4 and IPv6  (if used) 
+ 
  ### Common errors
  - Executing a request using IPv6 without having a properly configured reverse DNS.
  ```json
@@ -95,8 +95,8 @@ and that the hostname  corresponds to the certificate used.  For both IPv4 and I
 ```
 - Executing a request from a host that is not registered on the certificate.
 
-A common case for this error is to have the FQDN registered on the certificate
-but a reverse dns look up returns another hostname for the client from where the request was executed.
+A common case for this error is to have the FQDN registered on the certificate 
+but a reverse dns look up returns another hostname for the client from where the request was executed. 
 ```json
 {
  "error": {
