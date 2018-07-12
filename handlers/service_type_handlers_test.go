@@ -893,6 +893,59 @@ func (suite *BindingHandlersSuite) TestServiceTypeUpdateNameAlreadyExists() {
 	suite.Equal(expRespJSON, w.Body.String())
 }
 
+// TestServiceTypeDeleteOe tests the normal case
+func (suite *ServiceTypeHandlersSuite) TestServiceTypeDeleteOne() {
+
+	req, err := http.NewRequest("DELETE", "http://localhost:8080/service-types/s1", nil)
+	if err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}", WrapConfig(ServiceTypeDeleteOne, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(204, w.Code)
+
+}
+
+// TestServiceTypeDeleteOneNotFound tests the case where the service doesn't exist
+func (suite *ServiceTypeHandlersSuite) TestServiceTypeDeleteOneNotFound() {
+
+	expResJSON := `{
+ "error": {
+  "message": "Service-type was not found",
+  "code": 404,
+  "status": "NOT FOUND"
+ }
+}`
+
+	req, err := http.NewRequest("DELETE", "http://localhost:8080/service-types/not_found", nil)
+	if err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}", WrapConfig(ServiceTypeDeleteOne, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(404, w.Code)
+	suite.Equal(expResJSON, w.Body.String())
+
+}
+
 func TestHandlersTestSuite(t *testing.T) {
 	suite.Run(t, new(ServiceTypeHandlersSuite))
 }

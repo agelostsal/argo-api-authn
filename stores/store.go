@@ -11,13 +11,16 @@ type Store interface {
 	QueryBindingsByUUID(uuid string) ([]QBinding, error)
 	QueryBindings(serviceUUID string, host string) ([]QBinding, error)
 	InsertServiceType(name string, hosts []string, authTypes []string, authMethod string, uuid string, createdOn string, sType string) (QServiceType, error)
+	DeleteServiceTypeByUUID(uuid string) error
 	InsertAuthMethod(am QAuthMethod) error
 	DeleteAuthMethod(am QAuthMethod) error
+	DeleteAuthMethodByServiceUUID(serviceUUID string) error
 	DeprecatedInsertAuthMethod(authM map[string]interface{}) error
 	InsertBinding(name string, serviceUUID string, host string, uuid string, dn string, oidcToken string, uniqueKey string) (QBinding, error)
 	UpdateBinding(original QBinding, updated QBinding) (QBinding, error)
 	UpdateServiceType(original QServiceType, updated QServiceType) (QServiceType, error)
 	UpdateAuthMethod(original QAuthMethod, updated QAuthMethod) (QAuthMethod, error)
 	DeleteBinding(qBinding QBinding) error
+	DeleteBindingByServiceUUID(serviceUUID string) error
 	DeprecatedDeleteAuthMethod(authM map[string]interface{}) error
 }

@@ -21,10 +21,10 @@ type ServiceType struct {
 // TempServiceType is a struct to be used as an intermediate node when updating a service type
 // containing only the `allowed to be updated fields`
 type TempServiceType struct {
-	Name           string   `json:"name"`
-	Hosts          []string `json:"hosts"`
-	AuthTypes      []string `json:"auth_types"`
-	AuthMethod     string   `json:"auth_method"`
+	Name       string   `json:"name"`
+	Hosts      []string `json:"hosts"`
+	AuthTypes  []string `json:"auth_types"`
+	AuthMethod string   `json:"auth_method"`
 }
 
 type ServiceTypesList struct {
@@ -317,4 +317,27 @@ func UpdateServiceType(original ServiceType, tempBind TempServiceType, store sto
 	}
 
 	return updated, err
+}
+
+// DeleteServiceType deletes a service from the datastore as well as all of the other entities that are associated with it
+func DeleteServiceType(serviceType ServiceType, store stores.Store) error {
+
+	var err error
+
+	// first delete all the bindings associated with the service type
+	if err = store.DeleteBindingByServiceUUID(serviceType.UUID); err != nil {
+		return err
+	}
+
+	// delete all the auth methods associated with the service type
+	if err = store.DeleteAuthMethodByServiceUUID(serviceType.UUID); err != nil {
+		return err
+	}
+
+	// finally delete the service type
+	if err = store.DeleteServiceTypeByUUID(serviceType.UUID); err != nil {
+		return err
+	}
+
+	return err
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/ARGOeu/argo-api-authn/utils"
 	LOGGER "github.com/sirupsen/logrus"
 )
+
 type QServiceType struct {
 	Name       string   `json:"name" bson:"name"`
 	Hosts      []string `json:"hosts" bson:"hosts"`

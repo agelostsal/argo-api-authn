@@ -260,6 +260,25 @@ func (suite *ServiceTestSuite) TestUpdateService() {
 
 }
 
+func (suite *ServiceTestSuite) TestDeleteServiceType() {
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	stDelete := ServiceType{UUID: "uuid1"}
+
+	err1 := DeleteServiceType(stDelete, mockstore)
+
+	// check if the service type, bindings and auth methods are deleted as well
+	_, errNotFound := FindServiceTypeByUUID("uuid1", mockstore)
+
+	suite.Equal(0, len(mockstore.Bindings))
+	suite.Equal(0, len(mockstore.Bindings))
+
+	suite.Equal("Service-type was not found", errNotFound.Error())
+	suite.Nil(err1)
+}
+
 func TestServiceTestSuite(t *testing.T) {
 	suite.Run(t, new(ServiceTestSuite))
 }

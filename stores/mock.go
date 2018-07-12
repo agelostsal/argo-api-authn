@@ -245,6 +245,18 @@ func (mock *Mockstore) UpdateAuthMethod(original QAuthMethod, updated QAuthMetho
 	return updated, nil
 }
 
+func (mock *Mockstore) DeleteServiceTypeByUUID(uuid string) error {
+
+	for idx, st := range mock.ServiceTypes {
+		if st.UUID == uuid {
+			mock.ServiceTypes = append(mock.ServiceTypes[:idx], mock.ServiceTypes[idx+1:]...)
+			break
+		}
+	}
+
+	return nil
+}
+
 // DeleteBinding removes the given qBinding from the slice of bindings
 func (mock *Mockstore) DeleteBinding(qBinding QBinding) error {
 
@@ -256,6 +268,21 @@ func (mock *Mockstore) DeleteBinding(qBinding QBinding) error {
 		}
 	}
 
+	return nil
+}
+
+func (mock *Mockstore) DeleteBindingByServiceUUID(serviceUUID string) error {
+
+	var remainingBindings []QBinding
+
+	// extract all the bindings that don't match the service's uuid
+	for _, qb := range mock.Bindings {
+		if qb.ServiceUUID != serviceUUID {
+			remainingBindings = append(remainingBindings, qb)
+		}
+	}
+
+	mock.Bindings = remainingBindings
 	return nil
 }
 
@@ -273,6 +300,20 @@ func (mock *Mockstore) DeleteAuthMethod(am QAuthMethod) error {
 
 	return nil
 
+}
+
+func (mock *Mockstore) DeleteAuthMethodByServiceUUID(serviceUUID string) error {
+
+	var remainingQAM []QAuthMethod
+
+	for _, qam := range mock.AuthMethods {
+		i, _ := utils.GetFieldValueByName(qam, "ServiceUUID")
+		if i.(string) != serviceUUID {
+			remainingQAM = append(remainingQAM, qam)
+		}
+	}
+	mock.AuthMethods = remainingQAM
+	return nil
 }
 
 // Deprecated: DeprecatedDeleteAuthMethod removes the given auth method from the slice of auth methods

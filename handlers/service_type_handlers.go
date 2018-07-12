@@ -125,3 +125,28 @@ func ServiceTypeUpdate(w http.ResponseWriter, r *http.Request) {
 	utils.RespondOk(w, 200, updatedSt)
 
 }
+
+// ServiceTypeDelete deletes a service type
+func ServiceTypeDeleteOne(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	var serviceType servicetypes.ServiceType
+
+	//context references
+	store := context.Get(r, "stores").(stores.Store)
+
+	// url vars
+	vars := mux.Vars(r)
+
+	if serviceType, err = servicetypes.FindServiceTypeByName(vars["service-type"], store); err != nil {
+		utils.RespondError(w, err)
+		return
+	}
+
+	if err = servicetypes.DeleteServiceType(serviceType, store); err != nil {
+		utils.RespondError(w, err)
+		return
+	}
+
+	utils.RespondOk(w, 204, nil)
+}

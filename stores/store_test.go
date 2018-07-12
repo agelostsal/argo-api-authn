@@ -387,6 +387,33 @@ func (suite *StoreTestSuite) TestUpdateAuthMethod() {
 
 }
 
+func (suite *StoreTestSuite) TestDeleteServiceTypeByUUID() {
+
+	suite.SetUpStoreTestSuite()
+
+	err1 := suite.Mockstore.DeleteServiceTypeByUUID("uuid1")
+
+	// query to check if the service type with uuid1 still exists
+	st, _ := suite.Mockstore.QueryServiceTypesByUUID("uuid1")
+
+	suite.Nil(err1)
+	suite.Nil(st)
+}
+
+func (suite *StoreTestSuite) TestDeleteBindingByUUID() {
+
+	suite.SetUpStoreTestSuite()
+
+	err1 := suite.Mockstore.DeleteBindingByServiceUUID("uuid1")
+
+	// query to check if the binding still exists
+	// since all bindings are related to service with uuid uuid1
+	// the mockstore slice should be empty
+
+	suite.Equal(0, len(suite.Mockstore.Bindings))
+	suite.Nil(err1)
+}
+
 func (suite *StoreTestSuite) TestDeleteBinding() {
 
 	suite.SetUpStoreTestSuite()
@@ -423,6 +450,17 @@ func (suite *StoreTestSuite) TestDeprecatedDeleteAuthMethod() {
 	suite.Equal(expAuthMs, suite.Mockstore.DeprecatedAuthMethods)
 
 	suite.Nil(err1)
+}
+
+func (suite *StoreTestSuite) TestDeleteAuthMethodByUUID() {
+
+	suite.SetUpStoreTestSuite()
+
+	// since all auth methods are assigned to the same service, we expect the slice of auth methods to be slice after deleting
+	err1 := suite.Mockstore.DeleteAuthMethodByServiceUUID("uuid1")
+
+	suite.Nil(err1)
+	suite.Equal(0, len(suite.Mockstore.AuthMethods))
 }
 
 func (suite *StoreTestSuite) TestDeleteAuthMethod() {
