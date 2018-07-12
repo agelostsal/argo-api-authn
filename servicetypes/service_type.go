@@ -9,13 +9,14 @@ import (
 )
 
 type ServiceType struct {
-	Name       string   `json:"name" required:"true"`
-	Hosts      []string `json:"hosts" required:"true"`
-	AuthTypes  []string `json:"auth_types" required:"true"`
-	AuthMethod string   `json:"auth_method" required:"true"`
-	UUID       string   `json:"uuid"`
-	CreatedOn  string   `json:"created_on"`
-	Type       string   `json:"type" required:"true"`
+	Name           string   `json:"name" required:"true"`
+	Hosts          []string `json:"hosts" required:"true"`
+	AuthTypes      []string `json:"auth_types" required:"true"`
+	AuthMethod     string   `json:"auth_method" required:"true"`
+	UUID           string   `json:"uuid"`
+	RetrievalField string   `json:"retrieval_field" required:"true"`
+	CreatedOn      string   `json:"created_on"`
+	Type           string   `json:"type" required:"true"`
 }
 
 // TempServiceType is a struct to be used as an intermediate node when updating a service type
@@ -25,6 +26,7 @@ type TempServiceType struct {
 	Hosts          []string `json:"hosts"`
 	AuthTypes      []string `json:"auth_types"`
 	AuthMethod     string   `json:"auth_method"`
+	RetrievalField string   `json:"retrieval_field"`
 }
 
 type ServiceTypesList struct {
@@ -51,7 +53,7 @@ func CreateServiceType(service ServiceType, store stores.Store, cfg config.Confi
 	uuid := uuid2.NewV4().String()
 
 	// insert the service type
-	if qService, err = store.InsertServiceType(service.Name, service.Hosts, service.AuthTypes, service.AuthMethod, uuid, utils.ZuluTimeNow(), service.Type); err != nil {
+	if qService, err = store.InsertServiceType(service.Name, service.Hosts, service.AuthTypes, service.AuthMethod, uuid, service.RetrievalField, utils.ZuluTimeNow(), service.Type); err != nil {
 		return ServiceType{}, err
 	}
 
