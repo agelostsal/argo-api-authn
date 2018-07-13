@@ -31,7 +31,7 @@ type QApiKeyAuth struct {
 	AccessKey string `json:"access_key" bson:"access_key"`
 }
 
-type QAuthMethod interface {}
+type QAuthMethod interface{}
 
 type QBasicAuthMethod struct {
 	ServiceUUID    string `json:"service_uuid" bson:"service_uuid"`
@@ -45,5 +45,5 @@ type QBasicAuthMethod struct {
 
 type QApiKeyAuthMethod struct {
 	QBasicAuthMethod `bson:",inline"`
-	AccessKey string `json:"access_key" bson:"access_key"`
+	AccessKey        string `json:"access_key" bson:"access_key"`
 }
