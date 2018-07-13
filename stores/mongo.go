@@ -76,6 +76,41 @@ func (mongo *MongoStore) QueryServiceTypesByUUID(uuid string) ([]QServiceType, e
 	return qServices, err
 }
 
+func (mongo *MongoStore) QueryApiKeyAuthMethods(serviceUUID string, host string) ([]QApiKeyAuthMethod, error) {
+
+	var err error
+	var qAuthms []QApiKeyAuthMethod
+
+	query := bson.M{"service_uuid": serviceUUID, "host": host}
+
+	c := mongo.Session.DB(mongo.Database).C("auth_methods")
+	err = c.Find(query).All(&qAuthms)
+
+	if err != nil {
+		LOGGER.Error("STORE", "\t", err.Error())
+		err = utils.APIErrDatabase(err.Error())
+		return qAuthms, err
+	}
+
+	return qAuthms, err
+}
+
+func(mongo *MongoStore)InsertAuthMethod(am QAuthMethod) (error) {
+
+	var err error
+
+	db := mongo.Session.DB(mongo.Database)
+	c := db.C("auth_methods")
+
+	if err := c.Insert(am); err != nil {
+		LOGGER.Error("STORE", "\t", err.Error())
+		err = utils.APIErrDatabase(err.Error())
+		return err
+	}
+
+	return err
+}
+
 // Deprecated: QueryAuthMethods
 func (mongo *MongoStore) DeprecatedQueryAuthMethods(serviceUUID string, host string, typeName string) ([]map[string]interface{}, error) {
 
@@ -260,6 +295,21 @@ func (mongo *MongoStore) DeleteBinding(qBinding QBinding) error {
 		return err
 	}
 
+	return err
+}
+
+func(mongo *MongoStore) DeleteAuthMethod(am QAuthMethod) error {
+
+	var err error
+
+	db := mongo.Session.DB(mongo.Database)
+	c := db.C("auth_methods")
+
+	if err := c.Remove(am); err != nil {
+		LOGGER.Error("STORE", "\t", err.Error())
+		err = utils.APIErrDatabase(err.Error())
+		return err
+	}
 	return err
 }
 
