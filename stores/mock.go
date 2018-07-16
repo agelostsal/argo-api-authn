@@ -41,7 +41,7 @@ func (mock *Mockstore) SetUp() {
 		{"path": "test_path_1", "access_key": "key1", "type": "api-key", "service_uuid": "uuid2", "host": "host4"}}
 
 	// Populate AuthMethods
-	amb1 := QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "test_path_1", UUID: "am_uuid_1", CreatedOn: ""}
+	amb1 := QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "test_path_1", Type: "api-key", UUID: "am_uuid_1", CreatedOn: ""}
 	am1 := &QApiKeyAuthMethod{AccessKey: "access_key"}
 	am1.QBasicAuthMethod = amb1
 	mock.AuthMethods = append(mock.AuthMethods, am1)
