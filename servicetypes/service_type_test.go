@@ -25,7 +25,8 @@ func (suite *ServiceTestSuite) TestCreateServiceType() {
 	res1, _ := mockstore.QueryServiceTypes("sCr")
 
 	// test the normal case with type web-api
-	sWb := ServiceType{"sCr_wb", []string{"host1", "host2"}, []string{"x509", "oidc"}, "api-key", "uuid1", "token", "web-api"}
+
+	sWb := ServiceType{"sCr_wb", []string{"host1", "host2"}, []string{"x509", "oidc"}, "api-key", "uuid1", "", "web-api"}
 	_, errWb := CreateServiceType(sWb, mockstore, *cfg)
 	res2, _ := mockstore.QueryServiceTypes("sCr_wb")
 

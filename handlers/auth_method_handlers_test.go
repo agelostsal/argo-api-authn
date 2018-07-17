@@ -203,7 +203,7 @@ func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListOneUnknownHost() {
 }
 
 // TestAuthMethodListAll tests the normal case and returns all auth methods in the service type
-func (suite *AuthMethodHandlersTestSuite) TestAuthMethodListAll() {
+func (suite *AuthMethodHandlersTestSuite) DeprecatedTestAuthMethodListAll() {
 
 	expRespJSON := `{
  "auth_methods": [

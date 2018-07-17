@@ -6,7 +6,7 @@ This request creates a new auth method for the given service type. The type of t
 as well as some of its predefined fields will be decided by the service-tye's `auth_method` and `type `fields.
 E.g. for a service-type of type `ams` with an auth_method of type `api-key`, it will create an api-key auth method
 with predeclared fields for `path` and `retrieval_field` that are common across all type `ams` service-types.
-Of course you can always override the default's if you like. 
+Of course you can always override the default's if you like.
 
 #### Fields
 
@@ -36,15 +36,15 @@ curl -X POST -H "Content-Type: application/json"
             "port": 9000,
         }
 ```
- 
+
 ### Response
-  
+
 If the request is successful, the response contains the newly created auth method.
-  
+
 Success Response
-  
+
 `201 CREATED`
-  
+
 ```
         {
             "access_key": "key1",
@@ -61,3 +61,90 @@ Success Response
 
 Please refer to section [Errors](api_errors.md) to see all possible Errors
 
+## [GET] Manage Auth Methods - List One Auth Method
+
+### Request
+
+```
+GET /v1/services/{service}/hosts/{host}/authm
+```
+
+### Example request
+
+```
+  curl -X GET -H "Content-Type: application/json"
+  "https://{URL}/v1/services/{service}/hosts/{host}/authm?key={key_in_the_config}"
+```
+
+If the request is successful, the response contains information for the requested auth method.
+
+#### Success Response
+
+`200 OK`
+
+```
+        {
+            "access_key": "key1",
+            "host": "127.0.0.1",
+            "service_uuid": "da22b2d4-ba6c-43ca-b28d-400sd0a5d83e",
+            "path": "/path/{{identifier}}?key={{access_key}}",
+            "port": 9000,
+            "retrieval_field": "token",
+            "type": "api-key",
+            "uuid": "da22b2d4-8ip0-43ca-b28d-500sd0a5d876e",
+            "created_on": "2018-05-05T18:04:05Z"
+        }
+```
+Please refer to section [Errors](api_errors.md) to see all possible Errors
+
+## [GET] Manage Auth Methods - List All Auth Methods
+
+### Request
+
+```
+GET /v1/authm`
+```
+
+### Example request
+
+```
+  curl -X GET -H "Content-Type: application/json"
+  "https://{URL}/v1/authm?key={key_in_the_config}"
+```
+
+If the request is successful, the response contains information for all the auth methods.
+
+#### Success Response
+
+`200 OK`
+
+```
+{
+  "auth_methods": [
+        {
+            "access_key": "key1",
+            "host": "127.0.0.1",
+            "service_uuid": "da22b2d4-ba6c-43ca-b28d-400sd0a5d83e",
+            "path": "/path/{{identifier}}?key={{access_key}}",
+            "port": 9000,
+            "retrieval_field": "token",
+            "type": "api-key",
+            "uuid": "da22b2d4-8ip0-43ca-b28d-500sd0a5d876e",
+            "created_on": "2018-05-05T18:04:05Z"
+        },
+        {
+            "access_key": "key1",
+            "host": "host2",
+            "service_uuid": "da22b2d4-ba6c-43ca-b28d-400sd0a5d83e",
+            "path": "/path/{{identifier}}?key={{access_key}}",
+            "port": 9000,
+            "retrieval_field": "token",
+            "type": "api-key",
+            "uuid": "da22b2d4-9kl2-43ca-b28d-500sd0a5d876e",
+            "created_on": "2018-05-05T18:04:05Z"
+        }
+  ]
+}
+```
+
+Please refer to section [Errors](api_errors.md) to see all possible Errors

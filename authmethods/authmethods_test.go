@@ -124,6 +124,32 @@ func (suite *AuthMethodsTestSuite) TestAuthMethodCreate() {
 
 }
 
+func (suite *AuthMethodsTestSuite) TestAuthMethodFIndAll() {
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	var expAmList AuthMethodsList
+
+	// test the normal case
+	amb1 := BasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "test_path_1", Type: "api-key", UUID: "am_uuid_1", CreatedOn: ""}
+	am1 := &ApiKeyAuthMethod{AccessKey: "access_key"}
+	am1.BasicAuthMethod = amb1
+	expAmList.AuthMethods = append(expAmList.AuthMethods, am1)
+
+	aMList, err1 := AuthMethodFindAll(mockstore)
+
+	// empty list
+	mockstore.AuthMethods = []stores.QAuthMethod{}
+	aMList2, err2 := AuthMethodFindAll(mockstore)
+
+	suite.Equal(expAmList, aMList)
+	suite.Equal(0, len(aMList2.AuthMethods))
+
+	suite.Nil(err1)
+	suite.Nil(err2)
+}
+
 func TestAuthMethodTestSuite(t *testing.T) {
 	suite.Run(t, new(AuthMethodsTestSuite))
 }

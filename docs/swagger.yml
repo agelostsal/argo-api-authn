@@ -217,6 +217,41 @@ paths:
         500:
           $ref: "#/responses/500"
 
+  /service-types/{Name}/hosts/{Host}/authm:
+    get:
+      summary: Retrieve authentication method information for a specific service type and host
+      description: |
+        Retrieve information for a specific service type
+      parameters:
+        - name: Name
+          in: path
+          description: Name of the service type
+          required: true
+          type: string
+        - name: Host
+          in: path
+          description: Name of the host
+          required: true
+          type: string
+        - $ref: '#/parameters/ApiKey'
+      tags:
+        - Service Types
+      responses:
+        200:
+          description: Returns the information of the requested auth method
+          schema:
+            $ref: '#/definitions/APIKeyAuthMethod'
+        400:
+          $ref: "#/responses/400"
+        401:
+          $ref: "#/responses/401"
+        403:
+          $ref: "#/responses/403"
+        404:
+          $ref: '#/responses/404'
+        500:
+          $ref: "#/responses/500"
+
   /service-types/{Name}/hosts/{Host}/authM:
     get:
       summary: Retrieve authentication method information for a specific service type and host
@@ -344,6 +379,27 @@ paths:
           $ref: "#/responses/403"
         404:
           $ref: '#/responses/404'
+        500:
+          $ref: "#/responses/500"
+
+  /authm:
+    get:
+      summary: Retrieve information for all authentication methods
+      description: |
+        Retrieve information for a specific service type
+      parameters:
+        - $ref: '#/parameters/ApiKey'
+      tags:
+        - Authentication Methods
+      responses:
+        200:
+          description: Returns the information of all authentication methods
+          schema:
+            $ref: '#/definitions/APIKeyAuthMethods'
+        401:
+          $ref: "#/responses/401"
+        403:
+          $ref: "#/responses/403"
         500:
           $ref: "#/responses/500"
 
@@ -730,13 +786,14 @@ definitions:
         description: port of the service type host
       type:
         type: string
-        description: the type of the auth method
+        description: type of the auth emthod
       uuid:
         type: string
         description: auth method's uuid
       created_on:
         type: string
-        description: time of creation
+        description: the type of the auth method
+
 
   TokenResponse:
     type: object
