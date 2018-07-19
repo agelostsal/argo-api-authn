@@ -148,3 +148,71 @@ If the request is successful, the response contains information for all the auth
 ```
 
 Please refer to section [Errors](api_errors.md) to see all possible Errors
+
+## [PUT] Manage Auth Methods - Update an existing auth method
+
+This request updates the auth method for the given service-type and host.
+This request can update one or more fields with one call.
+
+```
+PUT /v1/service-types/{service-type}/hosts/{host}/authm
+```
+
+### Example request
+```
+curl -X PUT -H "Content-Type: application/json"
+  "https://{URL}/v1/service-types/{Name}/authm?key={key_in_the_config}"
+```
+
+### Post Body
+
+```
+        {
+            "port": 8080,
+            "access_key": "key2"
+        }
+```
+
+### Response
+
+If the request is successful, the response contains the updated auth method.
+
+Success Response
+
+`200 OK`
+
+```
+        {
+            "access_key": "key2",
+            "host": "127.0.0.1",
+            "service_uuid": "da22b2d4-ba6c-43ca-b28d-400sd0a5d83e",
+            "path": "/path/{{identifier}}?key={{access_key}}",
+            "port": 8080,
+            "retrieval_field": "token",
+            "type": "api-key",
+            "uuid": "da22b2d4-8ip0-43ca-b28d-500sd0a5d876e",
+            "created_on": "2018-05-05T18:04:05Z"
+        }
+```
+
+Please refer to section [Errors](api_errors.md) to see all possible Errors
+
+## [DELETE] Manage Auth Methods - Delete an auth method
+
+This request deletes an auth method associated with the provided service-type and host.
+
+### Request
+
+```
+DELETE /v1/service-types/{service-type}/hosts/{host}/authm
+```
+
+### Response
+
+If the request is successful, the response is empty.
+
+#### Success Response
+
+`204 No Content`
+
+Please refer to section [Errors](api_errors.md) to see all possible Errors

@@ -17,6 +17,7 @@ type Store interface {
 	InsertBinding(name string, serviceUUID string, host string, uuid string, dn string, oidcToken string, uniqueKey string) (QBinding, error)
 	UpdateBinding(original QBinding, updated QBinding) (QBinding, error)
 	UpdateServiceType(original QServiceType, updated QServiceType) (QServiceType, error)
+	UpdateAuthMethod(original QAuthMethod, updated QAuthMethod) (QAuthMethod, error)
 	DeleteBinding(qBinding QBinding) error
 	DeprecatedDeleteAuthMethod(authM map[string]interface{}) error
 }

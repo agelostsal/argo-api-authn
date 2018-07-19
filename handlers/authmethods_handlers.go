@@ -166,3 +166,44 @@ func AuthMethodDeleteOne(w http.ResponseWriter, r *http.Request) {
 	// if everything went ok
 	utils.RespondOk(w, 204, nil)
 }
+
+func AuthMethodUpdateOne(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	var serviceType servicetypes.ServiceType
+	var ok bool
+	var authm authmethods.AuthMethod
+
+	//context references
+	store := context.Get(r, "stores").(stores.Store)
+
+	// url vars
+	vars := mux.Vars(r)
+
+	// check if the service type exists
+	if serviceType, err = servicetypes.FindServiceTypeByName(vars["service-type"], store); err != nil {
+		utils.RespondError(w, err)
+		return
+	}
+
+	// check if the host is associated with the service type
+	if ok = serviceType.HasHost(vars["host"]); !ok {
+		err = utils.APIErrNotFound("Host")
+		utils.RespondError(w, err)
+		return
+	}
+
+	// check if the auth method exists
+	if authm, err = authmethods.AuthMethodFinder(serviceType.UUID, vars["host"], serviceType.AuthMethod, store); err != nil {
+		utils.RespondError(w, err)
+		return
+	}
+
+	if authm, err = authmethods.AuthMethodUpdate(authm, r.Body, store); err != nil {
+		utils.RespondError(w, err)
+		return
+	}
+
+	// if everything went ok
+	utils.RespondOk(w, 200, authm)
+}

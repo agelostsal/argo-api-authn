@@ -51,7 +51,7 @@ func (suite *ApiKeyAuthMethodTestSuite) TestValidate() {
 	suite.Equal("Field: path contains invalid data. Missing {{access_key}} interpolation", err4.Error())
 }
 
-func (suite *ApiKeyAuthMethodTestSuite) TestFill() {
+func (suite *ApiKeyAuthMethodTestSuite) TestSetDefaults() {
 
 	// normal case
 	apk1 := ApiKeyAuthMethod{}
@@ -81,7 +81,7 @@ func (suite *ApiKeyAuthMethodTestSuite) TestApiKeyAuthFinder() {
 	var expectedQams []stores.QAuthMethod
 
 	// normal case
-	amb1 := stores.QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "test_path_1", UUID: "am_uuid_1", CreatedOn: "", Type: "api-key"}
+	amb1 := stores.QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "/path/{{identifier}}?key={{access_key}}", UUID: "am_uuid_1", CreatedOn: "", Type: "api-key", RetrievalField: "token"}
 	am1 := &stores.QApiKeyAuthMethod{AccessKey: "access_key"}
 	am1.QBasicAuthMethod = amb1
 	expectedQams = append(expectedQams, am1)
@@ -96,6 +96,34 @@ func (suite *ApiKeyAuthMethodTestSuite) TestApiKeyAuthFinder() {
 
 	suite.Nil(err1)
 	suite.Nil(err2)
+}
+
+func (suite *ApiKeyAuthMethodTestSuite) TestUpdate() {
+
+	apk1 := ApiKeyAuthMethod{}
+	ba1 := BasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "/v1/sone/{{obj}}?key={{obj2}}", RetrievalField: "token", Type: "api-key"}
+	apk1.BasicAuthMethod = ba1
+
+	// normal case - update some fields
+	apkUpd1 := &ApiKeyAuthMethod{}
+	baUpd1 := BasicAuthMethod{ServiceUUID: "some_uuid1", Host: "some_host", Port: 9090, Path: "/v1/sone/{{obj}}?key={{obj2}}", RetrievalField: "some_token", Type: "api-key"}
+	apkUpd1.BasicAuthMethod = baUpd1
+	r1 := ConvertAuthMethodToReadCloser(apkUpd1)
+	a1, err1 := apk1.Update(r1)
+
+	// update fields that aren't supposed to be updated
+	apkUpd2 := &ApiKeyAuthMethod{}
+	baUpd2 := BasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "/v1/sone/{{obj}}?key={{obj2}}", RetrievalField: "token", Type: "some_api-key", UUID: "some_uuid", CreatedOn: "some_time"}
+	apkUpd2.BasicAuthMethod = baUpd2
+	r2 := ConvertAuthMethodToReadCloser(apkUpd2)
+	a2, err2 := apk1.Update(r2)
+
+	suite.Equal(apkUpd1, a1)
+	suite.NotEqual(apk1, a2)
+
+	suite.Nil(err1)
+	suite.Nil(err2)
+
 }
 
 func TestApiKeyAuthMethod_Fill(t *testing.T) {

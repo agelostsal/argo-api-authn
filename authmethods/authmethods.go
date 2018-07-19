@@ -6,6 +6,7 @@ import (
 	"github.com/ARGOeu/argo-api-authn/utils"
 	"github.com/satori/go.uuid"
 	LOGGER "github.com/sirupsen/logrus"
+	"io"
 )
 
 var ApiKeyAuthMethodsPaths = map[string]string{
@@ -32,6 +33,7 @@ var QueryAuthMethodFinders = map[string]QueryAuthMethodFinder{
 type AuthMethod interface {
 	Validate(store stores.Store) error
 	SetDefaults(tp string) error
+	Update(r io.ReadCloser) (AuthMethod, error)
 }
 
 type AuthMethodsList struct {
@@ -260,4 +262,77 @@ func AuthMethodDelete(am AuthMethod, store stores.Store) error {
 	}
 
 	return err
+}
+
+// AuthMethodUpdate updates the given method with a reader's data
+func AuthMethodUpdate(am AuthMethod, r io.ReadCloser, store stores.Store) (AuthMethod, error) {
+
+	var err error
+	var updatedAm AuthMethod
+	var qOriginalAm stores.QAuthMethod
+	var qUpdatedAm stores.QAuthMethod
+	var iType interface{}
+	var iSuuidUpdated interface{}
+	var iSuuidOriginal interface{}
+	var iHostUpdated interface{}
+	var iHostOriginal interface{}
+
+	// grab the type of the provided auth method
+	if iType, err = utils.GetFieldValueByName(am, "Type"); err != nil {
+		return updatedAm, err
+	}
+
+	// update the given auth method
+	if updatedAm, err = am.Update(r); err != nil {
+		return updatedAm, err
+	}
+
+	// validate the updated auth method
+	if err = updatedAm.Validate(store); err != nil {
+		return updatedAm, err
+	}
+
+	// if serviceUUID and host have been modified , check if there is an auth method already present
+	if iSuuidOriginal, err = utils.GetFieldValueByName(am, "ServiceUUID"); err != nil {
+		err = utils.APIGenericInternalError(err.Error())
+		return updatedAm, err
+	}
+
+	if iSuuidUpdated, err = utils.GetFieldValueByName(updatedAm, "ServiceUUID"); err != nil {
+		err = utils.APIGenericInternalError(err.Error())
+		return updatedAm, err
+	}
+
+	if iHostOriginal, err = utils.GetFieldValueByName(am, "Host"); err != nil {
+		err = utils.APIGenericInternalError(err.Error())
+		return updatedAm, err
+	}
+
+	if iHostUpdated, err = utils.GetFieldValueByName(updatedAm, "Host"); err != nil {
+		err = utils.APIGenericInternalError(err.Error())
+		return updatedAm, err
+	}
+
+	if iSuuidUpdated != iSuuidOriginal || iHostUpdated != iHostOriginal {
+		if err = AuthMethodAlreadyExists(iSuuidUpdated.(string), iHostUpdated.(string), iType.(string), store); err != nil {
+			return updatedAm, err
+		}
+	}
+
+	// convert the given and updated auth methods to their respective query models
+	if qOriginalAm, err = AuthMethodConvertToQueryModel(am, iType.(string)); err != nil {
+		return updatedAm, err
+	}
+
+	if qUpdatedAm, err = AuthMethodConvertToQueryModel(updatedAm, iType.(string)); err != nil {
+		return updatedAm, err
+	}
+
+	// update the auth method
+	if qUpdatedAm, err = store.UpdateAuthMethod(qOriginalAm, qUpdatedAm); err != nil {
+		return updatedAm, err
+	}
+
+	return updatedAm, err
+
 }

@@ -20,6 +20,15 @@ type BasicAuthMethod struct {
 	CreatedOn      string `json:"created_on"`
 }
 
+// TempBasicAuthMethod represents the fields that are allowed to be modified
+type TempBasicAuthMethod struct {
+	ServiceUUID    string `json:"service_uuid" required:"true"`
+	Port           int    `json:"port" required:"true"`
+	Host           string `json:"host" required:"true"`
+	RetrievalField string `json:"retrieval_field" required:"true"`
+	Path           string `json:"path" required:"true"`
+}
+
 func (m *BasicAuthMethod) Validate(store stores.Store) error {
 
 	var ok bool
