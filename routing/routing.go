@@ -73,6 +73,7 @@ var ApiRoutes = []APIRoute{
 	{"authMethod:ListOne", "GET", "/service-types/{service-type}/hosts/{host}/authm", handlers.AuthMethodListOne, true},
 	{"authMethod:ListOne", "GET", "/service-types/{service-type}/hosts/{host}/authM", handlers.DeprecatedAuthMethodListOne, true},
 	{"authMethod:Delete", "DELETE", "/service-types/{service-type}/hosts/{host}/authM", handlers.DeprecatedAuthMethodDelete, true},
+	{"authMethod:Delete", "DELETE", "/service-types/{service-type}/hosts/{host}/authm", handlers.AuthMethodDeleteOne, true},
 	{"bindings:ListAllByServiceTypeAndHost", "GET", "/service-types/{service-type}/hosts/{host}/bindings", handlers.BindingListAllByServiceTypeAndHost, true},
 	{"bindings:ListOneByDN", "GET", "/service-types/{service-type}/hosts/{host}/bindings/{dn}", handlers.BindingListOneByDN, true},
 	{"authMethod:ListAll", "GET", "/authM", handlers.DeprecatedAuthMethodListAll, true},
