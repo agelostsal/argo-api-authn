@@ -2,6 +2,7 @@ package authmethods
 
 import (
 	"encoding/json"
+	"github.com/ARGOeu/argo-api-authn/config"
 	"github.com/ARGOeu/argo-api-authn/stores"
 	"github.com/ARGOeu/argo-api-authn/utils"
 	"github.com/satori/go.uuid"
@@ -34,6 +35,7 @@ type AuthMethod interface {
 	Validate(store stores.Store) error
 	SetDefaults(tp string) error
 	Update(r io.ReadCloser) (AuthMethod, error)
+	RetrieveAuthResource(data map[string]interface{}, cfg *config.Config) (map[string]interface{}, error)
 }
 
 type AuthMethodsList struct {
@@ -129,7 +131,7 @@ func AuthMethodFinder(serviceUUID string, host string, authMethodType string, st
 	}
 
 	// convert the query model to an auth method
-	if am, err = QueryModelConvertToAuthMethod(qAuthMs[0], "api-key"); err != nil {
+	if am, err = QueryModelConvertToAuthMethod(qAuthMs[0], authMethodType); err != nil {
 		return am, err
 	}
 

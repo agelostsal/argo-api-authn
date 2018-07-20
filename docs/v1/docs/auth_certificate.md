@@ -9,7 +9,7 @@ a token from the given service type.
 
 ```
 curl -X GET -H "Content-Type: application/json"
-  "https://{URL}/v1/service-types/{Name}/hosts/{host}:authX509" 
+  "https://{URL}/v1/service-types/{Name}/hosts/{host}:authx509" 
    --cert /path/to/a/cert/file --key /path/to/the/respective/key -k
 ```
 
