@@ -303,6 +303,24 @@ func (mongo *MongoStore) UpdateAuthMethod(original QAuthMethod, updated QAuthMet
 	return updated, err
 }
 
+func (mongo *MongoStore) DeleteServiceTypeByUUID(uuid string) error {
+
+	var err error
+
+	c := mongo.Session.DB(mongo.Database).C("service_types")
+
+	err = c.Remove(bson.M{"uuid": uuid})
+
+	if err != nil {
+		LOGGER.Error("STORE", "\t", err.Error())
+		LOGGER.Error("STORE service types", "\t", err.Error())
+		err = utils.APIErrDatabase(err.Error())
+		return err
+	}
+
+	return err
+}
+
 // Delete binding deletes a binding from the store
 func (mongo *MongoStore) DeleteBinding(qBinding QBinding) error {
 
@@ -320,6 +338,23 @@ func (mongo *MongoStore) DeleteBinding(qBinding QBinding) error {
 	return err
 }
 
+func (mongo *MongoStore) DeleteBindingByServiceUUID(serviceUUID string) error {
+
+	var err error
+	var info *mgo.ChangeInfo
+
+	db := mongo.Session.DB(mongo.Database)
+	c := db.C("bindings")
+
+	if info, err = c.RemoveAll(bson.M{"service_uuid": serviceUUID}); err != nil {
+		LOGGER.Error("STORE", "\t", err.Error())
+		err = utils.APIErrDatabase(err.Error())
+		return err
+	}
+	LOGGER.Infof("Bindings Remove Operation: %+v", *info)
+	return err
+}
+
 func (mongo *MongoStore) DeleteAuthMethod(am QAuthMethod) error {
 
 	var err error
@@ -333,6 +368,26 @@ func (mongo *MongoStore) DeleteAuthMethod(am QAuthMethod) error {
 		return err
 	}
 	return err
+}
+
+func (mongo *MongoStore) DeleteAuthMethodByServiceUUID(serviceUUID string) error {
+
+	var err error
+	var info *mgo.ChangeInfo
+
+	db := mongo.Session.DB(mongo.Database)
+	c := db.C("auth_methods")
+
+	if info, err = c.RemoveAll(bson.M{"service_uuid": serviceUUID}); err != nil {
+		LOGGER.Error("STORE", "\t", err.Error())
+		err = utils.APIErrDatabase(err.Error())
+		return err
+	}
+
+	LOGGER.Infof("Bindings Remove Operation: %+v", *info)
+
+	return err
+
 }
 
 // Deprecated: DeprecatedDeleteAuthMethod deletes the given auth method from the store

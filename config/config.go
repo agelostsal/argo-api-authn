@@ -22,8 +22,8 @@ type Config struct {
 	SupportedAuthMethods   []string `json:"supported_auth_methods" required:"true"`
 	SupportedServiceTypes  []string `json:"supported_service_types" required:"true"`
 	VerifySSL              bool     `json:"verify_ssl"`
-	TrustUnknownCAs		   bool 	`json:"trust_unknown_cas"`
-	VerifyCertificate      bool 	`json:"verify_certificate"`
+	TrustUnknownCAs        bool     `json:"trust_unknown_cas"`
+	VerifyCertificate      bool     `json:"verify_certificate"`
 }
 
 // ConfigSetUp unmarshals a json file specified by the input parameter into the config object
