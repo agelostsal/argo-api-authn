@@ -53,7 +53,7 @@ go clean
 %defattr(0644,argo-api-authn,argo-api-authn)
 %attr(0750,argo-api-authn,argo-api-authn) /var/www/argo-api-authn
 %attr(0755,argo-api-authn,argo-api-authn) /var/www/argo-api-authn/argo-api-authn
-%attr(0644,argo-api-authn,argo-api-authn) /etc/argo-api-authn/conf.d/argo-api-authn-config.json
+%config(noreplace) %attr(0644,argo-api-authn,argo-api-authn) /etc/argo-api-authn/conf.d/argo-api-authn-config.json
 %attr(0644,root,root) /usr/lib/systemd/system/argo-api-authn.service
 
 %changelog

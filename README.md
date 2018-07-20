@@ -70,9 +70,9 @@ Before you start, you need to issue a valid certificate.
    "certificate":"/path/to/cert/localhost.crt",
    "certificate_key":"/path/to/key/localhost.key",
    "service_token": "some-token",
-   "supported_auth_types": ["x509", "oidc"],
-   "supported_auth_methods": ["api-key", "x-api-token"],
-   "supported_service_types": ["ams", "web-api", "custom"],
+   "supported_auth_types": ["x509"],
+   "supported_auth_methods": ["api-key"],
+   "supported_service_types": ["ams"],
    "verify_ssl": true,
    "trust_unknown_cas": false,
    "verify_certificate": true
@@ -111,3 +111,9 @@ but a reverse dns look up returns another hostname for the client from where the
  ## Helpful Utilities
  You can find various utility scripts to help you get up and running the service inside the
  repo's `bin` folder. You can also find the respective documentation for the scripts inside the `docs` folder.
+
+## Feature Milestones
+
+- Add support for authenticating with external services through x-api-key header.
+- Add default configuration for interacting easier with the [argo-web-api](https://github.com/ARGOeu/argo-web-api).
+- Add support for using OIDC tokens as an alternative authentication mechanism.
