@@ -7,6 +7,7 @@ import (
 	LOGGER "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"reflect"
+	"crypto/tls"
 )
 
 type Config struct {
@@ -20,7 +21,9 @@ type Config struct {
 	SupportedAuthTypes     []string `json:"supported_auth_types" required:"true"`
 	SupportedAuthMethods   []string `json:"supported_auth_methods" required:"true"`
 	SupportedServiceTypes  []string `json:"supported_service_types" required:"true"`
-	VerifySSL              bool     `json:"verify_ssl" `
+	VerifySSL              bool     `json:"verify_ssl"`
+	TrustUnknownCAs		   bool 	`json:"trust_unknown_cas"`
+	VerifyCertificate      bool 	`json:"verify_certificate"`
 }
 
 // ConfigSetUp unmarshals a json file specified by the input parameter into the config object
@@ -50,4 +53,17 @@ func (cfg *Config) ConfigSetUp(path string) error {
 		LOGGER.Infof("Config Field: `%v` has been successfully initialized with value: %v", fl.Name, rvc.Field(i).Interface())
 	}
 	return nil
+}
+
+// ClintAuthPolicy determines, based on the given configuration what client authentication policy should the server follow
+func (cfg *Config) ClientAuthPolicy() tls.ClientAuthType {
+
+	var policy = tls.VerifyClientCertIfGiven
+
+	if cfg.TrustUnknownCAs {
+		policy = tls.RequestClientCert
+	}
+
+	return policy
+
 }

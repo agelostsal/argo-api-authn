@@ -73,7 +73,9 @@ Before you start, you need to issue a valid certificate.
    "supported_auth_types": ["x509", "oidc"],
    "supported_auth_methods": ["api-key", "x-api-token"],
    "supported_service_types": ["ams", "web-api", "custom"],
-   "verify_ssl": true
+   "verify_ssl": true,
+   "trust_unknown_cas": false,
+   "verify_certificate": true
  }
  ```
  

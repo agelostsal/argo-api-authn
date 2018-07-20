@@ -37,9 +37,11 @@ func DeprecatedAuthViaCert(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// validate the certificate
-	if err = auth.ValidateClientCertificate(r.TLS.PeerCertificates[0], r.RemoteAddr); err != nil {
-		utils.RespondError(w, err)
-		return
+	if cfg.VerifyCertificate {
+		if err = auth.ValidateClientCertificate(r.TLS.PeerCertificates[0], r.RemoteAddr); err != nil {
+			utils.RespondError(w, err)
+			return
+		}
 	}
 
 	// Find information regarding the requested serviceType
