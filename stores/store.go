@@ -3,6 +3,7 @@ package stores
 type Store interface {
 	SetUp()
 	Close()
+	Clone() Store
 	QueryServiceTypes(name string) ([]QServiceType, error)
 	QueryServiceTypesByUUID(uuid string) ([]QServiceType, error)
 	QueryApiKeyAuthMethods(serviceUUID string, host string) ([]QApiKeyAuthMethod, error)

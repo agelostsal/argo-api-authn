@@ -14,7 +14,11 @@ import (
 func WrapConfig(hfn http.HandlerFunc, store stores.Store, config *config.Config) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		context.Set(r, "stores", store)
+		// clone the store
+		tempStore := store.Clone()
+		defer tempStore.Close()
+
+		context.Set(r, "stores", tempStore)
 		context.Set(r, "config", *config)
 		context.Set(r, "service_token", config.ServiceToken)
 		hfn.ServeHTTP(w, r)

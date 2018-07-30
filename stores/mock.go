@@ -43,6 +43,19 @@ func (mock *Mockstore) Close() {
 	mock.Session = false
 }
 
+func (mock *Mockstore) Clone() Store {
+
+	return &Mockstore{
+		Session:      mock.Session,
+		Server:       mock.Server,
+		Database:     mock.Database,
+		ServiceTypes: mock.ServiceTypes,
+		Bindings:     mock.Bindings,
+		AuthMethods:  mock.AuthMethods,
+	}
+
+}
+
 func (mock *Mockstore) QueryServiceTypes(name string) ([]QServiceType, error) {
 
 	var qServices []QServiceType
