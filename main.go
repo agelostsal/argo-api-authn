@@ -48,6 +48,8 @@ func main() {
 	}
 	store.SetUp()
 
+	defer store.Close()
+
 	// configure the TLS config for the server
 	tlsConfig := &tls.Config{
 		MinVersion: tls.VersionTLS10,

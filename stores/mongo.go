@@ -31,6 +31,15 @@ func (mongo *MongoStore) SetUp() {
 
 }
 
+func (mongo *MongoStore) Clone() Store {
+
+	return &MongoStore{
+		Server:   mongo.Server,
+		Database: mongo.Database,
+		Session:  mongo.Session.Clone(),
+	}
+}
+
 func (mongo *MongoStore) Close() {
 	mongo.Session.Close()
 }
@@ -115,7 +124,6 @@ func (mongo *MongoStore) InsertAuthMethod(am QAuthMethod) error {
 
 	return err
 }
-
 
 func (mongo *MongoStore) QueryBindingsByDN(dn string, serviceUUID string, host string) ([]QBinding, error) {
 

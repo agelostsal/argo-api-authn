@@ -7,7 +7,7 @@ import (
 
 type StoreTestSuite struct {
 	suite.Suite
-	Mockstore Mockstore
+	Mockstore *Mockstore
 }
 
 // SetUpTestSuite assigns the mock store to be used in the querying tests
@@ -16,7 +16,7 @@ func (suite *StoreTestSuite) SetUpStoreTestSuite() {
 
 	mockstore := &Mockstore{Server: "localhost", Database: "test_db"}
 	mockstore.SetUp()
-	suite.Mockstore = *mockstore
+	suite.Mockstore = mockstore
 }
 
 // TestSetUp tests if the mockstore setup has been completed successfully
@@ -65,6 +65,16 @@ func (suite *StoreTestSuite) TestClose() {
 
 	suite.Mockstore.Close()
 	suite.Equal(false, suite.Mockstore.Session)
+}
+
+func (suite *StoreTestSuite) TestClone() {
+
+	suite.SetUpStoreTestSuite()
+
+	tempStore := suite.Mockstore.Clone()
+
+	suite.Equal(suite.Mockstore, tempStore)
+
 }
 
 func (suite *StoreTestSuite) TestQueryServiceTypes() {
