@@ -253,6 +253,28 @@ func (s *ServiceType) hasValidAuthMethod(cfg config.Config) error {
 	return err
 }
 
+// SupportsAuthType checks whether or not the service type wants to support that kind of auth type, e.g. x509
+func (s *ServiceType) SupportsAuthType(authType string) error {
+
+	var err error
+	var flag bool
+
+	for _, at := range s.AuthTypes {
+		if at == authType {
+			flag = true
+			break
+		}
+	}
+
+	if !flag {
+		err = utils.APIErrUnsupportedContent("Auth type", authType, fmt.Sprintf("Supported:%v", s.AuthTypes))
+		return err
+	}
+
+	return err
+
+}
+
 // IsOfValidType checks whether or not the type of a service type is supported
 func (s *ServiceType) IsOfValidType(cfg config.Config) error {
 

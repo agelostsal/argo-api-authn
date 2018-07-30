@@ -5,6 +5,8 @@
 This request will use the provided x509 certificate in order to retrieve
 a token from the given service type.
 
+Make sure that the specified service type configuration has x509 auth type declared.
+
 ### Example Request
 
 ```
@@ -20,7 +22,7 @@ curl -X GET -H "Content-Type: application/json"
  Success Response
  
  ```
- 200 CREATED
+ 200 OK
  ```
  
  ```

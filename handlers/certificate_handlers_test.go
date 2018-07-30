@@ -148,6 +148,36 @@ func (suite *CertificateHandlerSuite) TestAuthViaCert() {
 	suite.Equal(expRespJSON, w.Body.String())
 }
 
+// TestAuthViaCertUnsupportedX509AuthType tests the case where the specified service type doesn't want to support external authentication via x509
+func (suite *CertificateHandlerSuite) TestAuthViaCertUnsupportedX509AuthType() {
+
+	var err error
+	var mockstore *stores.Mockstore
+	var cfg *config.Config
+	var req *http.Request
+
+	expRespJSON := `{
+ "error": {
+  "message": "Auth type: x509 is not yet supported.Supported:[oidc]",
+  "code": 422,
+  "status": "UNPROCESSABLE ENTITY"
+ }
+}`
+	if req, mockstore, cfg, err = AuthViaCertSetUp("http://localhost:8080/service-types/s_auth_cert_unsup_x509/hosts/h1_auth_cert:authx509"); err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	qSt := stores.QServiceType{Name: "s_auth_cert_unsup_x509", Hosts: []string{"h1_auth_cert"}, AuthTypes: []string{"oidc"}, AuthMethod: "mock-auth", UUID: "uuid_auth_cert", CreatedOn: "2018-05-05T18:04:05Z"}
+	mockstore.ServiceTypes = append(mockstore.ServiceTypes, qSt)
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}:authx509", WrapConfig(AuthViaCert, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(422, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
 // TestAuthViaCertNoCRLDPs tests the case where the certificate has no crl distribution points on it
 func (suite *CertificateHandlerSuite) TestAuthViaCertNoCRLDPs() {
 
