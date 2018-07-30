@@ -261,6 +261,11 @@ paths:
           description: Name of the service type
           required: true
           type: string
+        - name: Host
+          in: path
+          description: Name of the host
+          required: true
+          type: string
         - $ref: '#/parameters/ApiKey'
         - name: Auth method information
           in: body
@@ -300,70 +305,6 @@ paths:
           $ref: '#/responses/409'
         422:
           $ref: '#/responses/422'
-        500:
-          $ref: "#/responses/500"
-    delete:
-      summary: Deletes the authentication method for a specific service type and host
-      description: |
-        Deletes the authentication method for a specific service type and host
-      parameters:
-        - name: Name
-          in: path
-          description: Name of the service type
-          required: true
-          type: string
-        - name: Host
-          in: path
-          description: Name of the host
-          required: true
-          type: string
-        - $ref: '#/parameters/ApiKey'
-      tags:
-        - Service Types
-      responses:
-        204:
-          description: Empty response
-        401:
-          $ref: "#/responses/401"
-        403:
-          $ref: "#/responses/403"
-        404:
-          $ref: '#/responses/404'
-        500:
-          $ref: "#/responses/500"
-
-  /service-types/{Name}/hosts/{Host}/authM:
-    get:
-      summary: Retrieve authentication method information for a specific service type and host
-      description: |
-        Retrieve information for a specific service type
-      parameters:
-        - name: Name
-          in: path
-          description: Name of the service type
-          required: true
-          type: string
-        - name: Host
-          in: path
-          description: Name of the host
-          required: true
-          type: string
-        - $ref: '#/parameters/ApiKey'
-      tags:
-        - Service Types
-      responses:
-        200:
-          description: Returns the information of the requested auth method
-          schema:
-            $ref: '#/definitions/APIKeyAuthMethod'
-        400:
-          $ref: "#/responses/400"
-        401:
-          $ref: "#/responses/401"
-        403:
-          $ref: "#/responses/403"
-        404:
-          $ref: '#/responses/404'
         500:
           $ref: "#/responses/500"
     delete:
@@ -480,75 +421,6 @@ paths:
           $ref: "#/responses/401"
         403:
           $ref: "#/responses/403"
-        500:
-          $ref: "#/responses/500"
-
-  /authM:
-    get:
-      summary: Retrieve information for all authentication methods
-      description: |
-        Retrieve information for a specific service type
-      parameters:
-        - $ref: '#/parameters/ApiKey'
-      tags:
-        - Authentication Methods
-      responses:
-        200:
-          description: Returns the information of all authentication methods
-          schema:
-            $ref: '#/definitions/APIKeyAuthMethods'
-        401:
-          $ref: "#/responses/401"
-        403:
-          $ref: "#/responses/403"
-        500:
-          $ref: "#/responses/500"
-
-    post:
-      summary: Create a new auth method
-      description: |
-        Create a new auth method
-      parameters:
-        - $ref: '#/parameters/ApiKey'
-        - name: auth method information
-          in: body
-          description: Required auth method information
-          required: true
-          schema:
-           type: object
-           properties:
-            type:
-              type: string
-            service_uuid:
-              type: string
-            host:
-              type: string
-            path:
-              type: string
-            port:
-              type: integer
-            access_key:
-              type: string
-
-      tags:
-        - Authentication Methods
-      responses:
-        201:
-          description: Returns the newly created auth method
-          schema:
-            $ref: '#/definitions/APIKeyAuthMethod'
-        400:
-          $ref: "#/responses/400"
-        401:
-          $ref: "#/responses/401"
-        403:
-          $ref: "#/responses/403"
-        404:
-          $ref: "#/responses/404"
-        409:
-          $ref: "#/responses/409"
-        422:
-          $ref: '#/responses/422'
         500:
           $ref: "#/responses/500"
 

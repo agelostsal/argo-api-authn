@@ -6,7 +6,6 @@ import (
 	"crypto/x509/pkix"
 	"encoding/asn1"
 	"encoding/pem"
-	"github.com/ARGOeu/argo-api-authn/auth-methods"
 	"github.com/ARGOeu/argo-api-authn/authmethods"
 	"github.com/ARGOeu/argo-api-authn/config"
 	"github.com/ARGOeu/argo-api-authn/stores"
@@ -121,24 +120,6 @@ lBlGGSW4gNfL1IYoakRwJiNiqZ+Gb7+6kHDSVneFeO/qJakXzlByjAA6quPbYzSf
 
 	// add the new finder so the handler can retrieve it
 	authmethods.QueryAuthMethodFinders["mock-auth"] = authmethods.MockKeyAuthFinder
-
-	// add a mock auth method handler
-	auth_methods.AuthMethodHandlers["mock-api-key"] =
-		func(data map[string]interface{}, store stores.Store, config *config.Config) (*http.Response, error) {
-
-			var req2 *http.Request
-			var err error
-
-			// mock the request that will take place against the given service type
-			if req2, err = http.NewRequest("GET", "http://localhost:8080/some_endpoint", nil); err != nil {
-				LOGGER.Error(err.Error())
-			}
-			router := mux.NewRouter().StrictSlash(true)
-			w := httptest.NewRecorder()
-			router.HandleFunc("/some_endpoint", MockServiceTypeEndpoint)
-			router.ServeHTTP(w, req2)
-			return w.Result(), err
-		}
 
 	return req, mockstore, cfg, err
 }
