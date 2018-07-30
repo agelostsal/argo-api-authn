@@ -45,12 +45,6 @@ func (suite *StoreTestSuite) TestSetUp() {
 
 	qBindings = append(qBindings, binding1, binding2, binding3)
 
-	// Populate DeprecatedAuthMethods
-	DeprecatedauthMethods := []map[string]interface{}{{"service_uuid": "uuid1", "host": "host1", "port": 9000.0, "path": "test_path_1", "access_key": "key1", "type": "api-key"},
-		{"host": "host2", "port": 9000.0, "path": "test_path_1", "type": "api-key", "service_uuid": "uuid1"},
-		{"access_key": "key1", "type": "api-key", "service_uuid": "uuid2", "host": "host3", "port": 9000.0},
-		{"path": "test_path_1", "access_key": "key1", "type": "api-key", "service_uuid": "uuid2", "host": "host4"}}
-
 	// Populate AuthMethods
 	amb1 := QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "/path/{{identifier}}?key={{access_key}}", Type: "api-key", UUID: "am_uuid_1", CreatedOn: "", RetrievalField: "token"}
 	am1 := &QApiKeyAuthMethod{AccessKey: "access_key"}
@@ -62,7 +56,6 @@ func (suite *StoreTestSuite) TestSetUp() {
 	suite.Equal(mockstore.Server, "localhost")
 	suite.Equal(mockstore.ServiceTypes, qServices)
 	suite.Equal(mockstore.Bindings, qBindings)
-	suite.Equal(mockstore.DeprecatedAuthMethods, DeprecatedauthMethods)
 	suite.Equal(mockstore.AuthMethods, qAuthms)
 }
 
@@ -152,34 +145,6 @@ func (suite *StoreTestSuite) TestQueryApiKeyAuthMethods() {
 	suite.Equal(expApiAms, apiAms)
 	suite.Equal(0, len(apiAms2))
 	suite.Equal(expApiAms, apiAms3)
-
-	suite.Nil(err1)
-	suite.Nil(err2)
-	suite.Nil(err3)
-}
-
-func (suite *StoreTestSuite) TestDeprecatedQueryAuthMethods() {
-
-	suite.SetUpStoreTestSuite()
-
-	// normal case outcome
-	expAuthMethod1 := []map[string]interface{}{{"type": "api-key", "service_uuid": "uuid1", "host": "host1", "path": "test_path_1", "port": 9000.0, "access_key": "key1"}}
-	authMethod1, err1 := suite.Mockstore.DeprecatedQueryAuthMethods("uuid1", "host1", "api-key")
-
-	// was not found
-	authMethod2, err2 := suite.Mockstore.DeprecatedQueryAuthMethods("wrong_service", "wrong_host", "wrong_type")
-
-	// normal case - all
-	expAuthMethods := []map[string]interface{}{{"service_uuid": "uuid1", "host": "host1", "port": 9000.0, "path": "test_path_1", "access_key": "key1", "type": "api-key"},
-		{"host": "host2", "port": 9000.0, "path": "test_path_1", "type": "api-key", "service_uuid": "uuid1"},
-		{"access_key": "key1", "type": "api-key", "service_uuid": "uuid2", "host": "host3", "port": 9000.0},
-		{"path": "test_path_1", "access_key": "key1", "type": "api-key", "service_uuid": "uuid2", "host": "host4"}}
-	authMethods, err3 := suite.Mockstore.DeprecatedQueryAuthMethods("", "", "")
-
-	// tests the normal case
-	suite.Equal(expAuthMethod1, authMethod1)
-	suite.Equal(0, len(authMethod2))
-	suite.Equal(expAuthMethods, authMethods)
 
 	suite.Nil(err1)
 	suite.Nil(err2)
@@ -294,18 +259,6 @@ func (suite *StoreTestSuite) TestInsertServiceType() {
 
 	suite.Equal(expQServices1[0], qServices1[0])
 	suite.Nil(err1)
-}
-
-func (suite *StoreTestSuite) TestDeprecatedInsertAuthMethod() {
-
-	suite.SetUpStoreTestSuite()
-
-	am := map[string]interface{}{"type": "api-key", "service_uuid": "s_temp", "host": "h_temp", "port": 9000.0, "path": "test_path_1", "access_key": "key1"}
-	err := suite.Mockstore.DeprecatedInsertAuthMethod(am)
-	amq, _ := suite.Mockstore.DeprecatedQueryAuthMethods("s_temp", "h_temp", "api-key")
-
-	suite.Equal(am, amq[0])
-	suite.Nil(err)
 }
 
 func (suite *StoreTestSuite) TestInsertBinding() {
@@ -430,24 +383,6 @@ func (suite *StoreTestSuite) TestDeleteBinding() {
 	qBindings, _ := suite.Mockstore.QueryBindings("", "")
 
 	suite.Equal(expBindings, qBindings)
-
-	suite.Nil(err1)
-}
-
-func (suite *StoreTestSuite) TestDeprecatedDeleteAuthMethod() {
-
-	suite.SetUpStoreTestSuite()
-
-	amD := map[string]interface{}{"service_uuid": "uuid1", "host": "host1", "port": 9000.0, "path": "test_path_1", "access_key": "key1", "type": "api-key"}
-
-	err1 := suite.Mockstore.DeprecatedDeleteAuthMethod(amD)
-
-	// check the slice containing the auth methods to see if the auth method was removed
-	expAuthMs := []map[string]interface{}{{"host": "host2", "port": 9000.0, "path": "test_path_1", "type": "api-key", "service_uuid": "uuid1"},
-		{"access_key": "key1", "type": "api-key", "service_uuid": "uuid2", "host": "host3", "port": 9000.0},
-		{"path": "test_path_1", "access_key": "key1", "type": "api-key", "service_uuid": "uuid2", "host": "host4"}}
-
-	suite.Equal(expAuthMs, suite.Mockstore.DeprecatedAuthMethods)
 
 	suite.Nil(err1)
 }

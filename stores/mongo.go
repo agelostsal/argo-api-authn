@@ -116,31 +116,6 @@ func (mongo *MongoStore) InsertAuthMethod(am QAuthMethod) error {
 	return err
 }
 
-// Deprecated: QueryAuthMethods
-func (mongo *MongoStore) DeprecatedQueryAuthMethods(serviceUUID string, host string, typeName string) ([]map[string]interface{}, error) {
-
-	var qAuthMethods = []map[string]interface{}{}
-	var err error
-
-	query := bson.M{}
-
-	if serviceUUID != "" && host != "" && typeName != "" {
-		query = bson.M{"type": typeName, "service_uuid": serviceUUID, "host": host}
-	}
-
-	c := mongo.Session.DB(mongo.Database).C("auth_methods")
-	err = c.Find(query).All(&qAuthMethods)
-
-	if err != nil {
-		LOGGER.Error("STORE", "\t", err.Error())
-		err = utils.APIErrDatabase(err.Error())
-		return qAuthMethods, err
-	}
-
-	LOGGER.Info(qAuthMethods)
-
-	return qAuthMethods, err
-}
 
 func (mongo *MongoStore) QueryBindingsByDN(dn string, serviceUUID string, host string) ([]QBinding, error) {
 
@@ -214,23 +189,6 @@ func (mongo *MongoStore) InsertServiceType(name string, hosts []string, authType
 	}
 
 	return qService, err
-}
-
-// Deprecated: DeprecatedInsertAuthMethod inserts a new auth method to the database
-func (mongo *MongoStore) DeprecatedInsertAuthMethod(authM map[string]interface{}) error {
-
-	var err error
-
-	db := mongo.Session.DB(mongo.Database)
-	c := db.C("auth_methods")
-
-	if err := c.Insert(authM); err != nil {
-		LOGGER.Error("STORE", "\t", err.Error())
-		err = utils.APIErrDatabase(err.Error())
-		return err
-	}
-
-	return err
 }
 
 //InsertBinding inserts a new binding into the datastore
@@ -386,23 +344,6 @@ func (mongo *MongoStore) DeleteAuthMethodByServiceUUID(serviceUUID string) error
 
 	LOGGER.Infof("Bindings Remove Operation: %+v", *info)
 
-	return err
-
-}
-
-// Deprecated: DeprecatedDeleteAuthMethod deletes the given auth method from the store
-func (mongo *MongoStore) DeprecatedDeleteAuthMethod(authM map[string]interface{}) error {
-
-	var err error
-
-	db := mongo.Session.DB(mongo.Database)
-	c := db.C("auth_methods")
-
-	if err := c.Remove(authM); err != nil {
-		LOGGER.Error("STORE", "\t", err.Error())
-		err = utils.APIErrDatabase(err.Error())
-		return err
-	}
 	return err
 
 }
