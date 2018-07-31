@@ -75,9 +75,7 @@ func AuthViaCert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	extraRequestData := map[string]interface{}{"binding-identifier": binding.UniqueKey}
-
-	if dataRes, err = authm.RetrieveAuthResource(extraRequestData, &cfg); err != nil {
+	if dataRes, err = authm.RetrieveAuthResource(binding, serviceType, &cfg); err != nil {
 		utils.RespondError(w, err)
 		return
 	}

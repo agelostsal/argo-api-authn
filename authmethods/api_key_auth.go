@@ -5,7 +5,9 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"github.com/ARGOeu/argo-api-authn/bindings"
 	"github.com/ARGOeu/argo-api-authn/config"
+	"github.com/ARGOeu/argo-api-authn/servicetypes"
 	"github.com/ARGOeu/argo-api-authn/stores"
 	"github.com/ARGOeu/argo-api-authn/utils"
 	LOGGER "github.com/sirupsen/logrus"
@@ -43,43 +45,6 @@ func (m *ApiKeyAuthMethod) Validate(store stores.Store) error {
 	// check if all required field have been provided
 	if err = utils.ValidateRequired(*m); err != nil {
 		err := utils.APIErrEmptyRequiredField("auth method", err.Error())
-		return err
-	}
-
-	// check if the path contains at least the two interpolations, {{identifier}}, {{access_key}}
-	if !strings.Contains(m.Path, "{{identifier}}") {
-		err = utils.APIErrInvalidFieldContent("path", "Missing {{identifier}} interpolation")
-		return err
-	}
-
-	if !strings.Contains(m.Path, "{{access_key}}") {
-		err = utils.APIErrInvalidFieldContent("path", "Missing {{access_key}} interpolation")
-		return err
-	}
-
-	return err
-}
-
-func (m *ApiKeyAuthMethod) SetDefaults(stp string) error {
-
-	var err error
-	var ok bool
-	var val string
-
-	// try to check if the service type that this auth method will belong to, has pre-defined settings
-	if val, ok = AuthMethodsRetrievalFields[stp]; ok {
-		m.RetrievalField = val
-	} else {
-		err = utils.APIGenericInternalError("Type is supported but not found")
-		LOGGER.Errorf("Type: %v was used to retrieve from AuthMethodsRetrievalFields, but was not found inside the source code of despite being supported", stp)
-		return err
-	}
-
-	if val, ok = ApiKeyAuthMethodsPaths[stp]; ok {
-		m.Path = val
-	} else {
-		err = utils.APIGenericInternalError("Type is supported but not found")
-		LOGGER.Errorf("Type: %v was used to retrieve from ApiKeyAuthMethodsPaths, but was not found inside the source code of despite being supported", stp)
 		return err
 	}
 
@@ -142,24 +107,31 @@ func (m *ApiKeyAuthMethod) Update(r io.ReadCloser) (AuthMethod, error) {
 	return updatedAM, err
 }
 
-func (m *ApiKeyAuthMethod) RetrieveAuthResource(data map[string]interface{}, cfg *config.Config) (map[string]interface{}, error) {
+func (m *ApiKeyAuthMethod) RetrieveAuthResource(binding bindings.Binding, serviceType servicetypes.ServiceType, cfg *config.Config) (map[string]interface{}, error) {
 
 	var externalResp map[string]interface{}
 	var err error
 	var ok bool
 	var resp *http.Response
 	var authResource interface{}
-	var bindingInfo interface{}
+	var retrievalField string
+	var path string
 
-	if bindingInfo, ok = data["binding-identifier"]; !ok {
-		LOGGER.Errorf("Binding-identifier was not found in the provided map: %v", data)
+	if retrievalField, ok = cfg.ServiceTypesRetrievalFields[serviceType.Type]; !ok {
 		err = utils.APIGenericInternalError("Backend error")
+		LOGGER.Errorf("The retrieval field for type: %v was not found in the config retrieval fields: %v", serviceType.Type, cfg.ServiceTypesRetrievalFields)
+		return externalResp, err
+	}
+
+	if path, ok = cfg.ServiceTypesPaths[serviceType.Type]; !ok {
+		err = utils.APIGenericInternalError("Backend error")
+		LOGGER.Errorf("The path for type: %v was not found in the config retrieval fields: %v", serviceType.Type, cfg.ServiceTypesPaths)
 		return externalResp, err
 	}
 
 	// build the path that identifies the resource we are going to request
-	resourcePath := fmt.Sprintf("https://%v:%v%v", m.Host, strconv.Itoa(m.Port), m.Path)
-	resourcePath = strings.Replace(resourcePath, "{{identifier}}", bindingInfo.(string), 1)
+	resourcePath := fmt.Sprintf("https://%v:%v%v", m.Host, strconv.Itoa(m.Port), path)
+	resourcePath = strings.Replace(resourcePath, "{{identifier}}", binding.UniqueKey, 1)
 	resourcePath = strings.Replace(resourcePath, "{{access_key}}", m.AccessKey, 1)
 
 	// build the client and execute the request
@@ -192,8 +164,8 @@ func (m *ApiKeyAuthMethod) RetrieveAuthResource(data map[string]interface{}, cfg
 	defer resp.Body.Close()
 
 	// check if the retrieval field that we need is present in the response
-	if authResource, ok = externalResp[m.RetrievalField]; !ok {
-		err = utils.APIGenericInternalError(fmt.Sprintf("The specified retrieval field: `%v` was not found in the response body of the service type", m.RetrievalField))
+	if authResource, ok = externalResp[retrievalField]; !ok {
+		err = utils.APIGenericInternalError(fmt.Sprintf("The specified retrieval field: `%v` was not found in the response body of the service type", retrievalField))
 		return externalResp, err
 	}
 

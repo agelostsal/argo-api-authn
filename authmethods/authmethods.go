@@ -2,7 +2,9 @@ package authmethods
 
 import (
 	"encoding/json"
+	"github.com/ARGOeu/argo-api-authn/bindings"
 	"github.com/ARGOeu/argo-api-authn/config"
+	"github.com/ARGOeu/argo-api-authn/servicetypes"
 	"github.com/ARGOeu/argo-api-authn/stores"
 	"github.com/ARGOeu/argo-api-authn/utils"
 	"github.com/satori/go.uuid"
@@ -33,9 +35,8 @@ var QueryAuthMethodFinders = map[string]QueryAuthMethodFinder{
 
 type AuthMethod interface {
 	Validate(store stores.Store) error
-	SetDefaults(tp string) error
 	Update(r io.ReadCloser) (AuthMethod, error)
-	RetrieveAuthResource(data map[string]interface{}, cfg *config.Config) (map[string]interface{}, error)
+	RetrieveAuthResource(binding bindings.Binding, serviceType servicetypes.ServiceType, cfg *config.Config) (map[string]interface{}, error)
 }
 
 type AuthMethodsList struct {

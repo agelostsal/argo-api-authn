@@ -33,7 +33,7 @@ func (mock *Mockstore) SetUp() {
 	mock.Bindings = append(mock.Bindings, binding1, binding2, binding3)
 
 	// Populate AuthMethods
-	amb1 := QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "/path/{{identifier}}?key={{access_key}}", Type: "api-key", UUID: "am_uuid_1", CreatedOn: "", RetrievalField: "token"}
+	amb1 := QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Type: "api-key", UUID: "am_uuid_1", CreatedOn: ""}
 	am1 := &QApiKeyAuthMethod{AccessKey: "access_key"}
 	am1.QBasicAuthMethod = amb1
 	mock.AuthMethods = append(mock.AuthMethods, am1)

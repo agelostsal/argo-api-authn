@@ -75,7 +75,9 @@ Before you start, you need to issue a valid certificate.
    "supported_service_types": ["ams"],
    "verify_ssl": true,
    "trust_unknown_cas": false,
-   "verify_certificate": true
+   "verify_certificate": true,
+   "service_types_paths": {"ams": "/v1/users:byUUID/{{identifier}}?key={{access_key}}"},
+   "service_types_retrieval_fields": {"ams": "token"}
  }
  ```
  

@@ -23,12 +23,6 @@ type CertificateHandlerSuite struct {
 	suite.Suite
 }
 
-// MockServiceTypeEndpoint mocks the behavior of a service type endpoint and returns a response containing the requested resource
-func MockServiceTypeEndpoint(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(200)
-	w.Write([]byte("{\"token\": \"some-value\"}"))
-}
-
 func AuthViaCertSetUp(reqPath string) (*http.Request, *stores.Mockstore, *config.Config, error) {
 
 	var err error
@@ -101,8 +95,8 @@ lBlGGSW4gNfL1IYoakRwJiNiqZ+Gb7+6kHDSVneFeO/qJakXzlByjAA6quPbYzSf
 	mockstore = &stores.Mockstore{Server: "localhost", Database: "test_db"}
 	mockstore.SetUp()
 	// append a service type to be used only in auth via cert tests
-	qSt := stores.QServiceType{Name: "s_auth_cert", Hosts: []string{"h1_auth_cert"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "mock-auth", UUID: "uuid_auth_cert", CreatedOn: "2018-05-05T18:04:05Z"}
-	qSt2 := stores.QServiceType{Name: "s_auth_cert_incorrect", Hosts: []string{"h1_auth_cert", "h1_auth_cert_revoked"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "mock-auth", UUID: "uuid_auth_cert_incorrect", CreatedOn: "2018-05-05T18:04:05Z"}
+	qSt := stores.QServiceType{Name: "s_auth_cert", Hosts: []string{"h1_auth_cert"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "mock-auth", UUID: "uuid_auth_cert", Type: "ams", CreatedOn: "2018-05-05T18:04:05Z"}
+	qSt2 := stores.QServiceType{Name: "s_auth_cert_incorrect", Hosts: []string{"h1_auth_cert", "h1_auth_cert_revoked"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "mock-auth", UUID: "uuid_auth_cert_incorrect", Type: "ams", CreatedOn: "2018-05-05T18:04:05Z"}
 	mockstore.ServiceTypes = append(mockstore.ServiceTypes, qSt, qSt2)
 	// append a binding to be used only in auth via cert tests
 	qB := stores.QBinding{Name: "b_auth_cert", ServiceUUID: "uuid_auth_cert", Host: "h1_auth_cert", DN: "CN=localhost,O=COMODO CA Limited,L=Salford,ST=Greater Manchester,C=GB", OIDCToken: "", UniqueKey: "success", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}

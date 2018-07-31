@@ -20,7 +20,23 @@ func (suite *ConfigTestSuite) TestConfigSetUp() {
 	// tests the case of a normal setup
 	cfg2 := &Config{}
 	err2 := cfg2.ConfigSetUp("./configuration-test-files/test-conf.json")
-	expCfg2 := &Config{9000, "test_mongo_host", "test_mongo_db", "/path/to/cas", "/path/to/cert", "/path/to/key", "token", []string{"x509", "oidc"}, []string{"api-key", "x-api-token"}, []string{"ams", "web-api", "custom"}, false, false, true}
+	expCfg2 := &Config{
+		ServicePort:                 9000,
+		MongoHost:                   "test_mongo_host",
+		MongoDB:                     "test_mongo_db",
+		CertificateAuthorities:      "/path/to/cas",
+		Certificate:                 "/path/to/cert",
+		CertificateKey:              "/path/to/key",
+		ServiceToken:                "token",
+		SupportedAuthTypes:          []string{"x509", "oidc"},
+		SupportedAuthMethods:        []string{"api-key", "x-api-token"},
+		SupportedServiceTypes:       []string{"ams", "web-api", "custom"},
+		VerifySSL:                   false,
+		TrustUnknownCAs:             false,
+		VerifyCertificate:           true,
+		ServiceTypesPaths:           map[string]string{"ams": "/v1/users:byUUID/{{identifier}}?key={{access_key}}"},
+		ServiceTypesRetrievalFields: map[string]string{"ams": "token"},
+	}
 
 	//tests the case of a malformed json
 	cfg3 := &Config{}
@@ -34,7 +50,7 @@ func (suite *ConfigTestSuite) TestConfigSetUp() {
 	cfg5 := &Config{}
 	err5 := cfg5.ConfigSetUp("./configuration-test-files/test-conf-empty-field.json")
 
-	suite.Equal(cfg2, expCfg2)
+	suite.Equal(expCfg2, cfg2)
 
 	suite.Equal("open /wrong/path: no such file or directory", err1.Error())
 	suite.Nil(err2)

@@ -50,9 +50,7 @@ Success Response
             "access_key": "key1",
             "host": "127.0.0.1",
             "service_uuid": "da22b2d4-ba6c-43ca-b28d-400sd0a5d83e",
-            "path": "/path/{{identifier}}?key={{access_key}}",
             "port": 9000,
-            "retrieval_field": "token",
             "type": "api-key",
             "uuid": "da22b2d4-8ip0-43ca-b28d-500sd0a5d876e",
             "created_on": "2018-05-05T18:04:05Z"
@@ -87,9 +85,7 @@ If the request is successful, the response contains information for the requeste
             "access_key": "key1",
             "host": "127.0.0.1",
             "service_uuid": "da22b2d4-ba6c-43ca-b28d-400sd0a5d83e",
-            "path": "/path/{{identifier}}?key={{access_key}}",
             "port": 9000,
-            "retrieval_field": "token",
             "type": "api-key",
             "uuid": "da22b2d4-8ip0-43ca-b28d-500sd0a5d876e",
             "created_on": "2018-05-05T18:04:05Z"
@@ -125,9 +121,7 @@ If the request is successful, the response contains information for all the auth
             "access_key": "key1",
             "host": "127.0.0.1",
             "service_uuid": "da22b2d4-ba6c-43ca-b28d-400sd0a5d83e",
-            "path": "/path/{{identifier}}?key={{access_key}}",
             "port": 9000,
-            "retrieval_field": "token",
             "type": "api-key",
             "uuid": "da22b2d4-8ip0-43ca-b28d-500sd0a5d876e",
             "created_on": "2018-05-05T18:04:05Z"
@@ -136,9 +130,7 @@ If the request is successful, the response contains information for all the auth
             "access_key": "key1",
             "host": "host2",
             "service_uuid": "da22b2d4-ba6c-43ca-b28d-400sd0a5d83e",
-            "path": "/path/{{identifier}}?key={{access_key}}",
             "port": 9000,
-            "retrieval_field": "token",
             "type": "api-key",
             "uuid": "da22b2d4-9kl2-43ca-b28d-500sd0a5d876e",
             "created_on": "2018-05-05T18:04:05Z"
@@ -186,9 +178,7 @@ Success Response
             "access_key": "key2",
             "host": "127.0.0.1",
             "service_uuid": "da22b2d4-ba6c-43ca-b28d-400sd0a5d83e",
-            "path": "/path/{{identifier}}?key={{access_key}}",
             "port": 8080,
-            "retrieval_field": "token",
             "type": "api-key",
             "uuid": "da22b2d4-8ip0-43ca-b28d-500sd0a5d876e",
             "created_on": "2018-05-05T18:04:05Z"
