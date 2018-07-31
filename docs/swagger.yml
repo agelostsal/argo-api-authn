@@ -278,11 +278,7 @@ paths:
                type: string
              port:
                type: integer
-             path:
-               type: string
              host:
-               type: string
-             retrieval_field:
                type: string
              access_key:
                 type: string
@@ -726,9 +722,6 @@ definitions:
       access_key:
         type: string
         description: key needed too access the service type
-      path:
-        type: string
-        description: service type exposed path to query users
       host:
         type: string
         description: host of the service type

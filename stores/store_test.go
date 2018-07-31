@@ -46,7 +46,7 @@ func (suite *StoreTestSuite) TestSetUp() {
 	qBindings = append(qBindings, binding1, binding2, binding3)
 
 	// Populate AuthMethods
-	amb1 := QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "/path/{{identifier}}?key={{access_key}}", Type: "api-key", UUID: "am_uuid_1", CreatedOn: "", RetrievalField: "token"}
+	amb1 := QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Type: "api-key", UUID: "am_uuid_1", CreatedOn: ""}
 	am1 := &QApiKeyAuthMethod{AccessKey: "access_key"}
 	am1.QBasicAuthMethod = amb1
 	qAuthms = append(qAuthms, am1)
@@ -141,7 +141,7 @@ func (suite *StoreTestSuite) TestQueryApiKeyAuthMethods() {
 
 	// normal case
 	var expApiAms []QApiKeyAuthMethod
-	amb1 := QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "/path/{{identifier}}?key={{access_key}}", Type: "api-key", UUID: "am_uuid_1", CreatedOn: "", RetrievalField: "token"}
+	amb1 := QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Type: "api-key", UUID: "am_uuid_1", CreatedOn: ""}
 	qapi := QApiKeyAuthMethod{amb1, "access_key"}
 	expApiAms = append(expApiAms, qapi)
 	apiAms, err1 := suite.Mockstore.QueryApiKeyAuthMethods("uuid1", "host1")
@@ -244,7 +244,7 @@ func (suite *StoreTestSuite) TestInsertAuthMethod() {
 	suite.SetUpStoreTestSuite()
 
 	// insert an QApiKeyAuthMethod and then query the datastore to see if it was inserted
-	amb1 := QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host2", Port: 9000, Path: "/path/{{identifier}}?key={{access_key}}", UUID: "am_uuid_1", CreatedOn: "", RetrievalField: "token"}
+	amb1 := QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host2", Port: 9000, UUID: "am_uuid_1", CreatedOn: ""}
 	expApiAms := []QApiKeyAuthMethod{{amb1, "access_key"}}
 
 	amIns := &QApiKeyAuthMethod{amb1, "access_key"}
@@ -328,11 +328,11 @@ func (suite *StoreTestSuite) TestUpdateAuthMethod() {
 
 	suite.SetUpStoreTestSuite()
 
-	amb1 := QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "/path/{{identifier}}?key={{access_key}}", Type: "api-key", UUID: "am_uuid_1", CreatedOn: "", RetrievalField: "token"}
+	amb1 := QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Type: "api-key", UUID: "am_uuid_1", CreatedOn: ""}
 	original := &QApiKeyAuthMethod{AccessKey: "access_key"}
 	original.QBasicAuthMethod = amb1
 
-	amb2 := QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "/path/{{identifier}}?key={{access_key}}", Type: "api-key", UUID: "am_uuid_1", CreatedOn: "", RetrievalField: "token"}
+	amb2 := QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Type: "api-key", UUID: "am_uuid_1", CreatedOn: ""}
 	updated := &QApiKeyAuthMethod{AccessKey: "access_key_2"}
 	updated.QBasicAuthMethod = amb2
 
@@ -340,7 +340,7 @@ func (suite *StoreTestSuite) TestUpdateAuthMethod() {
 
 	// query the datastore to see if the update was successful
 	apiAms, _ := suite.Mockstore.QueryApiKeyAuthMethods("uuid1", "host1")
-	ambExp := QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "/path/{{identifier}}?key={{access_key}}", Type: "api-key", UUID: "am_uuid_1", CreatedOn: "", RetrievalField: "token"}
+	ambExp := QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Type: "api-key", UUID: "am_uuid_1", CreatedOn: ""}
 	expApiAms := []QApiKeyAuthMethod{{ambExp, "access_key_2"}}
 
 	suite.Equal(uqam1, updated)
@@ -414,14 +414,14 @@ func (suite *StoreTestSuite) TestDeleteAuthMethod() {
 	var expAMS []QAuthMethod
 
 	// add a temporary auth method
-	amb1 := QBasicAuthMethod{ServiceUUID: "ins_uuid", Host: "ins_host", Port: 9000, Path: "/path/{{identifier}}?key={{access_key}}", Type: "api-key", UUID: "am_uuid_1", CreatedOn: "", RetrievalField: "token"}
+	amb1 := QBasicAuthMethod{ServiceUUID: "ins_uuid", Host: "ins_host", Port: 9000, Type: "api-key", UUID: "am_uuid_1", CreatedOn: ""}
 	am1 := QApiKeyAuthMethod{AccessKey: "access_key"}
 	am1.QBasicAuthMethod = amb1
 	suite.Mockstore.AuthMethods = append(suite.Mockstore.AuthMethods, &am1)
 
 	err1 := suite.Mockstore.DeleteAuthMethod(&am1)
 
-	amb := QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Path: "/path/{{identifier}}?key={{access_key}}", Type: "api-key", UUID: "am_uuid_1", CreatedOn: "", RetrievalField: "token"}
+	amb := QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Type: "api-key", UUID: "am_uuid_1", CreatedOn: ""}
 	expApiAms := &QApiKeyAuthMethod{amb, "access_key"}
 	expAMS = append(expAMS, expApiAms)
 

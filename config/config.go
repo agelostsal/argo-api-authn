@@ -11,19 +11,21 @@ import (
 )
 
 type Config struct {
-	ServicePort            int      `json:"service_port" required:"true"`
-	MongoHost              string   `json:"mongo_host" required:"true"`
-	MongoDB                string   `json:"mongo_db" required:"true"`
-	CertificateAuthorities string   `json:"certificate_authorities" required:"true"`
-	Certificate            string   `json:"certificate" required:"true"`
-	CertificateKey         string   `json:"certificate_key" required:"true"`
-	ServiceToken           string   `json:"service_token" required:"true"`
-	SupportedAuthTypes     []string `json:"supported_auth_types" required:"true"`
-	SupportedAuthMethods   []string `json:"supported_auth_methods" required:"true"`
-	SupportedServiceTypes  []string `json:"supported_service_types" required:"true"`
-	VerifySSL              bool     `json:"verify_ssl"`
-	TrustUnknownCAs        bool     `json:"trust_unknown_cas"`
-	VerifyCertificate      bool     `json:"verify_certificate"`
+	ServicePort                 int               `json:"service_port" required:"true"`
+	MongoHost                   string            `json:"mongo_host" required:"true"`
+	MongoDB                     string            `json:"mongo_db" required:"true"`
+	CertificateAuthorities      string            `json:"certificate_authorities" required:"true"`
+	Certificate                 string            `json:"certificate" required:"true"`
+	CertificateKey              string            `json:"certificate_key" required:"true"`
+	ServiceToken                string            `json:"service_token" required:"true"`
+	SupportedAuthTypes          []string          `json:"supported_auth_types" required:"true"`
+	SupportedAuthMethods        []string          `json:"supported_auth_methods" required:"true"`
+	SupportedServiceTypes       []string          `json:"supported_service_types" required:"true"`
+	VerifySSL                   bool              `json:"verify_ssl"`
+	TrustUnknownCAs             bool              `json:"trust_unknown_cas"`
+	VerifyCertificate           bool              `json:"verify_certificate"`
+	ServiceTypesPaths           map[string]string `json:"service_types_paths" required:"true"`
+	ServiceTypesRetrievalFields map[string]string `json:"service_types_retrieval_fields" required:"true"`
 }
 
 // ConfigSetUp unmarshals a json file specified by the input parameter into the config object

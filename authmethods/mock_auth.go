@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/ARGOeu/argo-api-authn/bindings"
 	"github.com/ARGOeu/argo-api-authn/config"
+	"github.com/ARGOeu/argo-api-authn/servicetypes"
 	"github.com/ARGOeu/argo-api-authn/stores"
 	"github.com/ARGOeu/argo-api-authn/utils"
 	"github.com/gorilla/mux"
@@ -40,24 +42,23 @@ func (m *MockAuthMethod) Update(r io.ReadCloser) (AuthMethod, error) {
 	return nil, nil
 }
 
-func (m *MockAuthMethod) RetrieveAuthResource(data map[string]interface{}, cfg *config.Config) (map[string]interface{}, error) {
+func (m *MockAuthMethod) RetrieveAuthResource(binding bindings.Binding, serviceType servicetypes.ServiceType, cfg *config.Config) (map[string]interface{}, error) {
 
 	var resp *http.Response
 	var err error
-	var bindingInfo interface{}
 	var ok bool
 	var externalResp map[string]interface{}
 	var externalHandler ExternalServiceHandler
 	var authResource interface{}
+	var retrievalField string
 
-	// use the binding identifier to pick the respective mocked external request handler
-	// e.g. success and incorrect-retrieval-field
-	if bindingInfo, ok = data["binding-identifier"]; !ok {
+	if retrievalField, ok = cfg.ServiceTypesRetrievalFields[serviceType.Type]; !ok {
 		err = utils.APIGenericInternalError("Backend error")
+		LOGGER.Errorf("The retrieval field for type: %v was not found in the config retrieval fields: %v", serviceType.Type, cfg.ServiceTypesRetrievalFields)
 		return externalResp, err
 	}
 
-	if externalHandler, ok = ExternalServiceHandlers[bindingInfo.(string)]; !ok {
+	if externalHandler, ok = ExternalServiceHandlers[binding.UniqueKey]; !ok {
 		err = utils.APIGenericInternalError("Backend error")
 		return externalResp, err
 	}
@@ -83,7 +84,7 @@ func (m *MockAuthMethod) RetrieveAuthResource(data map[string]interface{}, cfg *
 	defer resp.Body.Close()
 
 	// check if the retrieval field that we need is present in the response
-	if authResource, ok = externalResp[m.RetrievalField]; !ok {
+	if authResource, ok = externalResp[retrievalField]; !ok {
 		err = utils.APIGenericInternalError(fmt.Sprintf("The specified retrieval field: `%v` was not found in the response body of the service type", m.RetrievalField))
 		return externalResp, err
 	}

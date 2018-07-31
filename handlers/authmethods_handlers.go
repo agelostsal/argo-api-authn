@@ -36,12 +36,6 @@ func AuthMethodCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// fill the auth method with the default values for its type (e.g. ams)
-	if err = authM.SetDefaults(serviceType.Type); err != nil {
-		utils.RespondError(w, err)
-		return
-	}
-
 	// check the validity of the JSON and fill the auth method object
 	if err = json.NewDecoder(r.Body).Decode(&authM); err != nil {
 		err := utils.APIErrBadRequest(err.Error())
