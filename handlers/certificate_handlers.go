@@ -50,6 +50,12 @@ func AuthViaCert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// check if the service type wants to support external x509 authentication
+	if err = serviceType.SupportsAuthType("x509"); err != nil {
+		utils.RespondError(w, err)
+		return
+	}
+
 	// check if the provided host is associated with the given serviceType type
 	if ok = serviceType.HasHost(vars["host"]); ok == false {
 		err = utils.APIErrNotFound("Host")

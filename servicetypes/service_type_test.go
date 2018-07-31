@@ -198,6 +198,17 @@ func (suite *ServiceTestSuite) TestServiceTypeHasHost() {
 
 }
 
+func (suite *ServiceTestSuite) TestSupportsAuthType() {
+
+	st := ServiceType{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, UUID: "uuid1", AuthMethod: "api-key", CreatedOn: "2018-05-05T18:04:05Z"}
+
+	err1 := st.SupportsAuthType("x509")
+	err2 := st.SupportsAuthType("unknown_auth_type")
+
+	suite.Nil(err1)
+	suite.Equal("Auth type: unknown_auth_type is not yet supported.Supported:[x509 oidc]", err2.Error())
+}
+
 func (suite *ServiceTestSuite) TestUpdateService() {
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
