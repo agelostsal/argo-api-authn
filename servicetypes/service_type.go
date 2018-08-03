@@ -290,7 +290,7 @@ func (s *ServiceType) IsOfValidType(cfg config.Config) error {
 }
 
 //UpdateServiceType updates a binding after validating its fields
-func UpdateServiceType(original ServiceType, tempBind TempServiceType, store stores.Store, cfg config.Config) (ServiceType, error) {
+func UpdateServiceType(original ServiceType, tempServiceType TempServiceType, store stores.Store, cfg config.Config) (ServiceType, error) {
 
 	var err error
 	var updated ServiceType
@@ -303,7 +303,7 @@ func UpdateServiceType(original ServiceType, tempBind TempServiceType, store sto
 		return ServiceType{}, err
 	}
 
-	if err := utils.CopyFields(tempBind, &updated); err != nil {
+	if err := utils.CopyFields(tempServiceType, &updated); err != nil {
 		err = utils.APIGenericInternalError(err.Error())
 		return ServiceType{}, err
 	}
@@ -314,8 +314,8 @@ func UpdateServiceType(original ServiceType, tempBind TempServiceType, store sto
 	}
 
 	// if there is an update happening to the name field, check if its unique
-	if original.Name != tempBind.Name {
-		if err = ExistsWithName(tempBind.Name, store); err != nil {
+	if original.Name != tempServiceType.Name {
+		if err = ExistsWithName(tempServiceType.Name, store); err != nil {
 			return ServiceType{}, err
 		}
 	}

@@ -12,14 +12,6 @@ import (
 	"io"
 )
 
-var ApiKeyAuthMethodsPaths = map[string]string{
-	"ams": "/v1/users:byUUID/{{identifier}}?key={{access_key}}",
-}
-
-var AuthMethodsRetrievalFields = map[string]string{
-	"ams": "token",
-}
-
 type AuthMethodInit func() AuthMethod
 
 var AuthMethodsTypes = map[string]AuthMethodInit{
@@ -153,7 +145,7 @@ func AuthMethodAlreadyExists(serviceUUID string, host string, authMethodType str
 		return err
 	}
 
-	// if the error
+	// if there is any other error, treat it as a normal error
 	if err.Error() != "Auth method was not found" {
 		return err
 	}
