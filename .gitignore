@@ -1,0 +1,5 @@
+.idea
+.DS_STORE
+argo-api-authn
+ams-create-users-gocdb.cfg
+config.json

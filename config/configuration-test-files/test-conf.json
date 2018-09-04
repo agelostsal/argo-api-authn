@@ -1,0 +1,17 @@
+{
+  "service_port":9000,
+  "mongo_host":"test_mongo_host",
+  "mongo_db":"test_mongo_db",
+  "certificate_authorities":"/path/to/cas",
+  "certificate":"/path/to/cert",
+  "certificate_key":"/path/to/key",
+  "service_token": "token",
+  "supported_auth_types": ["x509", "oidc"],
+  "supported_auth_methods": ["api-key", "x-api-token"],
+  "supported_service_types": ["ams", "web-api", "custom"],
+  "ssl_verify": true,
+  "trust_unknown_cas": false,
+  "verify_certificate": true,
+  "service_types_paths": {"ams": "/v1/users:byUUID/{{identifier}}?key={{access_key}}"},
+  "service_types_retrieval_fields": {"ams": "token"}
+}

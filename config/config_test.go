@@ -1,0 +1,78 @@
+package config
+
+import (
+	"testing"
+
+	"crypto/tls"
+	"github.com/stretchr/testify/suite"
+)
+
+type ConfigTestSuite struct {
+	suite.Suite
+}
+
+func (suite *ConfigTestSuite) TestConfigSetUp() {
+
+	// tests the case of a wrong path to a config file
+	cfg1 := &Config{}
+	err1 := cfg1.ConfigSetUp("/wrong/path")
+
+	// tests the case of a normal setup
+	cfg2 := &Config{}
+	err2 := cfg2.ConfigSetUp("./configuration-test-files/test-conf.json")
+	expCfg2 := &Config{
+		ServicePort:                 9000,
+		MongoHost:                   "test_mongo_host",
+		MongoDB:                     "test_mongo_db",
+		CertificateAuthorities:      "/path/to/cas",
+		Certificate:                 "/path/to/cert",
+		CertificateKey:              "/path/to/key",
+		ServiceToken:                "token",
+		SupportedAuthTypes:          []string{"x509", "oidc"},
+		SupportedAuthMethods:        []string{"api-key", "x-api-token"},
+		SupportedServiceTypes:       []string{"ams", "web-api", "custom"},
+		VerifySSL:                   false,
+		TrustUnknownCAs:             false,
+		VerifyCertificate:           true,
+		ServiceTypesPaths:           map[string]string{"ams": "/v1/users:byUUID/{{identifier}}?key={{access_key}}"},
+		ServiceTypesRetrievalFields: map[string]string{"ams": "token"},
+	}
+
+	//tests the case of a malformed json
+	cfg3 := &Config{}
+	err3 := cfg3.ConfigSetUp("./configuration-test-files/test-conf-invalid.json")
+
+	// tests the case of an undeclared field in the json file
+	cfg4 := &Config{}
+	err4 := cfg4.ConfigSetUp("./configuration-test-files/test-conf-missing-field.json")
+
+	// tests the case of an empty field in the json file
+	cfg5 := &Config{}
+	err5 := cfg5.ConfigSetUp("./configuration-test-files/test-conf-empty-field.json")
+
+	suite.Equal(expCfg2, cfg2)
+
+	suite.Equal("open /wrong/path: no such file or directory", err1.Error())
+	suite.Nil(err2)
+	suite.Equal("Something went wrong while marshaling the json data. Error: unexpected end of JSON input", err3.Error())
+	suite.Equal("config object contains empty fields. empty value for field: service_port", err4.Error())
+	suite.Equal("config object contains empty fields. empty value for field: mongo_host", err5.Error())
+
+}
+
+func (suite *ConfigTestSuite) TestClientAuthPolicy() {
+
+	// trust unknown cas
+	cfg1 := &Config{TrustUnknownCAs: true}
+
+	// don't trust unknown cas
+	cfg2 := &Config{TrustUnknownCAs: false}
+
+	suite.Equal(tls.RequestClientCert, cfg1.ClientAuthPolicy())
+	suite.Equal(tls.VerifyClientCertIfGiven, cfg2.ClientAuthPolicy())
+}
+
+func TestConfigTestSuite(t *testing.T) {
+	suite.Run(t, new(ConfigTestSuite))
+
+}
