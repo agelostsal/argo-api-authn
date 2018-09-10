@@ -52,7 +52,7 @@ SoPmZKiBeb+2OQ2n7+FI8ftkqxWw6zjh651brAoy/0zqLTRPh+c=
 	ers2 := ExtractEnhancedRDNSequenceToString(enhancedCert)
 
 	suite.Equal("O=COMPANY,L=CITY,ST=TN,C=TC", ers)
-	suite.Equal("O=COMPANY,L=CITY,ST=TN,C=TC,DC=v2,DC=v1", ers2)
+	suite.Equal("O=COMPANY,L=CITY,ST=TN,C=TC,DC=v1+DC=v2", ers2)
 }
 
 func (suite *CertificateTestSuite) TestCertHasExpired() {
@@ -170,6 +170,14 @@ lBlGGSW4gNfL1IYoakRwJiNiqZ+Gb7+6kHDSVneFeO/qJakXzlByjAA6quPbYzSf
 	err4 := ValidateClientCertificate(crt, "127.0.0.1:8080")
 	suite.Equal("x509: certificate is valid for COMODO RSA Domain Validation Secure Server CA, not localhost", err4.Error())
 
+}
+
+func (suite *CertificateTestSuite) TestFormatRdnToString() {
+
+	rdnValues := []string{"V1", "V2", "V3"}
+	printableString := FormatRdnToString("RDN", rdnValues)
+
+	suite.Equal("RDN=V1+RDN=V2+RDN=V3", printableString)
 }
 
 func TestCertificateTestSuite(t *testing.T) {

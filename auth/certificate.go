@@ -10,6 +10,7 @@ import (
 	"github.com/ARGOeu/argo-api-authn/utils"
 	LOGGER "github.com/sirupsen/logrus"
 	"net"
+	"strings"
 	"time"
 )
 
@@ -19,6 +20,7 @@ var ExtraAttributeNames = map[string]string{
 
 // load_CAs reads the root certificates from a directory within the filesystem, and creates the trusted root CA chain
 func LoadCAs(dir string) (roots *x509.CertPool) {
+
 	LOGGER.Info("Building the root CA chain...")
 	pattern := "*.pem"
 	roots = x509.NewCertPool()
@@ -33,9 +35,6 @@ func LoadCAs(dir string) (roots *x509.CertPool) {
 				return errors.New("Something went wrong while parsing certificate: " + filepath.Join(dir, info.Name()))
 			}
 		}
-		// if info.IsDir() {
-		// 	LOGGER.Infof("Skipping a dir without errors: %+v \n", info.Name())
-		// }
 		return nil
 	})
 
@@ -53,22 +52,59 @@ func LoadCAs(dir string) (roots *x509.CertPool) {
 // and then adding extra attribute names that we have defined
 func ExtractEnhancedRDNSequenceToString(cert *x509.Certificate) string {
 
-	var ers string
+	var sb strings.Builder
 
-	ers = cert.Subject.ToRDNSequence().String()
+	// create a map that will hold the values of the additional RDNs that we have defined
+	// make sure that the initialized keys match the values of the ExtraAttributeNames map defined in this package
+	extraRDNS := map[string][]string{}
+	extraRDNS["DC"] = []string{}
 
-	// we loop the extra attributes in reverse order since certificates from goc db have the RDNs reversed
-
-	for i := len(cert.Subject.Names); i > 0; i-- {
-		atv := cert.Subject.Names[i-1]
+	// loop through the attribute names of the cert
+	// if the type matches any of the predefined asn1.ObjectIdentifiers then append its value to the respective rdn
+	for i := 0; i < len(cert.Subject.Names); i++ {
+		atv := cert.Subject.Names[i]
 		if value, ok := ExtraAttributeNames[atv.Type.String()]; ok {
-			ers += "," + value + "=" + atv.Value.(string)
+			extraRDNS[value] = append(extraRDNS[value], atv.Value.(string))
 		}
 
 	}
 
-	return ers
+	sb.WriteString(cert.Subject.ToRDNSequence().String())
 
+	// check the extra RDNs if the have any registered values
+	if len(extraRDNS["DC"]) > 0 {
+		sb.WriteString(",")
+		sb.WriteString(FormatRdnToString("DC", extraRDNS["DC"]))
+	}
+
+	return sb.String()
+
+}
+
+// FormatRdnToString transforms the values of a given RDN to a printable string
+// e.g. rdn=DC, rdnValues=[argo, grnet, gr ], ths should be transformed to DC=argo+DC=grnet+DC=gr
+func FormatRdnToString(rdn string, rdnValues []string) string {
+
+	var sb strings.Builder
+
+	// operator is a string literal that stands between the values of the given RDN
+	var operator string
+
+	// loop through the values and create the printable string
+	for _, rdnValue := range rdnValues {
+
+		// if the string is empty, we should use no operator since there are no values present in the string
+		if sb.String() != "" {
+			operator = "+"
+		}
+
+		sb.WriteString(operator)
+		sb.WriteString(rdn)
+		sb.WriteString("=")
+		sb.WriteString(rdnValue)
+	}
+
+	return sb.String()
 }
 
 // ValidateClientCertificate performs a number of different checks to ensure the provided certificate is valid
@@ -88,13 +124,16 @@ func ValidateClientCertificate(cert *x509.Certificate, clientIP string) error {
 		return err
 	}
 
-	LOGGER.Infof("Certificate request: %v from Host: %v with IP: %v", cert.Subject.ToRDNSequence().String(), hosts, clientIP)
+	LOGGER.Infof("Certificate request: %v from Host: %v with IP: %v", ExtractEnhancedRDNSequenceToString(cert), hosts, clientIP)
 
 	// loop through hosts and check if any of them matches with the one specified in the certificate
 	var tmpErr error
 	for _, h := range hosts {
+		// if there is an error, hold a temporary error and move to next host
 		if err = cert.VerifyHostname(h); err != nil {
 			tmpErr = &utils.APIError{Code: 403, Message: err.Error(), Status: "ACCESS_FORBIDDEN"}
+			// if there is no error, clear the temporary error and break out of the check loop,
+			// if we don't break the loop, if there is another host declared, it will declare a temporary error
 		} else {
 			tmpErr = nil
 			break
