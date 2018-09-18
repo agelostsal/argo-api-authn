@@ -276,7 +276,17 @@ def create_users(config, verify):
 
         # modify the acl for each topic , to add all associated users
         authorized_users = services[srv_type]
-        requests.post("https://"+ams_host+"/v1/projects/"+ams_project+"/topics/"+srv_type+":modifyAcl?key="+ams_token, data=json.dumps({'authorized_users': authorized_users}), verify=verify)
+        if len(authorized_users) != 0:
+
+            get_topic_acl_req =  requests.get("https://"+ams_host+"/v1/projects/"+ams_project+"/topics/"+srv_type+":acl?key="+ams_token, verify=verify)
+
+            if get_topic_acl_req.status_code == 200:
+                acl_users = json.loads(get_topic_acl_req.text)
+                authorized_users = authorized_users + acl_users["authorized_users"]
+                modify_topic_acl_req = requests.post("https://"+ams_host+"/v1/projects/"+ams_project+"/topics/"+srv_type+":modifyAcl?key="+ams_token, data=json.dumps({'authorized_users': authorized_users}), verify=verify)
+                LOGGER.critical("Modified ACL for topic: {} with users {}. Response from AMS {}".format(srv_type, str(authorized_users), modify_topic_acl_req.text))
+            else:
+                LOGGER.critical("Couldn't get ACL for topic {}. Response from AMS {}".format(srv_type, get_topic_acl_req.text))
 
         LOGGER.critical("Service Type: " + srv_type)
 
