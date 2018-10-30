@@ -12,5 +12,5 @@ setup(
     scripts=['./bin/argo-api-authn-scripts/ams-create-users-gocdb.py'],
     package_dir={'argo_api_authn_scripts': './bin/argo-api-authn-scripts/'},
     packages=['argo_api_authn_scripts'],
-    install_requires=['defusedxml==0.5.0', 'requests==2.18.4']
+    install_requires=['defusedxml==0.5.0', 'requests==2.20']
     )
