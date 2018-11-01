@@ -3,6 +3,7 @@
 | Script | Description | Shortcut |
 |--------|-------------|---------- |
 | ams-create-users-gocdb.py | Python script that creates ams users and binding.| [Details](#ams-create-users-gocdb) |
+| ams-create-users-cloud-info.py | Python script that creates ams users, binding and topics per site.| [Details](#ams-create-users-cloud-info) |
 
 <a id="ams-create-users-gocdb"></a>
 ## AMS Create users from goc db script
@@ -17,8 +18,25 @@ it will first look at /etc/argo-api-authn/conf.d/ams-users-create-gocdb.cfg
 and then will look at projects conf folder`
 
 `-verify: If specified all the requests will check the validity of the ssl certificate`
-##### Configuration
-Use the `ams-create-users-gocdb.template` to produce your conf file.
+
+<a id="ams-create-users-cloud-info"></a>
+## AMS Create users and topics per site
+Python utility script that takes an xml feed from goc db, creates the respective
+ams users under the specified project, assigns to the correct project's topic, 
+creates the binding for each user, using the dn from goc db and finally creates 
+topics with the schema SITE\_`sitename`\_ENDPOINT\_`id_in_gocdb`.
+
+`ams-create-users-cloud-info.py -c <ConfigPath> -verify`
+
+`-c : Path to an appropriate config file.If not specified
+it will first look at /etc/argo-api-authn/conf.d/ams-create-users-cloud-info.cfg
+and then will look at projects conf folder`
+
+`-verify: If specified all the requests will check the validity of the ssl certificate`
+
+## Configuration
+Use the `ams-create-users-gocdb.template` or `ams-create-users-cloud-info.template`
+respectively to produce your conf file.
 The project should exist in AMS in advance.
 The service types specified should also be present as topics in ams under the specified project
 ```buildoutcfg
