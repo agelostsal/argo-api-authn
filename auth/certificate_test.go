@@ -88,7 +88,7 @@ SoPmZKiBeb+2OQ2n7+FI8ftkqxWw6zjh651brAoy/0zqLTRPh+c=
 	err1 := CertHasExpired(crt)
 
 	// expired case
-	crt.NotAfter = time.Now()
+	crt.NotAfter = time.Now().AddDate(0,0,-1)
 	err2 := CertHasExpired(crt)
 
 	//  not active yet
