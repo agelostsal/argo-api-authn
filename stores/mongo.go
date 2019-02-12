@@ -16,19 +16,18 @@ type MongoStore struct {
 // Initialize initializes the mongo stores struct
 func (mongo *MongoStore) SetUp() {
 
-	var err error
-	var session = &mgo.Session{}
+	for {
+		LOGGER.Info("STORE", "\t", "Trying to connect to mongo: ", mongo.Server)
+		session, err := mgo.Dial(mongo.Server)
+		if err != nil {
+			LOGGER.Error("STORE", "\t", err.Error())
+			continue
+		}
 
-	session, err = mgo.Dial(mongo.Server)
-	mongo.Session = session
-
-	if err != nil {
-		LOGGER.Error("STORE", "\t", err.Error())
-		return
+		mongo.Session = session
+		LOGGER.Info("STORE", "\t", "Connected to Mongo: ", mongo.Server)
+		break
 	}
-
-	LOGGER.Info("STORE", "\t", "Connected to Mongo: ", mongo.Server)
-
 }
 
 func (mongo *MongoStore) Clone() Store {
