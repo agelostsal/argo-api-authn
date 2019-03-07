@@ -3,7 +3,7 @@
 
 Name: argo-api-authn
 Summary: ARGO Authentication API. Map X509, OICD to token.
-Version: 0.1.1
+Version: 0.1.2
 Release: 1%{?dist}
 License: ASL 2.0
 Buildroot: %{_tmppath}/%{name}-buildroot
@@ -57,6 +57,10 @@ go clean
 %attr(0644,root,root) /usr/lib/systemd/system/argo-api-authn.service
 
 %changelog
+* Thu Mar 7 2019 Agelos Tsalapatis  <agelos.tsal@gmail.com> - 0.1.2-1%{?dist}
+- ARGO-1659 Authn should not start if there is no database connection established
+- Utility script that creates users and topics per site
+- ARGO-1463 argo-api-authn moderate severity security vulnerability regarding requests library
 * Tue Oct 2 2018 Kostas Koumantaros  <kkoumantaros@gmail.com> - 0.1.1-1%{?dist}
 - ARGO-1405 Don't override the topic's acl in goc db users creation script
 - ARGO-1397 Fix DN parsing to follow a predictable pattern
