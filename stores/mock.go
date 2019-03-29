@@ -27,9 +27,9 @@ func (mock *Mockstore) SetUp() {
 	mock.ServiceTypes = append(mock.ServiceTypes, service1, service2, serviceSame1, serviceSame2)
 
 	// Populate Bindings
-	binding1 := QBinding{Name: "b1", ServiceUUID: "uuid1", Host: "host1", UUID: "b_uuid1", DN: "test_dn_1", OIDCToken: "", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
-	binding2 := QBinding{Name: "b2", ServiceUUID: "uuid1", Host: "host1", UUID: "b_uuid2", DN: "test_dn_2", OIDCToken: "", UniqueKey: "unique_key_2", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
-	binding3 := QBinding{Name: "b3", ServiceUUID: "uuid1", Host: "host2", UUID: "b_uuid3", DN: "test_dn_3", OIDCToken: "", UniqueKey: "unique_key_3", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
+	binding1 := QBinding{Name: "b1", ServiceUUID: "uuid1", Host: "host1", UUID: "b_uuid1", AuthIdentifier: "test_dn_1", UniqueKey: "unique_key_1", AuthType: "x509", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
+	binding2 := QBinding{Name: "b2", ServiceUUID: "uuid1", Host: "host1", UUID: "b_uuid2", AuthIdentifier: "test_dn_2", UniqueKey: "unique_key_2", AuthType: "x509", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
+	binding3 := QBinding{Name: "b3", ServiceUUID: "uuid1", Host: "host2", UUID: "b_uuid3", AuthIdentifier: "test_dn_3", UniqueKey: "unique_key_3", AuthType: "x509", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
 	mock.Bindings = append(mock.Bindings, binding1, binding2, binding3)
 
 	// Populate AuthMethods
@@ -114,12 +114,12 @@ func (mock *Mockstore) QueryApiKeyAuthMethods(serviceUUID string, host string) (
 
 }
 
-func (mock *Mockstore) QueryBindingsByDN(dn string, serviceUUID string, host string) ([]QBinding, error) {
+func (mock *Mockstore) QueryBindingsByAuthID(authID string, serviceUUID string, host string, authType string) ([]QBinding, error) {
 
 	var qBindings []QBinding
 
 	for _, qBinding := range mock.Bindings {
-		if qBinding.DN == dn && qBinding.Host == host && qBinding.ServiceUUID == serviceUUID {
+		if qBinding.AuthIdentifier == authID && qBinding.Host == host && qBinding.ServiceUUID == serviceUUID && qBinding.AuthType == authType {
 			qBindings = append(qBindings, qBinding)
 		}
 	}
@@ -174,9 +174,18 @@ func (mock *Mockstore) InsertServiceType(name string, hosts []string, authTypes 
 	return qService, nil
 }
 
-func (mock *Mockstore) InsertBinding(name string, serviceUUID string, host string, uuid string, dn string, oidcToken string, uniqueKey string) (QBinding, error) {
+func (mock *Mockstore) InsertBinding(name string, serviceUUID string, host string, uuid string, authID string, uniqueKey string, authType string) (QBinding, error) {
 
-	qBinding := QBinding{Name: name, ServiceUUID: serviceUUID, Host: host, DN: dn, UUID: uuid, OIDCToken: oidcToken, UniqueKey: uniqueKey, CreatedOn: utils.ZuluTimeNow()}
+	qBinding := QBinding{
+		Name:           name,
+		ServiceUUID:    serviceUUID,
+		Host:           host,
+		UUID:           uuid,
+		AuthIdentifier: authID,
+		UniqueKey:      uniqueKey,
+		AuthType:       authType,
+		CreatedOn:      utils.ZuluTimeNow(),
+	}
 
 	mock.Bindings = append(mock.Bindings, qBinding)
 

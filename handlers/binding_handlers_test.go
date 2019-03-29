@@ -12,6 +12,7 @@ import (
 	"github.com/ARGOeu/argo-api-authn/bindings"
 	"github.com/ARGOeu/argo-api-authn/config"
 	"github.com/gorilla/mux"
+	"io/ioutil"
 	"net/http/httptest"
 )
 
@@ -26,9 +27,9 @@ func (suite *BindingHandlersSuite) TestBindingCreate() {
 	"name": "new_binding",
 	"service_uuid": "uuid1",
     "host": "host1",
-    "dn": "test_dn",
-    "oidc_token": "",
-    "unique_key": "uni_key"
+    "auth_identifier": "test_dn",
+    "unique_key": "uni_key",
+    "auth_type": "x509"
 }`
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/bindings", bytes.NewBuffer([]byte(postJSON)))
@@ -53,10 +54,9 @@ func (suite *BindingHandlersSuite) TestBindingCreate() {
 	suite.Equal("uuid1", createdBind.ServiceUUID)
 	suite.Equal("host1", createdBind.Host)
 	suite.Equal("new_binding", createdBind.Name)
-	suite.Equal("test_dn", createdBind.DN)
-	suite.Equal("", createdBind.OIDCToken)
+	suite.Equal("test_dn", createdBind.AuthIdentifier)
 	suite.Equal("uni_key", createdBind.UniqueKey)
-
+	suite.Equal("x509", createdBind.AuthType)
 }
 
 // TestBindingCreateMissingFieldName tests the case where the binding doesn't contain the  name field
@@ -65,8 +65,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldName() {
 	postJSON := `{
 	"service_uuid": "uuid1",
     "host": "host1",
-    "dn": "test_dn",
-    "oidc_token": "",
+    "auth_identifier": "test_dn",
     "unique_key": "uni_key"
 }`
 
@@ -104,8 +103,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateInvalidJSON() {
 	postJSON := `{
 	"service_uuid": "uuid1",
     "host": "host1",
-    "dn": "test_dn",
-    "oidc_token": "",
+    "auth_identifier": "test_dn",
     "unique_key": "uni_key"
 `
 
@@ -143,8 +141,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldServiceUUID() {
 	postJSON := `{
     "name": "b1",
     "host": "host1",
-    "dn": "test_dn",
-    "oidc_token": "",
+    "auth_identifier": "test_dn",
     "unique_key": "uni_key"
 }`
 
@@ -182,8 +179,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldHost() {
 	postJSON := `{
     "name": "b1",
 	"service_uuid": "uuid1",
-    "dn": "test_dn",
-    "oidc_token": "",
+    "auth_identifier": "test_dn",
     "unique_key": "uni_key"
 }`
 
@@ -215,8 +211,8 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldHost() {
 
 }
 
-// TestBindingCreateMissingFieldDNAndOIDC tests the case where the binding doesn't contain both dn and oidc fields
-func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldDNAndOIDC() {
+// TestBindingCreateMissingFieldAuthID tests the case where the binding doesn't contain the auth_identifier field
+func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldAuthID() {
 
 	postJSON := `{
     "name": "b1",
@@ -227,7 +223,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldDNAndOIDC() {
 
 	expRespJSON := `{
  "error": {
-  "message": "binding object contains empty fields. Both DN and OIDC Token fields are empty",
+  "message": "binding object contains empty fields. empty value for field: auth_identifier",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
@@ -260,8 +256,8 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldUniqueKey() {
     "name": "b1",
     "service_uuid": "uuid1",
     "host": "host1",
-    "dn": "test_dn",
-    "oidc_token": ""
+    "auth_identifier": "test_dn",
+    "auth_type": "x509"
 }`
 
 	expRespJSON := `{
@@ -298,8 +294,8 @@ func (suite *BindingHandlersSuite) TestBindingCreateUnknownService() {
     "name": "b1",
     "service_uuid": "unknown",
     "host": "host1",
-    "dn": "test_dn",
-    "oidc_token": "",
+    "auth_identifier": "test_dn",
+    "auth_type": "x509",
     "unique_key":"key1"
 }`
 
@@ -337,8 +333,8 @@ func (suite *BindingHandlersSuite) TestBindingCreateUnknownHost() {
     "name": "b1",
     "service_uuid": "uuid1",
     "host": "unknown",
-    "dn": "test_dn",
-    "oidc_token": "",
+    "auth_identifier": "test_dn",
+    "auth_type": "x509",
     "unique_key":"key1"
 }`
 
@@ -376,14 +372,14 @@ func (suite *BindingHandlersSuite) TestBindingCreateDNAlreadyExists() {
     "name": "b1",
     "service_uuid": "uuid1",
     "host": "host1",
-    "dn": "test_dn_1",
-    "oidc_token": "",
-    "unique_key":"key1"
+    "auth_identifier": "test_dn_1",
+    "unique_key":"key1",
+    "auth_type": "x509"
 }`
 
 	expRespJSON := `{
  "error": {
-  "message": "binding object with dn: test_dn_1 already exists",
+  "message": "binding object with auth_identifier: test_dn_1 already exists",
   "code": 409,
   "status": "CONFLICT"
  }
@@ -418,8 +414,9 @@ func (suite *BindingHandlersSuite) TestBindingListAll() {
    "service_uuid": "uuid1",
    "host": "host1",
    "uuid": "b_uuid1",
-   "dn": "test_dn_1",
+   "auth_identifier": "test_dn_1",
    "unique_key": "unique_key_1",
+   "auth_type": "x509",
    "created_on": "2018-05-05T15:04:05Z"
   },
   {
@@ -427,8 +424,9 @@ func (suite *BindingHandlersSuite) TestBindingListAll() {
    "service_uuid": "uuid1",
    "host": "host1",
    "uuid": "b_uuid2",
-   "dn": "test_dn_2",
+   "auth_identifier": "test_dn_2",
    "unique_key": "unique_key_2",
+   "auth_type": "x509",
    "created_on": "2018-05-05T15:04:05Z"
   },
   {
@@ -436,8 +434,9 @@ func (suite *BindingHandlersSuite) TestBindingListAll() {
    "service_uuid": "uuid1",
    "host": "host2",
    "uuid": "b_uuid3",
-   "dn": "test_dn_3",
+   "auth_identifier": "test_dn_3",
    "unique_key": "unique_key_3",
+   "auth_type": "x509",
    "created_on": "2018-05-05T15:04:05Z"
   }
  ]
@@ -471,8 +470,9 @@ func (suite *BindingHandlersSuite) TestBindingListAllByServiceTypeAndHost() {
    "service_uuid": "uuid1",
    "host": "host1",
    "uuid": "b_uuid1",
-   "dn": "test_dn_1",
+   "auth_identifier": "test_dn_1",
    "unique_key": "unique_key_1",
+   "auth_type": "x509",
    "created_on": "2018-05-05T15:04:05Z"
   },
   {
@@ -480,8 +480,9 @@ func (suite *BindingHandlersSuite) TestBindingListAllByServiceTypeAndHost() {
    "service_uuid": "uuid1",
    "host": "host1",
    "uuid": "b_uuid2",
-   "dn": "test_dn_2",
+   "auth_identifier": "test_dn_2",
    "unique_key": "unique_key_2",
+   "auth_type": "x509",
    "created_on": "2018-05-05T15:04:05Z"
   }
  ]
@@ -621,16 +622,17 @@ func (suite *BindingHandlersSuite) TestBindingListAllByServiceTypeAndHostUnknown
 	suite.Equal(expRespJSON, w.Body.String())
 }
 
-// TestBindingListOneByDN tests the normal case
-func (suite *BindingHandlersSuite) TestBindingListOneByDN() {
+// TestBindingListOneByAuthID tests the normal case
+func (suite *BindingHandlersSuite) TestBindingListOneByAuthID() {
 
 	expRespJSON := `{
  "name": "b1",
  "service_uuid": "uuid1",
  "host": "host1",
  "uuid": "b_uuid1",
- "dn": "test_dn_1",
+ "auth_identifier": "test_dn_1",
  "unique_key": "unique_key_1",
+ "auth_type": "x509",
  "created_on": "2018-05-05T15:04:05Z"
 }`
 
@@ -647,7 +649,7 @@ func (suite *BindingHandlersSuite) TestBindingListOneByDN() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/service-types/{service-type}/hosts/{host}/bindings/{dn}", WrapConfig(BindingListOneByDN, mockstore, cfg))
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/bindings/{dn}", WrapConfig(BindingListOneByAuthID, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(200, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -658,7 +660,7 @@ func (suite *BindingHandlersSuite) TestBindingListOneByDNMultipleEntries() {
 
 	expRespJSON := `{
  "error": {
-  "message": "Database Error: More than 1 bindings found under the service type: uuid1 and host: host1 using the same DN: test_dn_1",
+  "message": "Database Error: More than 1 bindings found under the service type: uuid1 and host: host1 using the same AuthIdentifier: test_dn_1",
   "code": 500,
   "status": "INTERNAL SERVER ERROR"
  }
@@ -673,7 +675,7 @@ func (suite *BindingHandlersSuite) TestBindingListOneByDNMultipleEntries() {
 	mockstore.SetUp()
 
 	// add a binding that already exists
-	binding1 := stores.QBinding{Name: "b1", ServiceUUID: "uuid1", Host: "host1", UUID: "b_uuid1", DN: "test_dn_1", OIDCToken: "", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
+	binding1 := stores.QBinding{Name: "b1", ServiceUUID: "uuid1", Host: "host1", UUID: "b_uuid1", AuthIdentifier: "test_dn_1", AuthType: "x509", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
 	mockstore.Bindings = append(mockstore.Bindings, binding1)
 
 	cfg := &config.Config{}
@@ -681,7 +683,7 @@ func (suite *BindingHandlersSuite) TestBindingListOneByDNMultipleEntries() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/service-types/{service-type}/hosts/{host}/bindings/{dn}", WrapConfig(BindingListOneByDN, mockstore, cfg))
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/bindings/{dn}", WrapConfig(BindingListOneByAuthID, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(500, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -771,7 +773,7 @@ func (suite *BindingHandlersSuite) TestBindingListOneByDnUnknownDN() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/service-types/{service-type}/hosts/{host}/bindings/{dn}", WrapConfig(BindingListOneByDN, mockstore, cfg))
+	router.HandleFunc("/service-types/{service-type}/hosts/{host}/bindings/{dn}", WrapConfig(BindingListOneByAuthID, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(404, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -785,8 +787,9 @@ func (suite *BindingHandlersSuite) TestBindingListOneByUUID() {
  "service_uuid": "uuid1",
  "host": "host1",
  "uuid": "b_uuid1",
- "dn": "test_dn_1",
+ "auth_identifier": "test_dn_1",
  "unique_key": "unique_key_1",
+ "auth_type": "x509",
  "created_on": "2018-05-05T15:04:05Z"
 }`
 
@@ -857,7 +860,7 @@ func (suite *BindingHandlersSuite) TestBindingListOneByUUIDMultipleEntries() {
 	mockstore.SetUp()
 
 	// add a binding that already exists
-	binding1 := stores.QBinding{Name: "b1", ServiceUUID: "uuid1", Host: "host1", UUID: "b_uuid1", DN: "test_dn_1", OIDCToken: "", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
+	binding1 := stores.QBinding{Name: "b1", ServiceUUID: "uuid1", Host: "host1", UUID: "b_uuid1", AuthIdentifier: "test_dn_1", AuthType: "x509", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
 	mockstore.Bindings = append(mockstore.Bindings, binding1)
 
 	cfg := &config.Config{}
@@ -883,8 +886,9 @@ func (suite *BindingHandlersSuite) TestBindingUpdate() {
  "service_uuid": "uuid1",
  "host": "host1",
  "uuid": "b_uuid1",
- "dn": "test_dn_1",
+ "auth_identifier": "test_dn_1",
  "unique_key": "unique_key_1",
+ "auth_type": "x509",
  "created_on": "2018-05-05T15:04:05Z"
 }`
 	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
@@ -1009,12 +1013,12 @@ func (suite *BindingHandlersSuite) TestBindingUpdateUniqueKeyEmpty() {
 func (suite *BindingHandlersSuite) TestBindingUpdateDNEmpty() {
 
 	postJSON := `{
-	"dn": ""
+	"auth_identifier": ""
 }`
 
 	expRespJSON := `{
  "error": {
-  "message": "binding object contains empty fields. Both DN and OIDC Token fields are empty",
+  "message": "binding object contains empty fields. empty value for field: auth_identifier",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
@@ -1137,16 +1141,16 @@ func (suite *BindingHandlersSuite) TestBindingUpdateInvalidJSON() {
 	suite.Equal(expRespJSON, w.Body.String())
 }
 
-// TestBindingUpdateDNAlreadyExists tests case of updating a binding's dn into an already existing one
-func (suite *BindingHandlersSuite) TestBindingUpdateDNAlreadyExists() {
+// TestBindingUpdateAuthIDAlreadyExists tests case of updating a binding's auth identifier into an already existing one
+func (suite *BindingHandlersSuite) TestBindingUpdateAuthIDAlreadyExists() {
 
 	postJSON := `{
-	"dn": "test_dn_2"
+	"auth_identifier": "test_dn_2"
 }`
 
 	expRespJSON := `{
  "error": {
-  "message": "binding object with dn: test_dn_2 already exists",
+  "message": "binding object with auth_identifier: test_dn_2 already exists",
   "code": 409,
   "status": "CONFLICT"
  }
@@ -1252,5 +1256,6 @@ func (suite *BindingHandlersSuite) TestBindingDeleteUnknownDN() {
 }
 
 func TestBindingHandlersSuite(t *testing.T) {
+	LOGGER.SetOutput(ioutil.Discard)
 	suite.Run(t, new(BindingHandlersSuite))
 }
