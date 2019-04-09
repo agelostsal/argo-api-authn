@@ -16,6 +16,7 @@ type AuthMethodInit func() AuthMethod
 
 var AuthMethodsTypes = map[string]AuthMethodInit{
 	"api-key": NewApiKeyAuthMethod,
+	"headers": NewHeadersAuthMethod,
 }
 
 // A function type that refers to all the query functions for all the respective tuh method types
@@ -23,6 +24,7 @@ type QueryAuthMethodFinder func(serviceUUID string, host string, store stores.St
 
 var QueryAuthMethodFinders = map[string]QueryAuthMethodFinder{
 	"api-key": ApiKeyAuthFinder,
+	"headers": HeadersAuthFinder,
 }
 
 type AuthMethod interface {

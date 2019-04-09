@@ -33,7 +33,7 @@ func (suite *StoreTestSuite) TestSetUp() {
 
 	// Populate qServices
 	service1 := QServiceType{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", UUID: "uuid1", CreatedOn: "2018-05-05T18:04:05Z", Type: "ams"}
-	service2 := QServiceType{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", UUID: "uuid2", CreatedOn: "2018-05-05T18:04:05Z", Type: "ams"}
+	service2 := QServiceType{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "headers", UUID: "uuid2", CreatedOn: "2018-05-05T18:04:05Z", Type: "web-api"}
 	serviceSame1 := QServiceType{Name: "same_name"}
 	serviceSame2 := QServiceType{Name: "same_name"}
 	qServices = append(qServices, service1, service2, serviceSame1, serviceSame2)
@@ -42,14 +42,16 @@ func (suite *StoreTestSuite) TestSetUp() {
 	binding1 := QBinding{Name: "b1", ServiceUUID: "uuid1", Host: "host1", UUID: "b_uuid1", AuthIdentifier: "test_dn_1", UniqueKey: "unique_key_1", AuthType: "x509", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
 	binding2 := QBinding{Name: "b2", ServiceUUID: "uuid1", Host: "host1", UUID: "b_uuid2", AuthIdentifier: "test_dn_2", UniqueKey: "unique_key_2", AuthType: "x509", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
 	binding3 := QBinding{Name: "b3", ServiceUUID: "uuid1", Host: "host2", UUID: "b_uuid3", AuthIdentifier: "test_dn_3", UniqueKey: "unique_key_3", AuthType: "x509", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
+	binding4 := QBinding{Name: "b4", ServiceUUID: "uuid2", Host: "host3", UUID: "b_uuid4", AuthIdentifier: "test_dn_1", UniqueKey: "unique_key_1", AuthType: "x509", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
 
-	qBindings = append(qBindings, binding1, binding2, binding3)
+	qBindings = append(qBindings, binding1, binding2, binding3, binding4)
 
 	// Populate AuthMethods
 	amb1 := QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Type: "api-key", UUID: "am_uuid_1", CreatedOn: ""}
-	am1 := &QApiKeyAuthMethod{AccessKey: "access_key"}
-	am1.QBasicAuthMethod = amb1
-	qAuthms = append(qAuthms, am1)
+	am1 := &QApiKeyAuthMethod{QBasicAuthMethod: amb1, AccessKey: "access_key"}
+	amb2 := QBasicAuthMethod{ServiceUUID: "uuid2", Host: "host3", Port: 9000, Type: "headers", UUID: "am_uuid_2", CreatedOn: ""}
+	am2 := &QHeadersAuthMethod{QBasicAuthMethod: amb2, Headers: map[string]string{"x-api-key": "key-1", "Accept": "application/json"}}
+	qAuthms = append(qAuthms, am1, am2)
 
 	suite.Equal(mockstore.Session, true)
 	suite.Equal(mockstore.Database, "test_db")
@@ -84,13 +86,13 @@ func (suite *StoreTestSuite) TestQueryServiceTypes() {
 	// normal case outcome - 1 service
 	expQServices1 := []QServiceType{{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", UUID: "uuid1", CreatedOn: "2018-05-05T18:04:05Z", Type: "ams"}}
 	qServices1, err1 := suite.Mockstore.QueryServiceTypes("s1")
-	expQServices2 := []QServiceType{{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", UUID: "uuid2", CreatedOn: "2018-05-05T18:04:05Z", Type: "ams"}}
+	expQServices2 := []QServiceType{{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "headers", UUID: "uuid2", CreatedOn: "2018-05-05T18:04:05Z", Type: "web-api"}}
 	qServices2, err2 := suite.Mockstore.QueryServiceTypes("s2")
 
 	// normal case outcome - all services
 	expQServicesAll := []QServiceType{
 		{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", UUID: "uuid1", CreatedOn: "2018-05-05T18:04:05Z", Type: "ams"},
-		{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", UUID: "uuid2", CreatedOn: "2018-05-05T18:04:05Z", Type: "ams"},
+		{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "headers", UUID: "uuid2", CreatedOn: "2018-05-05T18:04:05Z", Type: "web-api"},
 		{Name: "same_name"},
 		{Name: "same_name"},
 	}
@@ -161,6 +163,32 @@ func (suite *StoreTestSuite) TestQueryApiKeyAuthMethods() {
 	suite.Nil(err3)
 }
 
+func (suite *StoreTestSuite) TestQueryHeadersMethods() {
+
+	suite.SetUpStoreTestSuite()
+
+	// normal case
+	var expApiAms []QHeadersAuthMethod
+	amb2 := QBasicAuthMethod{ServiceUUID: "uuid2", Host: "host3", Port: 9000, Type: "headers", UUID: "am_uuid_2", CreatedOn: ""}
+	am2 := QHeadersAuthMethod{QBasicAuthMethod: amb2, Headers: map[string]string{"x-api-key": "key-1", "Accept": "application/json"}}
+	expApiAms = append(expApiAms, am2)
+	apiAms, err1 := suite.Mockstore.QueryHeadersAuthMethods("uuid2", "host3")
+
+	// not found - empty list
+	apiAms2, err2 := suite.Mockstore.QueryHeadersAuthMethods("unknown", "unknown")
+
+	// query all
+	apiAms3, err3 := suite.Mockstore.QueryHeadersAuthMethods("", "")
+
+	suite.Equal(expApiAms, apiAms)
+	suite.Equal(0, len(apiAms2))
+	suite.Equal(expApiAms, apiAms3)
+
+	suite.Nil(err1)
+	suite.Nil(err2)
+	suite.Nil(err3)
+}
+
 func (suite *StoreTestSuite) TestQueryBindingsByDN() {
 
 	suite.SetUpStoreTestSuite()
@@ -219,6 +247,7 @@ func (suite *StoreTestSuite) TestQueryBindings() {
 		{Name: "b1", ServiceUUID: "uuid1", Host: "host1", UUID: "b_uuid1", AuthIdentifier: "test_dn_1", UniqueKey: "unique_key_1", AuthType: "x509", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""},
 		{Name: "b2", ServiceUUID: "uuid1", Host: "host1", UUID: "b_uuid2", AuthIdentifier: "test_dn_2", UniqueKey: "unique_key_2", AuthType: "x509", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""},
 		{Name: "b3", ServiceUUID: "uuid1", Host: "host2", UUID: "b_uuid3", AuthIdentifier: "test_dn_3", UniqueKey: "unique_key_3", AuthType: "x509", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""},
+		{Name: "b4", ServiceUUID: "uuid2", Host: "host3", UUID: "b_uuid4", AuthIdentifier: "test_dn_1", UniqueKey: "unique_key_1", AuthType: "x509", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""},
 	}
 	qBindings2, err2 := suite.Mockstore.QueryBindings("", "")
 
@@ -368,11 +397,9 @@ func (suite *StoreTestSuite) TestDeleteBindingByUUID() {
 
 	err1 := suite.Mockstore.DeleteBindingByServiceUUID("uuid1")
 
-	// query to check if the binding still exists
-	// since all bindings are related to service with uuid uuid1
-	// the mockstore slice should be empty
+	// since 3 of the 4 bindings belong to the service with uuid1
 
-	suite.Equal(0, len(suite.Mockstore.Bindings))
+	suite.Equal(1, len(suite.Mockstore.Bindings))
 	suite.Nil(err1)
 }
 
@@ -388,6 +415,7 @@ func (suite *StoreTestSuite) TestDeleteBinding() {
 	expBindings := []QBinding{
 		{Name: "b2", ServiceUUID: "uuid1", Host: "host1", UUID: "b_uuid2", AuthIdentifier: "test_dn_2", UniqueKey: "unique_key_2", AuthType: "x509", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""},
 		{Name: "b3", ServiceUUID: "uuid1", Host: "host2", UUID: "b_uuid3", AuthIdentifier: "test_dn_3", UniqueKey: "unique_key_3", AuthType: "x509", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""},
+		{Name: "b4", ServiceUUID: "uuid2", Host: "host3", UUID: "b_uuid4", AuthIdentifier: "test_dn_1", UniqueKey: "unique_key_1", AuthType: "x509", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""},
 	}
 	qBindings, _ := suite.Mockstore.QueryBindings("", "")
 
@@ -400,11 +428,10 @@ func (suite *StoreTestSuite) TestDeleteAuthMethodByUUID() {
 
 	suite.SetUpStoreTestSuite()
 
-	// since all auth methods are assigned to the same service, we expect the slice of auth methods to be slice after deleting
 	err1 := suite.Mockstore.DeleteAuthMethodByServiceUUID("uuid1")
 
 	suite.Nil(err1)
-	suite.Equal(0, len(suite.Mockstore.AuthMethods))
+	suite.Equal(1, len(suite.Mockstore.AuthMethods))
 }
 
 func (suite *StoreTestSuite) TestDeleteAuthMethod() {
@@ -422,7 +449,9 @@ func (suite *StoreTestSuite) TestDeleteAuthMethod() {
 
 	amb := QBasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Type: "api-key", UUID: "am_uuid_1", CreatedOn: ""}
 	expApiAms := &QApiKeyAuthMethod{amb, "access_key"}
-	expAMS = append(expAMS, expApiAms)
+	amb2 := QBasicAuthMethod{ServiceUUID: "uuid2", Host: "host3", Port: 9000, Type: "headers", UUID: "am_uuid_2", CreatedOn: ""}
+	expHeaderam := &QHeadersAuthMethod{QBasicAuthMethod: amb2, Headers: map[string]string{"x-api-key": "key-1", "Accept": "application/json"}}
+	expAMS = append(expAMS, expApiAms, expHeaderam)
 
 	suite.Equal(expAMS, suite.Mockstore.AuthMethods)
 	suite.Nil(err1)

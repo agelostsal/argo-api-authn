@@ -92,6 +92,6 @@ func (suite *ApiKeyAuthMethodTestSuite) TestUpdate() {
 
 }
 
-func TestApiKeyAuthMethod_Fill(t *testing.T) {
+func TestApiKeyAuthMethodSuite(t *testing.T) {
 	suite.Run(t, new(ApiKeyAuthMethodTestSuite))
 }

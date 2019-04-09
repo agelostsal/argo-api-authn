@@ -438,6 +438,16 @@ func (suite *BindingHandlersSuite) TestBindingListAll() {
    "unique_key": "unique_key_3",
    "auth_type": "x509",
    "created_on": "2018-05-05T15:04:05Z"
+  },
+  {
+   "name": "b4",
+   "service_uuid": "uuid2",
+   "host": "host3",
+   "uuid": "b_uuid4",
+   "auth_identifier": "test_dn_1",
+   "unique_key": "unique_key_1",
+   "auth_type": "x509",
+   "created_on": "2018-05-05T15:04:05Z"
   }
  ]
 }`

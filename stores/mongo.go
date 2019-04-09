@@ -108,6 +108,30 @@ func (mongo *MongoStore) QueryApiKeyAuthMethods(serviceUUID string, host string)
 	return qAuthms, err
 }
 
+func (mongo *MongoStore) QueryHeadersAuthMethods(serviceUUID string, host string) ([]QHeadersAuthMethod, error) {
+
+	var err error
+	var qAuthms []QHeadersAuthMethod
+
+	var query = bson.M{"service_uuid": serviceUUID, "host": host, "type": "headers"}
+
+	// if there is no serviceUUID and host provided, return all api key auth methods
+	if serviceUUID == "" && host == "" {
+		query = bson.M{"type": "headers"}
+	}
+
+	c := mongo.Session.DB(mongo.Database).C("auth_methods")
+	err = c.Find(query).All(&qAuthms)
+
+	if err != nil {
+		LOGGER.Error("STORE", "\t", err.Error())
+		err = utils.APIErrDatabase(err.Error())
+		return qAuthms, err
+	}
+
+	return qAuthms, err
+}
+
 func (mongo *MongoStore) InsertAuthMethod(am QAuthMethod) error {
 
 	var err error

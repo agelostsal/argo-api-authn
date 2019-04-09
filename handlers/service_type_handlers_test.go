@@ -543,10 +543,10 @@ func (suite *ServiceTypeHandlersSuite) TestServiceTypeListAll() {
    "auth_types": [
     "x509"
    ],
-   "auth_method": "api-key",
+   "auth_method": "headers",
    "uuid": "uuid2",
    "created_on": "2018-05-05T18:04:05Z",
-   "type": "ams"
+   "type": "web-api"
   },
   {
    "name": "same_name",

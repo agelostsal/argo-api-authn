@@ -135,7 +135,12 @@ func (suite *AuthMethodsTestSuite) TestAuthMethodFIndAll() {
 	amb1 := BasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Type: "api-key", UUID: "am_uuid_1", CreatedOn: ""}
 	am1 := &ApiKeyAuthMethod{AccessKey: "access_key"}
 	am1.BasicAuthMethod = amb1
-	expAmList.AuthMethods = append(expAmList.AuthMethods, am1)
+
+	amb2 := BasicAuthMethod{ServiceUUID: "uuid2", Host: "host3", Port: 9000, Type: "headers", UUID: "am_uuid_2", CreatedOn: ""}
+	am2 := &HeadersAuthMethod{Headers: map[string]string{"x-api-key": "key-1", "Accept": "application/json"}}
+	am2.BasicAuthMethod = amb2
+
+	expAmList.AuthMethods = append(expAmList.AuthMethods, am1, am2)
 
 	aMList, err1 := AuthMethodFindAll(mockstore)
 
@@ -162,7 +167,7 @@ func (suite *AuthMethodsTestSuite) TestAuthMethodDelete() {
 
 	err1 := AuthMethodDelete(am1, mockstore)
 
-	suite.Equal(0, len(mockstore.AuthMethods))
+	suite.Equal(1, len(mockstore.AuthMethods))
 
 	suite.Nil(err1)
 }
