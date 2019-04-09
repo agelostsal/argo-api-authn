@@ -164,7 +164,7 @@ func (suite *ServiceTestSuite) TestFindAllServiceTypes() {
 	// normal case outcome - all services
 	expQServicesAll := []ServiceType{
 		{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", UUID: "uuid1", CreatedOn: "2018-05-05T18:04:05Z", Type: "ams"},
-		{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", UUID: "uuid2", CreatedOn: "2018-05-05T18:04:05Z", Type: "ams"},
+		{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "headers", UUID: "uuid2", CreatedOn: "2018-05-05T18:04:05Z", Type: "web-api"},
 		{Name: "same_name"},
 		{Name: "same_name"},
 	}
@@ -283,8 +283,8 @@ func (suite *ServiceTestSuite) TestDeleteServiceType() {
 	// check if the service type, bindings and auth methods are deleted as well
 	_, errNotFound := FindServiceTypeByUUID("uuid1", mockstore)
 
-	suite.Equal(0, len(mockstore.Bindings))
-	suite.Equal(0, len(mockstore.Bindings))
+	suite.Equal(1, len(mockstore.Bindings))
+	suite.Equal(1, len(mockstore.AuthMethods))
 
 	suite.Equal("Service-type was not found", errNotFound.Error())
 	suite.Nil(err1)

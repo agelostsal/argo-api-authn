@@ -43,6 +43,11 @@ type QApiKeyAuthMethod struct {
 	AccessKey        string `json:"access_key" bson:"access_key"`
 }
 
+type QHeadersAuthMethod struct {
+	QBasicAuthMethod `bson:",inline"`
+	Headers          map[string]string `json:"headers" bson:"headers"`
+}
+
 type QAuthMethodFactory struct{}
 
 func (f *QAuthMethodFactory) Create(amType string) (QAuthMethod, error) {
@@ -65,8 +70,13 @@ type QAuthMethodInit func() QAuthMethod
 
 var QAuthMethodsTypes = map[string]QAuthMethodInit{
 	"api-key": NewQApiKeyAuthMethod,
+	"headers": NewQHeadersAuthMethod,
 }
 
 func NewQApiKeyAuthMethod() QAuthMethod {
 	return new(QApiKeyAuthMethod)
+}
+
+func NewQHeadersAuthMethod() QAuthMethod {
+	return new(QHeadersAuthMethod)
 }
