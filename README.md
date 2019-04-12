@@ -71,13 +71,19 @@ Before you start, you need to issue a valid certificate.
    "certificate_key":"/path/to/key/localhost.key",
    "service_token": "some-token",
    "supported_auth_types": ["x509"],
-   "supported_auth_methods": ["api-key"],
-   "supported_service_types": ["ams"],
+   "supported_auth_methods": ["api-key", "headers"],
+   "supported_service_types": ["ams", "web-api"],
    "verify_ssl": true,
    "trust_unknown_cas": false,
    "verify_certificate": true,
-   "service_types_paths": {"ams": "/v1/users:byUUID/{{identifier}}?key={{access_key}}"},
-   "service_types_retrieval_fields": {"ams": "token"}
+   "service_types_paths": {
+    "ams": "/v1/users:byUUID/{{identifier}}?key={{access_key}}",
+    "web-api": "/api/v2/users:byID/{{identifier}}?export=flat"
+    },
+   "service_types_retrieval_fields": {
+   "ams": "token",
+   "web-api": "api_key"
+   }
  }
  ```
  
@@ -116,6 +122,8 @@ but a reverse dns look up returns another hostname for the client from where the
 
 ## Feature Milestones
 
-- Add support for authenticating with external services through x-api-key header.
-- Add default configuration for interacting easier with the [argo-web-api](https://github.com/ARGOeu/argo-web-api).
+- ~~Add support for authenticating with external services through x-api-key header.~~
+
+- ~~Add default configuration for interacting easier with the [argo-web-api](https://github.com/ARGOeu/argo-web-api).~~
+
 - Add support for using OIDC tokens as an alternative authentication mechanism.

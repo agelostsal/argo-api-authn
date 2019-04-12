@@ -56,6 +56,41 @@ func (suite *ServiceTypeHandlersSuite) TestServiceTypeCreate() {
 	suite.Equal("api-key", createdSer.AuthMethod)
 }
 
+func (suite *ServiceTypeHandlersSuite) TestServiceTypeCreateWEBAPI() {
+
+	postJSON := `{
+	"name": "web-api-devel",
+	"hosts": ["127.0.0.1"],
+	"auth_types": ["x509"],
+	"auth_method": "headers",
+	"type": "web-api"
+}`
+
+	req, err := http.NewRequest("POST", "http://localhost:8080/service-types", bytes.NewBuffer([]byte(postJSON)))
+	if err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types", WrapConfig(ServiceTypeCreate, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(201, w.Code)
+	createdSer := servicetypes.ServiceType{}
+	_ = json.Unmarshal([]byte(w.Body.String()), &createdSer)
+
+	suite.Equal("web-api-devel", createdSer.Name)
+	suite.Equal([]string{"127.0.0.1"}, createdSer.Hosts)
+	suite.Equal([]string{"x509"}, createdSer.AuthTypes)
+	suite.Equal("headers", createdSer.AuthMethod)
+}
+
 // TestServiceTypeCreateInvalidName tests the case where the service type's name already exists
 func (suite *ServiceTypeHandlersSuite) TestServiceTypeCreateInvalidName() {
 
@@ -270,7 +305,7 @@ func (suite *ServiceTypeHandlersSuite) TestServiceTypeCreateInvalidAuthMethod() 
 
 	expRespJSON := `{
  "error": {
-  "message": "auth_method: unsup_method is not yet supported.Supported:[api-key x-api-token]",
+  "message": "auth_method: unsup_method is not yet supported.Supported:[api-key headers]",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
@@ -770,7 +805,7 @@ func (suite *BindingHandlersSuite) TestServiceTypeUpdateUnsupportedAuthMethod() 
 
 	expRespJSON := `{
  "error": {
-  "message": "auth_method: unsup_auth is not yet supported.Supported:[api-key x-api-token]",
+  "message": "auth_method: unsup_auth is not yet supported.Supported:[api-key headers]",
   "code": 422,
   "status": "UNPROCESSABLE ENTITY"
  }
