@@ -21,21 +21,27 @@ func (suite *ConfigTestSuite) TestConfigSetUp() {
 	cfg2 := &Config{}
 	err2 := cfg2.ConfigSetUp("./configuration-test-files/test-conf.json")
 	expCfg2 := &Config{
-		ServicePort:                 9000,
-		MongoHost:                   "test_mongo_host",
-		MongoDB:                     "test_mongo_db",
-		CertificateAuthorities:      "/path/to/cas",
-		Certificate:                 "/path/to/cert",
-		CertificateKey:              "/path/to/key",
-		ServiceToken:                "token",
-		SupportedAuthTypes:          []string{"x509", "oidc"},
-		SupportedAuthMethods:        []string{"api-key", "x-api-token"},
-		SupportedServiceTypes:       []string{"ams", "web-api", "custom"},
-		VerifySSL:                   false,
-		TrustUnknownCAs:             false,
-		VerifyCertificate:           true,
-		ServiceTypesPaths:           map[string]string{"ams": "/v1/users:byUUID/{{identifier}}?key={{access_key}}"},
-		ServiceTypesRetrievalFields: map[string]string{"ams": "token"},
+		ServicePort:            9000,
+		MongoHost:              "test_mongo_host",
+		MongoDB:                "test_mongo_db",
+		CertificateAuthorities: "/path/to/cas",
+		Certificate:            "/path/to/cert",
+		CertificateKey:         "/path/to/key",
+		ServiceToken:           "token",
+		SupportedAuthTypes:     []string{"x509", "oidc"},
+		SupportedAuthMethods:   []string{"api-key", "headers"},
+		SupportedServiceTypes:  []string{"ams", "web-api", "custom"},
+		VerifySSL:              false,
+		TrustUnknownCAs:        false,
+		VerifyCertificate:      true,
+		ServiceTypesPaths: map[string]string{
+			"ams":     "/v1/users:byUUID/{{identifier}}?key={{access_key}}",
+			"web-api": "/api/v2/admin/users:byID/{{identifier}}?export=flat",
+		},
+		ServiceTypesRetrievalFields: map[string]string{
+			"ams":     "token",
+			"web-api": "api_key",
+		},
 	}
 
 	//tests the case of a malformed json
