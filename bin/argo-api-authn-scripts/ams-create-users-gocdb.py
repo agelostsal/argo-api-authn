@@ -258,7 +258,15 @@ def create_users(config, verify):
                 continue
 
             # Create the respective AUTH binding
-            bd_data = {'name': user_binding_name, 'service_uuid': authn_service_uuid, 'host': authn_service_host, 'dn': service_dn, 'unique_key': req_data["uuid"]}
+            bd_data = {
+                'name': user_binding_name,
+                'service_uuid': authn_service_uuid,
+                'host': authn_service_host,
+                'auth_identifier': service_dn,
+                'unique_key': req_data["uuid"],
+                "auth_type": "x509"
+            }
+
             authn_binding_crt_req = requests.post("https://"+authn_host+"/v1/bindings?key="+authn_token, data=json.dumps(bd_data), verify=verify)
             LOGGER.info(authn_binding_crt_req.text)
 
