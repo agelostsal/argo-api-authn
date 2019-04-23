@@ -12,6 +12,10 @@ service-types: gLite-APEL, eu.egi.cloud.accounting, eu.egi.storage.accounting
 # ams use role
 users_role: publisher
 
+# cert to access gocdb
+cert: /path/to/cert
+cert_key: /path/to/key
+
 # token to access ams
 ams_token:
 
