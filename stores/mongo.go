@@ -124,13 +124,21 @@ func (mongo *MongoStore) InsertAuthMethod(am QAuthMethod) error {
 	return err
 }
 
-func (mongo *MongoStore) QueryBindingsByDN(dn string, serviceUUID string, host string) ([]QBinding, error) {
+func (mongo *MongoStore) QueryBindingsByAuthID(authID string, serviceUUID string, host string, authType string) ([]QBinding, error) {
 
 	var qBindings []QBinding
 	var err error
 
 	c := mongo.Session.DB(mongo.Database).C("bindings")
-	err = c.Find(bson.M{"dn": dn, "service_uuid": serviceUUID, "host": host}).All(&qBindings)
+
+	query := bson.M{
+		"auth_identifier": authID,
+		"service_uuid":    serviceUUID,
+		"host":            host,
+		"auth_type":       authType,
+	}
+
+	err = c.Find(query).All(&qBindings)
 
 	if err != nil {
 		LOGGER.Error("STORE", "\t", err.Error())
@@ -199,12 +207,22 @@ func (mongo *MongoStore) InsertServiceType(name string, hosts []string, authType
 }
 
 //InsertBinding inserts a new binding into the datastore
-func (mongo *MongoStore) InsertBinding(name string, serviceUUID string, host string, uuid string, dn string, oidcToken string, uniqueKey string) (QBinding, error) {
+func (mongo *MongoStore) InsertBinding(name string, serviceUUID string, host string, uuid string, authID string, uniqueKey string, authType string) (QBinding, error) {
 
 	var qBinding QBinding
 	var err error
 
-	qBinding = QBinding{Name: name, ServiceUUID: serviceUUID, Host: host, UUID: uuid, DN: dn, OIDCToken: oidcToken, UniqueKey: uniqueKey, CreatedOn: utils.ZuluTimeNow()}
+	qBinding = QBinding{
+		Name:           name,
+		ServiceUUID:    serviceUUID,
+		Host:           host,
+		UUID:           uuid,
+		AuthIdentifier: authID,
+		UniqueKey:      uniqueKey,
+		AuthType:       authType,
+		CreatedOn:      utils.ZuluTimeNow(),
+	}
+
 	db := mongo.Session.DB(mongo.Database)
 	c := db.C("bindings")
 

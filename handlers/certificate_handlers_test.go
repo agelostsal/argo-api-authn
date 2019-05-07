@@ -12,6 +12,7 @@ import (
 	"github.com/gorilla/mux"
 	LOGGER "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/suite"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -99,9 +100,9 @@ lBlGGSW4gNfL1IYoakRwJiNiqZ+Gb7+6kHDSVneFeO/qJakXzlByjAA6quPbYzSf
 	qSt2 := stores.QServiceType{Name: "s_auth_cert_incorrect", Hosts: []string{"h1_auth_cert", "h1_auth_cert_revoked"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "mock-auth", UUID: "uuid_auth_cert_incorrect", Type: "ams", CreatedOn: "2018-05-05T18:04:05Z"}
 	mockstore.ServiceTypes = append(mockstore.ServiceTypes, qSt, qSt2)
 	// append a binding to be used only in auth via cert tests
-	qB := stores.QBinding{Name: "b_auth_cert", ServiceUUID: "uuid_auth_cert", Host: "h1_auth_cert", DN: "CN=localhost,O=COMODO CA Limited,L=Salford,ST=Greater Manchester,C=GB", OIDCToken: "", UniqueKey: "success", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
-	qB2 := stores.QBinding{Name: "b_auth_cert_incorrect", ServiceUUID: "uuid_auth_cert_incorrect", Host: "h1_auth_cert", DN: "CN=localhost,O=COMODO CA Limited,L=Salford,ST=Greater Manchester,C=GB", OIDCToken: "", UniqueKey: "incorrect-retrieval-field", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
-	qB3 := stores.QBinding{Name: "b_auth_cert_revoked", ServiceUUID: "uuid_auth_cert_incorrect", Host: "h1_auth_cert_revoked", DN: "CN=localhost", OIDCToken: "", UniqueKey: "success", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
+	qB := stores.QBinding{Name: "b_auth_cert", ServiceUUID: "uuid_auth_cert", Host: "h1_auth_cert", AuthIdentifier: "CN=localhost,O=COMODO CA Limited,L=Salford,ST=Greater Manchester,C=GB", AuthType: "x509", UniqueKey: "success", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
+	qB2 := stores.QBinding{Name: "b_auth_cert_incorrect", ServiceUUID: "uuid_auth_cert_incorrect", Host: "h1_auth_cert", AuthIdentifier: "CN=localhost,O=COMODO CA Limited,L=Salford,ST=Greater Manchester,C=GB", AuthType: "x509", UniqueKey: "incorrect-retrieval-field", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
+	qB3 := stores.QBinding{Name: "b_auth_cert_revoked", ServiceUUID: "uuid_auth_cert_incorrect", Host: "h1_auth_cert_revoked", AuthIdentifier: "CN=localhost", AuthType: "x509", UniqueKey: "success", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
 	mockstore.Bindings = append(mockstore.Bindings, qB, qB2, qB3)
 
 	// set up cfg
@@ -809,5 +810,6 @@ func (suite *CertificateHandlerSuite) TestAuthViaCertUnknownDN() {
 }
 
 func TestAuthViaCert(t *testing.T) {
+	LOGGER.SetOutput(ioutil.Discard)
 	suite.Run(t, new(CertificateHandlerSuite))
 }

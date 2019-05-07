@@ -442,9 +442,9 @@ paths:
                 type: string
               host:
                 type: string
-              dn:
+              auth_identifier:
                 type: string
-              oidc_token:
+              auth_type:
                 type: string
               unique_key:
                 type: string
@@ -545,9 +545,9 @@ paths:
                 type: string
               host:
                 type: string
-              dn:
+              auth_identifier:
                 type: string
-              oidc_token:
+              auth_type:
                 type: string
               unique_key:
                 type: string
@@ -657,14 +657,15 @@ definitions:
       uuid:
         type: string
         description: binding's uuid
-      dn:
+      auth_identifier:
         type: string
-        description: the dn of the certificate
-      oidc_token:
-        type: string
+        description: the authentication identifier that will be used to perform the mapping(e.g. a cert's DN)
       unique_key:
         type: string
         description: contains the resource to be used to authenticate against the assosciated service type
+      auth_type:
+        type: string
+        description: the type of authentication that this binding represets(e.g. x509)
       created_on:
         type: string
       last_auth:
