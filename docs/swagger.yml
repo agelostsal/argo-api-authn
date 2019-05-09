@@ -51,8 +51,10 @@ paths:
                   type: string
              auth_method:
               type: string
+              enum: [api-key, headers]
              type:
               type: string
+              enum: [ams, web-api]
       tags:
         - Service Types
       responses:
@@ -195,13 +197,17 @@ paths:
                 type: integer
              access_key:
                 type: string
+             headers:
+                type: object
+                additionalProperties:
+                  type: string
       tags:
         - Service Types
       responses:
         201:
           description: Returns the newly created auth method
           schema:
-            $ref: '#/definitions/APIKeyAuthMethod'
+            $ref: '#/definitions/AuthMethod'
         400:
           $ref: "#/responses/400"
         401:
@@ -240,7 +246,7 @@ paths:
         200:
           description: Returns the information of the requested auth method
           schema:
-            $ref: '#/definitions/APIKeyAuthMethod'
+            $ref: '#/definitions/AuthMethod'
         400:
           $ref: "#/responses/400"
         401:
@@ -288,7 +294,7 @@ paths:
         201:
           description: Returns the updated auth method
           schema:
-            $ref: '#/definitions/APIKeyAuthMethod'
+            $ref: '#/definitions/AuthMethod'
         400:
           $ref: "#/responses/400"
         401:
@@ -414,7 +420,7 @@ paths:
         200:
           description: Returns the information of all authentication methods
           schema:
-            $ref: '#/definitions/APIKeyAuthMethods'
+            $ref: '#/definitions/AuthMethods'
         401:
           $ref: "#/responses/401"
         403:
@@ -697,32 +703,39 @@ definitions:
         description: supported authentication types
       auth_method:
         type: string
+        enum: [api-key, headers]
         description: the authentication method that the sercvice supports
       uuid:
         type: string
         description: uuid assosiciatd with the service type
       type:
         type: string
-        description: service type's type, either AMS, web-api or custom
+        description: service type's type, either AMS or web-api
       created_on:
         type: string
+        enum: [ams, web-api]
         description: datetime of creation
 
-  APIKeyAuthMethods:
+  AuthMethods:
     type: object
     properties:
       auth_methods:
         type: array
         items:
-          $ref: '#/definitions/APIKeyAuthMethod'
+          $ref: '#/definitions/AuthMethod'
 
 
-  APIKeyAuthMethod:
+  AuthMethod:
     type: object
     properties:
       access_key:
         type: string
         description: key needed too access the service type
+      headers:
+        type: object
+        description: key-value pairs that represnt the headers that are going to be used if the auth method is of type headers
+        additionalProperties:
+          type: string
       host:
         type: string
         description: host of the service type
@@ -734,13 +747,13 @@ definitions:
         description: port of the service type host
       type:
         type: string
-        description: type of the auth emthod
+        enum: [api-key, headers]
       uuid:
         type: string
         description: auth method's uuid
       created_on:
         type: string
-        description: the type of the auth method
+        description: when the auth method was created
 
 
   TokenResponse:
@@ -756,20 +769,6 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/ServiceType'
-
-  Host:
-    type: object
-    properties:
-      name:
-        type: string
-        description: hostname
-
-  AuthType:
-    type: object
-    properties:
-      name:
-        type: string
-        description: type name
 
   ErrorMsg:
     type: object

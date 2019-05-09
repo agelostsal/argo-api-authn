@@ -3,16 +3,16 @@
 ## [POST] Manage Auth Methods - Create New Auth Method
 
 This request creates a new auth method for the given service type. The type of the auth method
-as well as some of its predefined fields will be decided by the service-tye's `auth_method` and `type `fields.
+as well as some of its predefined fields will be decided by the service-type's `auth_method` and `type `fields.
 E.g. for a service-type of type `ams` with an auth_method of type `api-key`, it will create an api-key auth method
 with predeclared fields for `path` and `retrieval_field` that are common across all type `ams` service-types.
 Of course you can always override the default's if you like.
 
+## API Key Auth methods
 #### Fields
 
 - path: Combined with the `host` and the `port` is represents the URL where the external resource is located. We use it to map the x509 certificate or any other auth mechanism to the needed token
 - access_key: In the case of an api-key method, the access key specifies te `key` to use in order to access the external resource
-- retrieval_field: The response field from the external service that will contain the attribute we are looking for. e.g. `token`
 
 ### Request
 
@@ -36,6 +36,39 @@ curl -X POST -H "Content-Type: application/json"
             "port": 9000,
         }
 ```
+
+## Headers Auth methods
+#### Fields
+
+- path: Combined with the `host` and the `port` is represents the URL where the external resource is located. We use it to map the x509 certificate or any other auth mechanism to the needed token
+- headers: A collection of `key value pairs` that will be used as request headers when accessing the respective service type
+
+### Request
+
+```
+POST /v1/service-types/{Name}/authm`
+```
+
+
+### Example request
+```
+curl -X POST -H "Content-Type: application/json"
+  "https://{URL}/v1/service-types/{Name}/authm?key={key_in_the_config}"
+```
+
+### Post Body
+
+```
+        {
+            "headers": {
+                "header-1": "value-1",
+                "header-2": "value-2"
+            },
+            "host": "127.0.0.1",
+            "port": 9000
+        }
+```
+
 
 ### Response
 
