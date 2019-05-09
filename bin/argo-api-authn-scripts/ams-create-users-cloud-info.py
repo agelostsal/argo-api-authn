@@ -196,12 +196,19 @@ def create_users(config, verify):
     ams_email = config.get("AMS", "ams_email")
     users_role = config.get("AMS", "users_role")
     goc_db_url_arch = config.get("AMS", "goc_db_host")
+    goc_db_site_url = "https://goc.egi.eu/gocdbpi/public/?method=get_site&sitename={{sitename}}"
 
     # retrieve authn info
     authn_host = config.get("AUTHN", "authn_host")
     authn_service_uuid = config.get("AUTHN", "service_uuid")
     authn_token = config.get("AUTHN", "authn_token")
     authn_service_host = config.get("AUTHN", "service_host")
+
+    # dict that acts as a cache for site contact emails
+    site_contact_emails = {}
+
+    # cert key tuple
+    cert_creds = (config.get("AMS", "cert"), config.get("AMS", "cert_key"))
 
     conf_services = config.get("AMS", "service-types").split(",")
     for srv_type in conf_services:
@@ -237,6 +244,27 @@ def create_users(config, verify):
                 missing_dns.append(service_endpoint.find("HOSTNAME").text)
                 continue
 
+            # try to get the site's contact email
+            contact_email = ams_email
+            # check the if we have retrieved this site's contact email before
+            site_name = service_endpoint.find("SITENAME").text
+            if site_name in site_contact_emails:
+                contact_email = site_contact_emails[site_name]
+            else:
+                try:
+                    # try to retrieve the site info from gocdb
+                    site_url = goc_db_site_url.replace("{{sitename}}", site_name)
+                    print site_url
+                    goc_site_request = requests.get(site_url, cert=cert_creds, verify=False)
+                    print goc_site_request.text
+                    site_xml_obj = ET.fromstring(goc_site_request.text)
+                    print "contact email\n"
+                    contact_email = site_xml_obj.find("SITE").find("CONTACT_EMAIL").text
+                    site_contact_emails[site_name] = contact_email
+                except Exception as e:
+                    LOGGER.warning("Couldn't get contact email for endpoint {} under site {}, {}".format(
+                        hostname, site_name, e.message))
+
             # Create AMS user
             hostname = service_endpoint.find("HOSTNAME").text.replace(".", "-")
             sitename = service_endpoint.find("SITENAME").text.replace(".", "-")
@@ -253,7 +281,7 @@ def create_users(config, verify):
                 continue
 
             project = {'project': ams_project, 'roles': [users_role]}
-            usr_create = {'projects': [project], 'email': ams_email}
+            usr_create = {'projects': [project], 'email': contact_email}
 
             # create the user
             ams_usr_crt_req = requests.post(
