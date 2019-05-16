@@ -251,15 +251,24 @@ def create_users(config, verify):
                 try:
                     # try to retrieve the site info from gocdb
                     site_url = goc_db_site_url.replace("{{sitename}}", site_name)
-                    print site_url
                     goc_site_request = requests.get(site_url, cert=cert_creds, verify=False)
-                    print goc_site_request.text
                     site_xml_obj = ET.fromstring(goc_site_request.text)
-                    print "contact email\n"
+
+                    # check if the site is in production
+                    in_prod = site_xml_obj.find("SITE").find("PRODUCTION_INFRASTRUCTURE")
+                    if in_prod.text != 'Production':
+                        raise Exception("Not in production")
+
+                    # check for certified or uncertified
+                    cert_uncert = site_xml_obj.find("SITE").find("CERTIFICATION_STATUS")
+                    if cert_uncert.text != "Certified" and cert_uncert.text != "Uncertified":
+                        raise Exception("Neither certified not uncertified")
+
                     contact_email = site_xml_obj.find("SITE").find("CONTACT_EMAIL").text
                     site_contact_emails[site_name] = contact_email
+
                 except Exception as e:
-                    LOGGER.warning("Couldn't get contact email for endpoint {} under site {}, {}".format(
+                    LOGGER.warning("Skipping endpoint {} under site {}, {}".format(
                         hostname, site_name, e.message))
 
             # convert the dn
@@ -286,7 +295,14 @@ def create_users(config, verify):
                 continue
 
             # Create the respective AUTH binding
-            bd_data = {'name': user_binding_name, 'service_uuid': authn_service_uuid, 'host': authn_service_host, 'dn': service_dn, 'unique_key': req_data["uuid"]}
+            bd_data = {
+                'name': user_binding_name,
+                'service_uuid': authn_service_uuid,
+                'host': authn_service_host,
+                'auth_identifier': service_dn,
+                'unique_key': req_data["uuid"],
+                "auth_type": "x509"
+            }
             authn_binding_crt_req = requests.post("https://"+authn_host+"/v1/bindings?key="+authn_token, data=json.dumps(bd_data), verify=verify)
             LOGGER.info(authn_binding_crt_req.text)
 
