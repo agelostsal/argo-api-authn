@@ -8,7 +8,7 @@ For example, a service type's "user", requires an api token to authenticate to i
  
 remembered by the "user" or retrieved using some form of credentials.
  
- A binding will hold additional information like a DN or an OIDC Token, that can be used to retrieve the required api token.
+ A binding will hold additional information like a DN or an OIDC Token(in the auth_identifier field), that can be used to retrieve the required api token.
  
  A binding is associated with the uuid of a service type,the host on which this service type runs on,
  
@@ -37,8 +37,8 @@ curl -X POST -H "Content-Type: application/json"
 	"name": "b1",
 	"service_uuid": "b61030d9-bef3-4768-9a03-7b1ff36e8af4cc",
 	"host": "host1",
-	"dn":"dn",
-	"oidc_token": "token",
+	"auth_identifier":"dn",
+	"auth_type": "x509",
 	"unique_key": "key"
 }
 ```
@@ -57,9 +57,9 @@ Success Response
      "service_uuid": "b61030d9-bef3-4768-9a03-7b1ff36e8af4cc",
      "host": "host1",
      "uuid": "p61020d9-bef3-4768-9a03-331ff36e8af4cc",
-     "dn": "host1",
-     "oidc_token": "token",
+     "auth_identifier": "dn",
      "unique_key": "key",
+     "auth_type": "x509",
      "created_on": "2018-05-24T09:58:17Z"
  }
  
@@ -95,8 +95,9 @@ If the request is successful, the response contains all the bindings in the serv
                   "service_uuid": "uuid1",
                   "host": "host1",
                   "uuid": "p61020d9-bef3-4768-9a03-331ff36e8af4cc",
-                  "oidc_token": "testdn",
+                  "auth_identifier": "testdn",
                   "unique_key": "key",
+                  "auth_type": "x509",
                   "created_on": "2018-05-23T09:25:25Z",
                   "last_auth": "2018-05-23T09:25:25Z"
               },
@@ -105,8 +106,9 @@ If the request is successful, the response contains all the bindings in the serv
                   "service_uuid": "uuid1",
                   "host": "host1",
                   "uuid": "p61020d9-bef3-4768-9a03-331ff36e8af4rr",
-                  "oidc_token": "testdn",
+                  "auth_identifier": "testdn",
                   "unique_key": "key",
+                  "auth_type": "x509",                
                   "created_on": "2018-05-23T09:25:43Z",
                   "last_auth": "2018-05-23T09:25:25Z"
               }
@@ -143,9 +145,10 @@ If the request is successful, the response contains all the bindings under the g
                   "name": "testb",
                   "service_uuid": "uuid1",
                   "host": "host1",
-                  "oidc_token": "testdn",
+                  "auth_identifier": "testdn",
                   "uuid": "p61020d9-bef3-4768-9a03-331ff36e8af4cc",
                   "unique_key": "key",
+                  "auth_type": "x509",                
                   "created_on": "2018-05-23T09:25:25Z",
                   "last_auth": "2018-05-23T09:25:25Z"
               },
@@ -154,8 +157,9 @@ If the request is successful, the response contains all the bindings under the g
                   "service_uuid": "uuid1",
                   "host": "host1",
                   "uuid": "p61020d9-bef3-4768-9a03-331ff36e8af4rr",
-                  "oidc_token": "testdn",
+                  "auth_identifier": "testdn",
                   "unique_key": "key",
+                  "auth_type": "x509",                
                   "created_on": "2018-05-23T09:25:43Z",
                   "last_auth": "2018-05-23T09:25:25Z"
               }
@@ -191,8 +195,9 @@ If the request is successful, the response contains the binding associated with 
       "service_uuid": "uuid1",
       "host": "host1",
       "uuid": "p61020d9-bef3-4768-9a03-331ff36e8af4cc",
-      "oidc_token": "testdn",
+      "auth_identifier": "testdn",
       "unique_key": "key",
+      "auth_type": "x509",                
       "created_on": "2018-05-23T09:25:25Z",
       "last_auth": "2018-05-23T09:25:25Z"   
   }
@@ -238,9 +243,9 @@ If the request is successful, the response contains the updated binding.
      "service_uuid": "b61030d9-bef3-4768-9a03-7b1ff36e8af4cc",
      "host": "host1",
      "uuid": "p61020d9-bef3-4768-9a03-331ff36e8af4cc",
-     "dn": "host1",
-     "oidc_token": "token",
+     "auth_identifier": "host1",
      "unique_key": "key",
+     "auth_type": "x509",                
      "created_on": "2018-05-24T09:58:17Z"
  }
 ```

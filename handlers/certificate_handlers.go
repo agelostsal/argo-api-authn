@@ -75,7 +75,7 @@ func AuthViaCert(w http.ResponseWriter, r *http.Request) {
 
 	LOGGER.Infof("Certificate request: %v for Service-Type: %v and  Host: %v", rdnSequence, serviceType.Name, vars["host"])
 
-	if binding, err = bindings.FindBindingByDN(rdnSequence, serviceType.UUID, vars["host"], store); err != nil {
+	if binding, err = bindings.FindBindingByAuthID(rdnSequence, serviceType.UUID, vars["host"], "x509", store); err != nil {
 		utils.RespondError(w, err)
 		return
 	}

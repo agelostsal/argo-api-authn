@@ -92,7 +92,7 @@ func (suite *ServiceTestSuite) TestCreateServiceType() {
 	suite.Equal("service-type object with name: s1 already exists", err2.Error())
 	suite.Equal("auth_types: unsup_type is not yet supported.Supported:[x509 oidc]", err3.Error())
 	suite.Equal("auth_types: empty is not yet supported.Supported:[x509 oidc]", err4.Error())
-	suite.Equal("auth_method: unsup_method is not yet supported.Supported:[api-key x-api-token]", err5.Error())
+	suite.Equal("auth_method: unsup_method is not yet supported.Supported:[api-key headers]", err5.Error())
 	suite.Equal("service-type object contains empty fields. empty value for field: name", err6.Error())
 	suite.Equal("service-type object contains empty fields. empty value for field: auth_method", err8.Error())
 	suite.Equal("service-type object contains empty fields. empty value for field: hosts", err9.Error())
@@ -164,7 +164,7 @@ func (suite *ServiceTestSuite) TestFindAllServiceTypes() {
 	// normal case outcome - all services
 	expQServicesAll := []ServiceType{
 		{Name: "s1", Hosts: []string{"host1", "host2", "host3"}, AuthTypes: []string{"x509", "oidc"}, AuthMethod: "api-key", UUID: "uuid1", CreatedOn: "2018-05-05T18:04:05Z", Type: "ams"},
-		{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "api-key", UUID: "uuid2", CreatedOn: "2018-05-05T18:04:05Z", Type: "ams"},
+		{Name: "s2", Hosts: []string{"host3", "host4"}, AuthTypes: []string{"x509"}, AuthMethod: "headers", UUID: "uuid2", CreatedOn: "2018-05-05T18:04:05Z", Type: "web-api"},
 		{Name: "same_name"},
 		{Name: "same_name"},
 	}
@@ -264,7 +264,7 @@ func (suite *ServiceTestSuite) TestUpdateService() {
 	suite.Equal("service-type object with name: s1 already exists", err2.Error())
 	suite.Equal("auth_types: unsup_type is not yet supported.Supported:[x509 oidc]", err3.Error())
 	suite.Equal("auth_types: empty is not yet supported.Supported:[x509 oidc]", err4.Error())
-	suite.Equal("auth_method: unsup_method is not yet supported.Supported:[api-key x-api-token]", err5.Error())
+	suite.Equal("auth_method: unsup_method is not yet supported.Supported:[api-key headers]", err5.Error())
 	suite.Equal("service-type object contains empty fields. empty value for field: name", err6.Error())
 	suite.Equal("service-type object contains empty fields. empty value for field: auth_method", err8.Error())
 	suite.Equal("service-type object contains empty fields. empty value for field: hosts", err9.Error())
@@ -283,8 +283,8 @@ func (suite *ServiceTestSuite) TestDeleteServiceType() {
 	// check if the service type, bindings and auth methods are deleted as well
 	_, errNotFound := FindServiceTypeByUUID("uuid1", mockstore)
 
-	suite.Equal(0, len(mockstore.Bindings))
-	suite.Equal(0, len(mockstore.Bindings))
+	suite.Equal(1, len(mockstore.Bindings))
+	suite.Equal(1, len(mockstore.AuthMethods))
 
 	suite.Equal("Service-type was not found", errNotFound.Error())
 	suite.Nil(err1)

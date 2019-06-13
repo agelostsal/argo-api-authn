@@ -1,6 +1,7 @@
 package bindings
 
 import (
+	"fmt"
 	"github.com/ARGOeu/argo-api-authn/servicetypes"
 	"github.com/ARGOeu/argo-api-authn/stores"
 	"github.com/ARGOeu/argo-api-authn/utils"
@@ -8,26 +9,26 @@ import (
 )
 
 type Binding struct {
-	Name        string `json:"name" required:"true"`
-	ServiceUUID string `json:"service_uuid" required:"true"`
-	Host        string `json:"host" required:"true"`
-	UUID        string `json:"uuid"`
-	DN          string `json:"dn,omitempty"`
-	OIDCToken   string `json:"oidc_token,omitempty"`
-	UniqueKey   string `json:"unique_key" required:"true"`
-	CreatedOn   string `json:"created_on,omitempty"`
-	LastAuth    string `json:"last_auth,omitempty"`
+	Name           string `json:"name" required:"true"`
+	ServiceUUID    string `json:"service_uuid" required:"true"`
+	Host           string `json:"host" required:"true"`
+	UUID           string `json:"uuid"`
+	AuthIdentifier string `json:"auth_identifier" required:"true"`
+	UniqueKey      string `json:"unique_key" required:"true"`
+	AuthType       string `json:"auth_type" required:"true"`
+	CreatedOn      string `json:"created_on,omitempty"`
+	LastAuth       string `json:"last_auth,omitempty"`
 }
 
 // TempUpdateBinding is a struct to be used as an intermediate node when updating a binding
 // containing only the `allowed to be updated fields`
 type TempUpdateBinding struct {
-	Name        string `json:"name"`
-	ServiceUUID string `json:"service_uuid"`
-	Host        string `json:"host"`
-	DN          string `json:"dn"`
-	OIDCToken   string `json:"oidc_token"`
-	UniqueKey   string `json:"unique_key"`
+	Name           string `json:"name"`
+	ServiceUUID    string `json:"service_uuid"`
+	Host           string `json:"host"`
+	AuthIdentifier string `json:"auth_identifier"`
+	AuthType       string `json:"auth_type"`
+	UniqueKey      string `json:"unique_key"`
 }
 
 type BindingList struct {
@@ -45,15 +46,15 @@ func CreateBinding(binding Binding, store stores.Store) (Binding, error) {
 		return binding, err
 	}
 
-	// check if a binding with same dn already exists under the same service type and host
-	if err := ExistsWithDN(binding.DN, binding.ServiceUUID, binding.Host, store); err != nil {
+	// check if a binding with same auth identifier already exists under the same service type and host
+	if err := ExistsWithAuthID(binding.AuthIdentifier, binding.ServiceUUID, binding.Host, binding.AuthType, store); err != nil {
 		return binding, err
 	}
 
 	// generate uuid
 	uuid := uuid2.NewV4().String()
 
-	if qBinding, err = store.InsertBinding(binding.Name, binding.ServiceUUID, binding.Host, uuid, binding.DN, binding.OIDCToken, binding.UniqueKey); err != nil {
+	if qBinding, err = store.InsertBinding(binding.Name, binding.ServiceUUID, binding.Host, uuid, binding.AuthIdentifier, binding.UniqueKey, binding.AuthType); err != nil {
 		return binding, err
 	}
 
@@ -78,12 +79,6 @@ func (binding *Binding) Validate(store stores.Store) error {
 		return err
 	}
 
-	// check if one of DN or OIDCToken has been provided
-	if binding.DN == "" && binding.OIDCToken == "" {
-		err = utils.APIErrEmptyRequiredField("binding", "Both DN and OIDC Token fields are empty")
-		return err
-	}
-
 	// check if the ServiceUUID is aligned with an existing service type
 	if serviceType, err = servicetypes.FindServiceTypeByUUID(binding.ServiceUUID, store); err != nil {
 		return err
@@ -95,17 +90,25 @@ func (binding *Binding) Validate(store stores.Store) error {
 		return err
 	}
 
+	// check if the auth type of the bindings is supported by the service type it belongs to
+	if err = serviceType.SupportsAuthType(binding.AuthType); err != nil {
+		err = utils.APIErrUnsupportedContent("Auth type", binding.AuthType,
+			fmt.Sprintf("Supported:%v", serviceType.AuthTypes))
+		return err
+	}
+
 	return nil
 }
 
-// ExistsWithDN checks if a binding with the provided dn already exists under the given service type and host
-func ExistsWithDN(dn string, serviceUUID string, host string, store stores.Store) error {
+// ExistsWithAuthID checks if a binding with the provided auth identifier already exists
+// under the given service type and host
+func ExistsWithAuthID(authID string, serviceUUID string, host string, authType string, store stores.Store) error {
 
 	var err error
 
-	// check if the given dn doesn't already exist under the given service type and host
+	// check if the given authID doesn't already exist under the given service type and host
 	// first check for all the other errors regrading bindings
-	if _, err = FindBindingByDN(dn, serviceUUID, host, store); err != nil {
+	if _, err = FindBindingByAuthID(authID, serviceUUID, host, authType, store); err != nil {
 		if err.Error() != "Binding was not found" {
 			return err
 		}
@@ -113,28 +116,26 @@ func ExistsWithDN(dn string, serviceUUID string, host string, store stores.Store
 
 	// if the error is nil, it means the function found and returned a binding
 	if err == nil {
-		err = utils.APIErrConflict("binding", "dn", dn)
+		err = utils.APIErrConflict("binding", "auth_identifier", authID)
 		return err
 	}
 
 	return nil
 }
 
-//TODO ExistsWithOIDCToken
-
-// FindBindingByDn queries the datastore and returns a binding based on the given dn and host
-func FindBindingByDN(dn string, serviceUUID string, host string, store stores.Store) (Binding, error) {
+// FindBindingByAuthID queries the datastore and returns a binding based on the given auth identifier, service and host
+func FindBindingByAuthID(authID string, serviceUUID string, host string, authType string, store stores.Store) (Binding, error) {
 
 	var qBindings []stores.QBinding
 	var err error
 	var binding Binding
 
-	if qBindings, err = store.QueryBindingsByDN(dn, serviceUUID, host); err != nil {
+	if qBindings, err = store.QueryBindingsByAuthID(authID, serviceUUID, host, authType); err != nil {
 		return Binding{}, err
 	}
 
 	if len(qBindings) > 1 {
-		err = utils.APIErrDatabase("More than 1 bindings found under the service type: " + serviceUUID + " and host: " + host + " using the same DN: " + dn)
+		err = utils.APIErrDatabase("More than 1 bindings found under the service type: " + serviceUUID + " and host: " + host + " using the same AuthIdentifier: " + authID)
 		return Binding{}, err
 	}
 
@@ -148,11 +149,6 @@ func FindBindingByDN(dn string, serviceUUID string, host string, store stores.St
 		return binding, err
 	}
 
-	// update LastAuth field
-	//if _, err = UpdateBinding(binding, utils.ZuluTimeNow(), store); err != nil {
-	//	err = &utils.APIError{Status: "INTERNAL SERVER ERROR", Code: 500, Message: err.Error()}
-	//	return Binding{}, err
-	//}
 	return binding, err
 }
 
@@ -257,17 +253,15 @@ func UpdateBinding(original Binding, tempBind TempUpdateBinding, store stores.St
 		return updated, err
 	}
 
-	// if there is a new dn provided, check whether or not it already exists
-	if original.DN != updated.DN {
+	// if there is a new auth identifier provided, check whether or not it already exists
+	if original.AuthIdentifier != updated.AuthIdentifier {
 
-		// check if a binding with same dn already exists under the same service type and host
-		if err := ExistsWithDN(updated.DN, updated.ServiceUUID, updated.Host, store); err != nil {
+		// check if a binding with same authID already exists under the same service type and host
+		if err := ExistsWithAuthID(updated.AuthIdentifier, updated.ServiceUUID, updated.Host, updated.AuthType, store); err != nil {
 			return Binding{}, err
 		}
 
 	}
-
-	//TODO check for the same oidc token
 
 	// convert the original binding to a QBinding
 	if err := utils.CopyFields(original, &qOriginalBinding); err != nil {

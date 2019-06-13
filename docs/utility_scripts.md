@@ -47,6 +47,9 @@ ams_project:
 goc_db_host:
 # service types referes to the different service types that will we should keep from the xml and assign them to the respectivew ams topic 
 service-types:
+# cert to access gocdb
+cert: /path/to/cert
+cert_key: /path/to/key
 # ams use role
 users_role: publisher
 # token to access ams

@@ -88,13 +88,15 @@ SoPmZKiBeb+2OQ2n7+FI8ftkqxWw6zjh651brAoy/0zqLTRPh+c=
 	err1 := CertHasExpired(crt)
 
 	// expired case
-	crt.NotAfter = time.Now().AddDate(0,0,-1)
+	crt.NotAfter = time.Now().AddDate(0, 0, -1)
 	err2 := CertHasExpired(crt)
 
 	//  not active yet
 	crt = ParseCert(commonCert)
 	// move the not before date a day to the future so the check fails because we haven't reached that date yet
 	crt.NotBefore = time.Now().Add(time.Hour * 24)
+	// also move the not after date so we can skip the expiration case and check the not before case
+	crt.NotAfter = time.Now().Add(time.Hour * 24)
 	err3 := CertHasExpired(crt)
 
 	suite.Nil(err1)

@@ -88,8 +88,8 @@ func BindingListAllByServiceTypeAndHost(w http.ResponseWriter, r *http.Request) 
 
 }
 
-// BindingListOneByDN finds and returns information about a binding, using its dn, service type and host
-func BindingListOneByDN(w http.ResponseWriter, r *http.Request) {
+// BindingListOneByAuthID finds and returns information about a binding, using its auth identifier, service type and host
+func BindingListOneByAuthID(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	var ok bool
@@ -115,7 +115,7 @@ func BindingListOneByDN(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if binding, err = bindings.FindBindingByDN(vars["dn"], serviceType.UUID, vars["host"], store); err != nil {
+	if binding, err = bindings.FindBindingByAuthID(vars["dn"], serviceType.UUID, vars["host"], "x509", store); err != nil {
 		utils.RespondError(w, err)
 		return
 	}

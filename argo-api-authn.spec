@@ -3,7 +3,7 @@
 
 Name: argo-api-authn
 Summary: ARGO Authentication API. Map X509, OICD to token.
-Version: 0.1.2
+Version: 0.1.3
 Release: 1%{?dist}
 License: ASL 2.0
 Buildroot: %{_tmppath}/%{name}-buildroot
@@ -57,6 +57,12 @@ go clean
 %attr(0644,root,root) /usr/lib/systemd/system/argo-api-authn.service
 
 %changelog
+* Thu Jun 13 2019 Agelos Tsalapatis  <agelos.tsal@gmail.com> - 0.1.3-1%{?dist}
+- ARGO-1773 Update authn scripts to filter service endpoints before creating the respective user
+- ARGO-1615 update authn scripts to get site-mail from gocdb
+- ARGO-1738 Add support for interacting with the argo-web-api
+- ARGO-1737 Add support for headers auth method
+- ARGO-1740 Change binding structure to be more generic
 * Thu Mar 7 2019 Agelos Tsalapatis  <agelos.tsal@gmail.com> - 0.1.2-1%{?dist}
 - ARGO-1659 Authn should not start if there is no database connection established
 - Utility script that creates users and topics per site

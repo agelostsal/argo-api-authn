@@ -56,6 +56,48 @@ func (suite *AuthMethodsHandlersTestSuite) TestAuthMethodCreate() {
 	suite.NotEqual("", expAm.CreatedOn)
 }
 
+// TestAuthMethodCreate tests the default case of creating an auth method of type api-key and service type of ams
+func (suite *AuthMethodsHandlersTestSuite) TestHeadersAuthMethodCreate() {
+
+	var expAm = &authmethods.HeadersAuthMethod{}
+
+	reqBody := `{
+ "headers": {"x-api-token": "token-1"},
+ "host": "host3",
+ "port": 9000
+}`
+
+	req, err := http.NewRequest("POST", "http://localhost:8080/service-types/s2/authm", bytes.NewBuffer([]byte(reqBody)))
+	if err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+	// empty the store
+	mockstore.AuthMethods = []stores.QAuthMethod{}
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/service-types/{service-type}/authm", WrapConfig(AuthMethodCreate, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(201, w.Code)
+
+	// unmarshal the response
+	json.Unmarshal([]byte(w.Body.String()), expAm)
+	suite.Equal("uuid2", expAm.ServiceUUID)
+	suite.Equal("host3", expAm.Host)
+	suite.Equal(9000, expAm.Port)
+	suite.Equal("headers", expAm.Type)
+	suite.Equal(map[string]string{"x-api-token": "token-1"}, expAm.Headers)
+	suite.NotEqual("", expAm.UUID)
+	suite.NotEqual("", expAm.CreatedOn)
+
+}
+
 // TestAuthMethodCreateOverrideDefaults tests the default case of creating an auth method of type api-key and service type of ams while overriding path and auth retrieval field
 func (suite *AuthMethodsHandlersTestSuite) TestAuthMethodCreateOverrideDefaults() {
 
@@ -519,6 +561,18 @@ func (suite *AuthMethodsHandlersTestSuite) TestAuthMethodListAll() {
    "uuid": "am_uuid_1",
    "created_on": "",
    "access_key": "access_key"
+  },
+  {
+   "service_uuid": "uuid2",
+   "port": 9000,
+   "host": "host3",
+   "type": "headers",
+   "uuid": "am_uuid_2",
+   "created_on": "",
+   "headers": {
+    "Accept": "application/json",
+    "x-api-key": "key-1"
+   }
   }
  ]
 }`
