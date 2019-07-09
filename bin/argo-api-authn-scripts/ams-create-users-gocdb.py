@@ -5,7 +5,7 @@ import sys
 import requests
 import json
 import defusedxml.ElementTree as ET
-import ConfigParser
+import configparser
 import logging
 import logging.handlers
 import argparse
@@ -269,13 +269,13 @@ def create_users(config, verify):
 
                 except Exception as e:
                     LOGGER.warning("Skipping endpoint {} under site {}, {}".format(
-                        hostname, site_name, e.message))
+                        hostname, site_name, e))
 
             # convert the dn
             try:
                 service_dn = RdnSequence(service_dn.text).__str__()
             except ValueError as ve:
-                LOGGER.error("Invalid DN: {}. Exception: {}".format(service_dn.text, ve.message))
+                LOGGER.error("Invalid DN: {}. Exception: {}".format(service_dn.text, ve))
                 continue
 
             project = {'project': ams_project, 'roles': [users_role]}
@@ -344,7 +344,7 @@ def create_users(config, verify):
 def main(args=None):
 
     # set up the config parser
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
 
     # check if config file has been given as cli argument else
     # check if config file resides in /etc/argo-api-authn/ folder else
