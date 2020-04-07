@@ -33,7 +33,8 @@ pipeline {
             steps {
                 echo 'Test & Coverage...'
                 sh """
-                make go-test
+                    cd ${WORKSPACE}/${PROJECT_DIR}
+                    make go-test
                 """
                 junit '**/junit.xml'
                 cobertura coberturaReportFile: '**/coverage.xml'
