@@ -5,7 +5,7 @@ import sys
 import requests
 import json
 import defusedxml.ElementTree as ET
-import ConfigParser
+import configparser
 import logging
 import logging.handlers
 import argparse
@@ -195,6 +195,7 @@ def create_users(config, verify):
     ams_token = config.get("AMS", "ams_token")
     ams_email = config.get("AMS", "ams_email")
     users_role = config.get("AMS", "users_role")
+    ams_consumer = config.get("AMS", "ams_consumer")
     goc_db_url_arch = config.get("AMS", "goc_db_host")
     goc_db_site_url = "https://goc.egi.eu/gocdbpi/public/?method=get_site&sitename={{sitename}}"
 
@@ -275,7 +276,7 @@ def create_users(config, verify):
 
                 except Exception as e:
                     LOGGER.warning("Skipping endpoint {} under site {}, {}".format(
-                        hostname, site_name, e.message))
+                        hostname, site_name, e))
 
             # Create AMS user
             user_binding_name = \
@@ -287,7 +288,7 @@ def create_users(config, verify):
             except ValueError as ve:
                 LOGGER.error(
                     "Invalid DN: {}. Exception: {}".
-                    format(service_dn.text, ve.message))
+                    format(service_dn.text, ve))
                 continue
 
             project = {'project': ams_project, 'roles': [users_role]}
@@ -300,30 +301,39 @@ def create_users(config, verify):
                 data=json.dumps(usr_create), verify=verify)
             LOGGER.info(ams_usr_crt_req.text)
 
-            # if the response doesn't contain the field uuid,
-            # it means the user was not created
-            req_data = json.loads(ams_usr_crt_req.text)
-            if ams_usr_crt_req.status_code != 200:
+            ams_user_uuid = ""
+
+            # if the response is neither a 200(OK) nor a 409(already exists)
+            # then move on to the next user
+            if ams_usr_crt_req.status_code != 200 and ams_usr_crt_req.status_code != 409:
                 LOGGER.critical("\nUser: " + user_binding_name)
                 LOGGER.critical(
                     "\nSomething went wrong while creating ams user." +
                     "\nBody data: " + str(usr_create) + "\nResponse Body: " +
                     ams_usr_crt_req.text)
+                continue
 
-            user_exists = False
-            if "uuid" not in req_data:
-                LOGGER.critical("uuid field not found in response from ams")
-                # if user already exists try to create the binding
-                if ams_usr_crt_req.status_code != 409:
-                    continue
+            if ams_usr_crt_req.status_code == 200:
+                ams_user_uuid = ams_usr_crt_req.json()["uuid"]
+                # count how many users have been created
+                user_count += 1
+
+            # If the user already exists, Get user by username
+            if ams_usr_crt_req.status_code == 409:
+
+                ams_usr_get_req = requests.get(
+                    "https://" + ams_host + "/v1/users/" +
+                    user_binding_name + "?key=" + ams_token, verify=verify)
+
+                # if the user retrieval was ok
+                if ams_usr_get_req.status_code == 200:
+                    LOGGER.info("\nSuccessfully retrieved user {} from ams".format(user_binding_name))
+                    ams_user_uuid = ams_usr_get_req.json()["uuid"]
                 else:
-                    user_exists = True
-                    # Get user by username
-                    ams_usr_get_req = requests.get(
-                        "https://" + ams_host + "/v1/users/" +
-                        user_binding_name + "?key=" + ams_token, verify=verify)
-                    LOGGER.info(ams_usr_get_req.text)
-                    req_data = json.loads(ams_usr_get_req.text)
+                    LOGGER.critical(
+                        "\nCould not retrieve user {} from ams."
+                        "\n Response {}".format(user_binding_name, ams_usr_get_req.text))
+                    continue
 
             # Create the respective AUTH binding
             bd_data = {
@@ -331,28 +341,25 @@ def create_users(config, verify):
                 'service_uuid': authn_service_uuid,
                 'host': authn_service_host,
                 'auth_identifier': service_dn,
-                'unique_key': req_data["uuid"],
+                'unique_key': ams_user_uuid,
                 "auth_type": "x509"
             }
+
             authn_binding_crt_req = requests.post(
                 "https://"+authn_host+"/v1/bindings?key="+authn_token,
                 data=json.dumps(bd_data), verify=verify)
             LOGGER.info(authn_binding_crt_req.text)
 
-            if authn_binding_crt_req.status_code != 201:
+            # if the response is neither a 201(Created) nor a 409(already exists)
+            if authn_binding_crt_req.status_code != 201 and authn_binding_crt_req.status_code != 409:
                 LOGGER.critical(
                     "Something went wrong while creating a binding." +
                     "\nBody data: " + str(bd_data) + "\nResponse: " +
                     authn_binding_crt_req.text)
-                if not user_exists:
-                    # delete the ams user, since binding could not be created
-                    requests.delete(
-                        "https://" + ams_host + "/v1/users/" + user_binding_name +
-                        "?key=" + ams_token, verify=verify)
                 continue
 
-            # count how many users have been created
-            user_count += 1
+            # since both the ams user was created or already existed AND the authn binding was created or already existed
+            # move to topic and subscription creation
 
             # create new topic
             primary_key = service_endpoint. \
@@ -362,7 +369,7 @@ def create_users(config, verify):
                 "https://" + ams_host + "/v1/projects/" + ams_project +
                 "/topics/" + topic_name + "?key=" + ams_token, verify=verify)
 
-            authorized_users = [user_binding_name]
+            topic_authorized_users = [user_binding_name]
             if topic_crt_req.status_code != 200:
                 if topic_crt_req.status_code != 409:
                     LOGGER.critical(
@@ -376,20 +383,61 @@ def create_users(config, verify):
                         verify=verify)
                     if get_topic_acl_req.status_code == 200:
                         acl_users = json.loads(get_topic_acl_req.text)
-                        authorized_users = authorized_users + \
-                            acl_users['authorized_users']
+                        topic_authorized_users = topic_authorized_users + acl_users['authorized_users']
+                        # remove duplicates
+                        topic_authorized_users = list(set(topic_authorized_users))
 
             # modify the authorized users
             modify_topic_req = requests.post(
                 "https://" + ams_host + "/v1/projects/" + ams_project +
                 "/topics/" + topic_name + ":modifyAcl?key=" + ams_token,
-                data=json.dumps({'authorized_users': authorized_users}),
+                data=json.dumps({'authorized_users': topic_authorized_users}),
                 verify=verify)
             LOGGER.critical(
-                "Modified ACL for topic: {} with users {}. " +
-                "Response from AMS {}".
+                "Modified ACL for topic: {0} with users {1}."
+                "Response from AMS {2}".
                 format(
                     topic_name, str(user_binding_name), modify_topic_req.text))
+
+            # create new sub
+            primary_key = service_endpoint.find("PRIMARY_KEY").text.replace(' ', '')
+            sub_name = 'SITE_' + sitename + '_ENDPOINT_' + primary_key
+            sub_authorized_users = [ams_consumer]
+            sub_data = dict()
+            sub_data["topic"] = "projects/" + ams_project + "/topics/" + sub_name
+            sub_data["ackDeadlineSeconds"] = 100
+
+            sub_crt_req = requests.put(
+                "https://" + ams_host + "/v1/projects/" + ams_project +
+                "/subscriptions/" + sub_name + "?key=" + ams_token, data=json.dumps(sub_data),verify=verify)
+
+            if sub_crt_req.status_code != 200 and sub_crt_req.status_code != 409:
+                LOGGER.critical(
+                    "Something went wrong while creating subscription " +
+                    sub_name + "\nResponse: " + sub_crt_req.text)
+
+            if sub_crt_req.status_code == 409:
+                    get_sub_acl_req = requests.get(
+                        "https://" + ams_host + "/v1/projects/" + ams_project +
+                        "/subscriptions/" + sub_name + ":acl?key=" + ams_token,
+                        verify=verify)
+                    if get_sub_acl_req.status_code == 200:
+                        acl_users = json.loads(get_sub_acl_req.text)
+                        sub_authorized_users = sub_authorized_users + acl_users['authorized_users']
+                        # remove duplicates
+                        sub_authorized_users = list(set(sub_authorized_users))
+
+            # modify the authorized users
+            modify_sub_req = requests.post(
+                "https://" + ams_host + "/v1/projects/" + ams_project +
+                "/subscriptions/" + sub_name + ":modifyAcl?key=" + ams_token,
+                data=json.dumps({'authorized_users': sub_authorized_users}),
+                verify=verify)
+            LOGGER.critical(
+                "Modified ACL for subscription: {0} with users {1}."
+                "Response from AMS {2}".
+                format(
+                    sub_name, sub_authorized_users, modify_sub_req.text))
 
         LOGGER.critical("Service Type: " + srv_type)
         LOGGER.critical("Missing DNS: " + str(missing_dns))
@@ -400,7 +448,7 @@ def create_users(config, verify):
 def main(args=None):
 
     # set up the config parser
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
 
     # check if config file has been given as cli argument else
     # check if config file resides in /etc/argo-api-authn/ folder else
