@@ -220,6 +220,12 @@ def create_users(config, verify):
         # user count
         user_count = 0
 
+        # updated bindings count
+        update_binding_count= 0 
+
+        # updated bindings names
+        update_bindings_names= []
+
         # form the goc db url
         goc_db_url = goc_db_url_arch.replace("{{service-type}}", srv_type)
         LOGGER.info("\nAccessing url: " + goc_db_url)
@@ -354,6 +360,36 @@ def create_users(config, verify):
                     authn_binding_crt_req.text)
                 continue
 
+            # if the binding already exists, check for an updated DN from gocdb
+            if authn_binding_crt_req.status_code == 409:
+                retrieve_binding_url = "https://{0}/v1/bindings/{1}?key={2}".format(authn_host, user_binding_name, authn_token)
+                authn_ret_bind_req = requests.get(url=retrieve_binding_url, verify=verify)
+                # if the binding retrieval was ok
+                if authn_ret_bind_req.status_code == 200:
+                    LOGGER.info("\nSuccessfully retrieved binding {} from authn".format(user_binding_name))
+                    binding = authn_ret_bind_req.json()
+
+                    # check if the dn has changed
+                    if binding["auth_identifier"] != service_dn:
+                        # update the respective binding with the new dn
+                        bind_upd_req_url = "https://{0}/v1/bindings/{1}?key={2}".format(authn_host, binding["uuid"], authn_token)
+                        upd_bd_data = {
+                            "auth_identifier": service_dn
+                        }
+                        authn_bind_upd_req = requests.put(url=bind_upd_req_url, data=json.dumps(upd_bd_data), verify=verify)
+                        LOGGER.info(authn_bind_upd_req.text)
+                        if authn_bind_upd_req.status_code == 200:
+                            update_binding_count += 1
+                            update_bindings_names.append(user_binding_name)
+
+    
+
+                else:
+                    LOGGER.critical(
+                        "\nCould not retrieve binding {} from authn."
+                        "\n Response {}".format(user_binding_name, authn_ret_bind_req.text))
+                    continue
+
             # since both the ams user was created or already existed AND the authn binding was created or already existed
             # move to topic and subscription creation
 
@@ -438,6 +474,10 @@ def create_users(config, verify):
         LOGGER.critical("Service Type: " + srv_type)
         LOGGER.critical("Missing DNS: " + str(missing_dns))
         LOGGER.critical("Total Users Created: " + str(user_count))
+        LOGGER.critical("Total Bindings Updated: " + str(update_binding_count))
+        LOGGER.critical("Updated bingings: " + str(update_bindings_names))
+
+
         LOGGER.critical("-----------------------------------------")
 
 

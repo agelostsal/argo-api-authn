@@ -51,6 +51,10 @@ func CreateBinding(binding Binding, store stores.Store) (Binding, error) {
 		return binding, err
 	}
 
+	if err := ExistsWithName(binding.Name, store); err != nil {
+		return binding, err
+	}
+
 	// generate uuid
 	uuid := uuid2.NewV4().String()
 
@@ -122,6 +126,28 @@ func ExistsWithAuthID(authID string, serviceUUID string, host string, authType s
 
 	return nil
 }
+
+func ExistsWithName(name string, store stores.Store) error {
+
+	var err error
+
+	// check if the given authID doesn't already exist under the given service type and host
+	// first check for all the other errors regrading bindings
+	if _, err = FindBindingByUUID("", name, store); err != nil {
+		if err.Error() != "Binding was not found" {
+			return err
+		}
+	}
+
+	// if the error is nil, it means the function found and returned a binding
+	if err == nil {
+		err = utils.APIErrConflict("binding", "name", name)
+		return err
+	}
+
+	return nil
+}
+
 
 // FindBindingByAuthID queries the datastore and returns a binding based on the given auth identifier, service and host
 func FindBindingByAuthID(authID string, serviceUUID string, host string, authType string, store stores.Store) (Binding, error) {
@@ -201,19 +227,21 @@ func FindBindingsByServiceTypeAndHost(serviceUUID string, host string, store sto
 }
 
 // FindBindingByUUID returns the binding associated with the provided uuid
-func FindBindingByUUID(uuid string, store stores.Store) (Binding, error) {
+func FindBindingByUUID(uuid, name string, store stores.Store) (Binding, error) {
 
 	var qBindings []stores.QBinding
 	var err error
 	var binding Binding
 
-	if qBindings, err = store.QueryBindingsByUUID(uuid); err != nil {
+	if qBindings, err = store.QueryBindingsByUUID(uuid, name); err != nil {
 		return Binding{}, err
 	}
 
-	if len(qBindings) > 1 {
-		err = utils.APIErrDatabase("More than 1 Bindings found with the same UUID: " + uuid)
-		return Binding{}, err
+	if uuid != "" {
+		if len(qBindings) > 1 {
+			err = utils.APIErrDatabase("More than 1 Bindings found with the same UUID: " + uuid)
+			return Binding{}, err
+		}
 	}
 
 	if len(qBindings) == 0 {

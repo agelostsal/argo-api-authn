@@ -215,10 +215,16 @@ def create_users(config, verify):
 
         # grab the xml data from goc db
         goc_request = requests.get(goc_db_url, verify=False)
-        LOGGER.info(goc_request.text)
+        #LOGGER.info(goc_request.text)
 
         # users from goc db that don't have a dn registered
         missing_dns = []
+
+        # updated bindings count
+        update_binding_count= 0 
+
+        # updated bindings names
+        update_bindings_names= []
 
         # srv_type
         srv_type = srv_type.replace(".", "-")
@@ -286,14 +292,38 @@ def create_users(config, verify):
             ams_usr_crt_req = requests.post(url=api_url, data=json.dumps(usr_create), verify=verify)
             LOGGER.info(ams_usr_crt_req.text)
 
-            # if the response doesn't contain the field uuid, it means the user was not created
-            req_data = json.loads(ams_usr_crt_req.text)
-            if ams_usr_crt_req.status_code != 200:
+            ams_user_uuid = ""
+
+            # if the response is neither a 200(OK) nor a 409(already exists)
+            # then move on to the next user
+            if ams_usr_crt_req.status_code != 200 and ams_usr_crt_req.status_code != 409:
                 LOGGER.critical("\nUser: " + user_binding_name)
-                LOGGER.critical("\nSomething went wrong while creating ams user.\nBody data: " + str(usr_create) + "\nResponse Body: " + ams_usr_crt_req.text)
-            if "uuid" not in req_data:
-                LOGGER.critical("uuid field not found in response from ams")
+                LOGGER.critical(
+                    "\nSomething went wrong while creating ams user." +
+                    "\nBody data: " + str(usr_create) + "\nResponse Body: " +
+                    ams_usr_crt_req.text)
                 continue
+
+            if ams_usr_crt_req.status_code == 200:
+                ams_user_uuid = ams_usr_crt_req.json()["uuid"]
+                # count how many users have been created
+                user_count += 1
+
+            # If the user already exists, Get user by username
+            if ams_usr_crt_req.status_code == 409:
+                proj_member_list_url = "https://{0}/v1/projects/{1}/members/{2}?key={3}".format(ams_host, ams_project, user_binding_name, ams_token)
+                ams_usr_get_req = requests.get(url=proj_member_list_url, verify=verify)
+
+                # if the user retrieval was ok
+                if ams_usr_get_req.status_code == 200:
+                    LOGGER.info("\nSuccessfully retrieved user {} from ams".format(user_binding_name))
+                    ams_user_uuid = ams_usr_get_req.json()["uuid"]
+                else:
+                    LOGGER.critical(
+                        "\nCould not retrieve user {} from ams."
+                        "\n Response {}".format(user_binding_name, ams_usr_get_req.text))
+                    continue
+
 
             # Create the respective AUTH binding
             bd_data = {
@@ -301,11 +331,39 @@ def create_users(config, verify):
                 'service_uuid': authn_service_uuid,
                 'host': authn_service_host,
                 'auth_identifier': service_dn,
-                'unique_key': req_data["uuid"],
+                'unique_key': ams_user_uuid,
                 "auth_type": "x509"
             }
+
             authn_binding_crt_req = requests.post("https://"+authn_host+"/v1/bindings?key="+authn_token, data=json.dumps(bd_data), verify=verify)
             LOGGER.info(authn_binding_crt_req.text)
+
+            # if the binding already exists, check for an updated DN from gocdb
+            if authn_binding_crt_req.status_code == 409:
+                retrieve_binding_url = "https://{0}/v1/bindings/{1}?key={2}".format(authn_host, user_binding_name, authn_token)
+                authn_ret_bind_req = requests.get(url=retrieve_binding_url, verify=verify)
+                # if the binding retrieval was ok
+                if authn_ret_bind_req.status_code == 200:
+                    LOGGER.info("\nSuccessfully retrieved binding {} from authn".format(user_binding_name))
+                    binding = authn_ret_bind_req.json()
+
+                    # check if the dn has changed
+                    if binding["auth_identifier"] != service_dn:
+                        # update the respective binding with the new dn
+                        bind_upd_req_url = "https://{0}/v1/bindings/{1}?key={2}".format(authn_host, binding["uuid"], authn_token)
+                        upd_bd_data = {
+                            "auth_identifier": service_dn
+                        }
+                        authn_bind_upd_req = requests.put(url=bind_upd_req_url, data=json.dumps(upd_bd_data), verify=verify)
+                        LOGGER.info(authn_bind_upd_req.text)
+                        if authn_bind_upd_req.status_code == 200:
+                            update_binding_count += 1
+                            update_bindings_names.append(user_binding_name)
+                else:
+                    LOGGER.critical(
+                        "\nCould not retrieve binding {} from authn."
+                        "\n Response {}".format(user_binding_name, authn_ret_bind_req.text))
+                    continue
 
             if authn_binding_crt_req.status_code != 201:
                 LOGGER.critical("Something went wrong while creating a binding.\nBody data: " + str(bd_data) + "\nResponse: " + authn_binding_crt_req.text)
@@ -338,6 +396,10 @@ def create_users(config, verify):
         LOGGER.critical("Missing DNS: " + str(missing_dns))
 
         LOGGER.critical("Total Users Created: " + str(user_count))
+        
+        LOGGER.critical("Total Bindings Updated: " + str(update_binding_count))
+        
+        LOGGER.critical("Updated bingings: " + str(update_bindings_names))
 
         LOGGER.critical("-----------------------------------------")
 

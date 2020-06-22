@@ -173,13 +173,23 @@ func (mongo *MongoStore) QueryBindingsByAuthID(authID string, serviceUUID string
 	return qBindings, err
 }
 
-func (mongo *MongoStore) QueryBindingsByUUID(uuid string) ([]QBinding, error) {
+func (mongo *MongoStore) QueryBindingsByUUID(uuid, name string) ([]QBinding, error) {
 
 	var qBindings []QBinding
 	var err error
 
+	q := bson.M{}
+
+	if uuid != "" {
+		q["uuid"] = uuid
+	}
+
+	if name != "" {
+		q["name"] = name
+	}
+
 	c := mongo.Session.DB(mongo.Database).C("bindings")
-	err = c.Find(bson.M{"uuid": uuid}).All(&qBindings)
+	err = c.Find(q).All(&qBindings)
 
 	if err != nil {
 		LOGGER.Error("STORE", "\t", err.Error())

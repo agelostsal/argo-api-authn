@@ -161,7 +161,7 @@ func (mock *Mockstore) QueryBindingsByAuthID(authID string, serviceUUID string, 
 	return qBindings, nil
 }
 
-func (mock *Mockstore) QueryBindingsByUUID(uuid string) ([]QBinding, error) {
+func (mock *Mockstore) QueryBindingsByUUID(uuid, name string) ([]QBinding, error) {
 
 	var qBindings []QBinding
 
