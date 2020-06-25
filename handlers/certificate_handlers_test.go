@@ -552,7 +552,7 @@ func (suite *CertificateHandlerSuite) TestAuthViaCertInvalidHost() {
 
 	expRespJSON := `{
  "error": {
-  "message": "x509: certificate is valid for COMODO RSA Domain Validation Secure Server CA, not localhost",
+  "message": "x509: certificate is valid for example.com, not localhost",
   "code": 403,
   "status": "ACCESS_FORBIDDEN"
  }
@@ -562,7 +562,7 @@ func (suite *CertificateHandlerSuite) TestAuthViaCertInvalidHost() {
 		LOGGER.Error(err.Error())
 	}
 
-	req.TLS.PeerCertificates[0].Subject.CommonName = "COMODO RSA Domain Validation Secure Server CA"
+	req.TLS.PeerCertificates[0].Subject.CommonName = "example.com"
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
