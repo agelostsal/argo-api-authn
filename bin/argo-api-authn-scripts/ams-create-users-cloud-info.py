@@ -295,10 +295,8 @@ def create_users(config, verify):
             usr_create = {'projects': [project], 'email': contact_email}
 
             # create the user
-            ams_usr_crt_req = requests.post(
-                "https://" + ams_host + "/v1/users/" + user_binding_name +
-                "?key=" + ams_token,
-                data=json.dumps(usr_create), verify=verify)
+            api_url = 'https://{0}/v1/projects/{1}/members/{2}?key={3}'.format(ams_host, ams_project, user_binding_name, ams_token)
+            ams_usr_crt_req = requests.post(url=api_url, data=json.dumps(usr_create), verify=verify)
             LOGGER.info(ams_usr_crt_req.text)
 
             ams_user_uuid = ""
@@ -320,10 +318,8 @@ def create_users(config, verify):
 
             # If the user already exists, Get user by username
             if ams_usr_crt_req.status_code == 409:
-
-                ams_usr_get_req = requests.get(
-                    "https://" + ams_host + "/v1/users/" +
-                    user_binding_name + "?key=" + ams_token, verify=verify)
+                proj_member_list_url = "https://{0}/v1/projects/{1}/members/{2}?key={3}".format(ams_host, ams_project, user_binding_name, ams_token)
+                ams_usr_get_req = requests.get(url=proj_member_list_url, verify=verify)
 
                 # if the user retrieval was ok
                 if ams_usr_get_req.status_code == 200:

@@ -282,7 +282,8 @@ def create_users(config, verify):
             usr_create = {'projects': [project], 'email': contact_email}
 
             # create the user
-            ams_usr_crt_req = requests.post("https://"+ams_host+"/v1/users/" + user_binding_name + "?key=" + ams_token, data=json.dumps(usr_create), verify=verify)
+            api_url = 'https://{0}/v1/projects/{1}/members/{2}?key={3}'.format(ams_host, ams_project, user_binding_name, ams_token)
+            ams_usr_crt_req = requests.post(url=api_url, data=json.dumps(usr_create), verify=verify)
             LOGGER.info(ams_usr_crt_req.text)
 
             # if the response doesn't contain the field uuid, it means the user was not created
