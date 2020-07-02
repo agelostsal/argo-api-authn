@@ -795,7 +795,7 @@ func (suite *BindingHandlersSuite) TestBindingListOneByUUID() {
  "created_on": "2018-05-05T15:04:05Z"
 }`
 
-	req, err := http.NewRequest("GET", "http://localhost:8080/bindings/b_uuid1", nil)
+	req, err := http.NewRequest("GET", "http://localhost:8080/bindings/b1", nil)
 	if err != nil {
 		LOGGER.Error(err.Error())
 	}
@@ -808,7 +808,7 @@ func (suite *BindingHandlersSuite) TestBindingListOneByUUID() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingListOneByUUID, mockstore, cfg))
+	router.HandleFunc("/bindings/{name}", WrapConfig(BindingListOneByName, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(200, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -837,42 +837,9 @@ func (suite *BindingHandlersSuite) TestBindingListOneByUUIDUnknownUUID() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingListOneByUUID, mockstore, cfg))
+	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingListOneByName, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(404, w.Code)
-	suite.Equal(expRespJSON, w.Body.String())
-}
-
-// TestBindingListOneByUUIDMultipleEntries tests the case where two or more bindings exists with the same uuid
-func (suite *BindingHandlersSuite) TestBindingListOneByUUIDMultipleEntries() {
-
-	expRespJSON := `{
- "error": {
-  "message": "Database Error: More than 1 Bindings found with the same UUID: b_uuid1",
-  "code": 500,
-  "status": "INTERNAL SERVER ERROR"
- }
-}`
-	req, err := http.NewRequest("GET", "http://localhost:8080/bindings/b_uuid1", nil)
-	if err != nil {
-		LOGGER.Error(err.Error())
-	}
-
-	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
-	mockstore.SetUp()
-
-	// add a binding that already exists
-	binding1 := stores.QBinding{Name: "b1", ServiceUUID: "uuid1", Host: "host1", UUID: "b_uuid1", AuthIdentifier: "test_dn_1", AuthType: "x509", UniqueKey: "unique_key_1", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}
-	mockstore.Bindings = append(mockstore.Bindings, binding1)
-
-	cfg := &config.Config{}
-	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
-
-	router := mux.NewRouter().StrictSlash(true)
-	w := httptest.NewRecorder()
-	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingListOneByUUID, mockstore, cfg))
-	router.ServeHTTP(w, req)
-	suite.Equal(500, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
 }
 

@@ -80,7 +80,7 @@ var ApiRoutes = []APIRoute{
 	{"bindings:create", "POST", "/bindings/{name}", handlers.BindingCreate, true},
 	{"bindings:ListAll", "GET", "/bindings", handlers.BindingListAll, true},
 	{"bindings:update", "PUT", "/bindings/{uuid}", handlers.BindingUpdate, true},
-	{"bindings:ListOneByUUID", "GET", "/bindings/{uuid}", handlers.BindingListOneByUUID, true},
+	{"bindings:ListOneByName", "GET", "/bindings/{name}", handlers.BindingListOneByName, true},
 	{"bindings:delete", "DELETE", "/bindings/{uuid}", handlers.BindingDelete, true},
 	{"auth:dn", "GET", "/service-types/{service-type}/hosts/{host}:authx509", handlers.AuthViaCert, false},
 }

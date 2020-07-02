@@ -128,8 +128,8 @@ func BindingListOneByAuthID(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// BindingListOneByUUID finds and returns information about a binding, associated with the provided UUID
-func BindingListOneByUUID(w http.ResponseWriter, r *http.Request) {
+// BindingListOneByName finds and returns information about a binding, associated with the provided name
+func BindingListOneByName(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	var binding bindings.Binding
@@ -140,7 +140,7 @@ func BindingListOneByUUID(w http.ResponseWriter, r *http.Request) {
 	// url vars
 	vars := mux.Vars(r)
 
-	if binding, err = bindings.FindBindingByUUIDAndName(vars["uuid"], "", store); err != nil {
+	if binding, err = bindings.FindBindingByUUIDAndName("", vars["name"], store); err != nil {
 		utils.RespondError(w, err)
 		return
 	}
