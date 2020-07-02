@@ -860,7 +860,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdate() {
  "auth_type": "x509",
  "created_on": "2018-05-05T15:04:05Z"
 }`
-	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
+	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
 		LOGGER.Error(err.Error())
 	}
@@ -873,7 +873,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdate() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
+	router.HandleFunc("/bindings/{name}", WrapConfig(BindingUpdate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(200, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -893,7 +893,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateServiceUUIDEmpty() {
   "status": "UNPROCESSABLE ENTITY"
  }
 }`
-	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
+	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
 		LOGGER.Error(err.Error())
 	}
@@ -906,7 +906,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateServiceUUIDEmpty() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
+	router.HandleFunc("/bindings/{name}", WrapConfig(BindingUpdate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(422, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -926,7 +926,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateHostEmpty() {
   "status": "UNPROCESSABLE ENTITY"
  }
 }`
-	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
+	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
 		LOGGER.Error(err.Error())
 	}
@@ -939,7 +939,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateHostEmpty() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
+	router.HandleFunc("/bindings/{name}", WrapConfig(BindingUpdate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(422, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -959,7 +959,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateUniqueKeyEmpty() {
   "status": "UNPROCESSABLE ENTITY"
  }
 }`
-	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
+	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
 		LOGGER.Error(err.Error())
 	}
@@ -972,7 +972,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateUniqueKeyEmpty() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
+	router.HandleFunc("/bindings/{name}", WrapConfig(BindingUpdate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(422, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -992,7 +992,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateDNEmpty() {
   "status": "UNPROCESSABLE ENTITY"
  }
 }`
-	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
+	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
 		LOGGER.Error(err.Error())
 	}
@@ -1005,7 +1005,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateDNEmpty() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
+	router.HandleFunc("/bindings/{name}", WrapConfig(BindingUpdate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(422, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -1025,7 +1025,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateUnknownHost() {
   "status": "NOT FOUND"
  }
 }`
-	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
+	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
 		LOGGER.Error(err.Error())
 	}
@@ -1038,7 +1038,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateUnknownHost() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
+	router.HandleFunc("/bindings/{name}", WrapConfig(BindingUpdate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(404, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -1058,7 +1058,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateUnknownServiceUUID() {
   "status": "NOT FOUND"
  }
 }`
-	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
+	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
 		LOGGER.Error(err.Error())
 	}
@@ -1071,7 +1071,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateUnknownServiceUUID() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
+	router.HandleFunc("/bindings/{name}", WrapConfig(BindingUpdate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(404, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -1091,7 +1091,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateInvalidJSON() {
   "status": "BAD REQUEST"
  }
 }`
-	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
+	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
 		LOGGER.Error(err.Error())
 	}
@@ -1104,7 +1104,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateInvalidJSON() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
+	router.HandleFunc("/bindings/{name}", WrapConfig(BindingUpdate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(400, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -1124,7 +1124,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateAuthIDAlreadyExists() {
   "status": "CONFLICT"
  }
 }`
-	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
+	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
 		LOGGER.Error(err.Error())
 	}
@@ -1137,7 +1137,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateAuthIDAlreadyExists() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
+	router.HandleFunc("/bindings/{name}", WrapConfig(BindingUpdate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(409, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -1157,7 +1157,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateNameAlreadyExists() {
   "status": "CONFLICT"
  }
 }`
-	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
+	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
 		LOGGER.Error(err.Error())
 	}
@@ -1170,7 +1170,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateNameAlreadyExists() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
+	router.HandleFunc("/bindings/{name}", WrapConfig(BindingUpdate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(409, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
