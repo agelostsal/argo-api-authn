@@ -56,6 +56,10 @@ func (suite *BindingTestSuite) TestCreateBinding() {
 	b10 := Binding{Name: "bins", ServiceUUID: "uuid1", Host: "host1", AuthIdentifier: "test_auth", UniqueKey: "key", AuthType: "unknown"}
 	_, err10 := CreateBinding(b10, mockstore)
 
+	// tests the case where a binding with the given name already exists
+	b11 := Binding{Name: "b1", ServiceUUID: "uuid1", Host: "host1", AuthIdentifier: "test_dn_1_1", UniqueKey: "key", AuthType: "x509"}
+	_, err11 := CreateBinding(b11, mockstore)
+
 	suite.Equal(b1.Name, res1[0].Name)
 	suite.Equal(b1.ServiceUUID, res1[0].ServiceUUID)
 	suite.Equal(b1.Host, res1[0].Host)
@@ -72,6 +76,7 @@ func (suite *BindingTestSuite) TestCreateBinding() {
 	suite.Equal("Host was not found", err8.Error())
 	suite.Equal("binding object with auth_identifier: test_dn_1 already exists", err9.Error())
 	suite.Equal("Auth type: unknown is not yet supported.Supported:[x509 oidc]", err10.Error())
+	suite.Equal("binding object with name: b1 already exists", err11.Error())
 
 }
 
@@ -105,14 +110,15 @@ func (suite *BindingTestSuite) TestFindBindingByDN() {
 
 }
 
-func (suite *BindingTestSuite) TestFindBindingByUUID() {
+func (suite *BindingTestSuite) TestFindBindingByUUIDAndName() {
 
 	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
 	mockstore.SetUp()
 
 	// tests the normal case
 	expBinding1 := Binding{Name: "b1", ServiceUUID: "uuid1", Host: "host1", UUID: "b_uuid1", AuthIdentifier: "test_dn_1", UniqueKey: "unique_key_1", AuthType: "x509"}
-	b1, err1 := FindBindingByUUID("b_uuid1", mockstore)
+	b1, err1 := FindBindingByUUIDAndName("b_uuid1", "", mockstore)
+	b1_name, err1_name := FindBindingByUUIDAndName("", "b1", mockstore)
 
 	suite.Equal(expBinding1.Name, b1.Name)
 	suite.Equal(expBinding1.ServiceUUID, b1.ServiceUUID)
@@ -122,15 +128,24 @@ func (suite *BindingTestSuite) TestFindBindingByUUID() {
 	suite.Equal(expBinding1.UniqueKey, b1.UniqueKey)
 	suite.Equal(expBinding1.AuthType, b1.AuthType)
 
+	suite.Equal(expBinding1.Name, b1_name.Name)
+	suite.Equal(expBinding1.ServiceUUID, b1_name.ServiceUUID)
+	suite.Equal(expBinding1.Host, b1_name.Host)
+	suite.Equal(expBinding1.UUID, b1_name.UUID)
+	suite.Equal(expBinding1.AuthIdentifier, b1_name.AuthIdentifier)
+	suite.Equal(expBinding1.UniqueKey, b1_name.UniqueKey)
+	suite.Equal(expBinding1.AuthType, b1_name.AuthType)
+
 	// tests the not found case
-	_, err2 := FindBindingByUUID("unknown", mockstore)
+	_, err2 := FindBindingByUUIDAndName("unknown", "", mockstore)
 
 	// tests the case of more than 2 bindigs with the same dn exist under the same host and service
 	// append one more binding , same to an existing
 	mockstore.Bindings = append(mockstore.Bindings, stores.QBinding{Name: "b1", ServiceUUID: "uuid1", Host: "host1", UUID: "b_uuid1", AuthIdentifier: "test_dn_1", UniqueKey: "unique_key_1"})
-	_, err3 := FindBindingByUUID("b_uuid1", mockstore)
+	_, err3 := FindBindingByUUIDAndName("b_uuid1", "", mockstore)
 
 	suite.Nil(err1)
+	suite.Nil(err1_name)
 	suite.Equal("Binding was not found", err2.Error())
 	suite.Equal("Database Error: More than 1 Bindings found with the same UUID: b_uuid1", err3.Error())
 
@@ -238,6 +253,10 @@ func (suite *BindingTestSuite) TestUpdateBinding() {
 	b10 := TempUpdateBinding{Name: "bins", ServiceUUID: "uuid1", Host: "host1", UniqueKey: "key", AuthIdentifier: "test_dn_1", AuthType: ""}
 	_, err10 := UpdateBinding(b1, b10, mockstore)
 
+	// tests the case where a binding with the given dn already exists
+	b11 := TempUpdateBinding{Name: "b4", ServiceUUID: "uuid1", Host: "host1", AuthIdentifier: "test_dn_4", UniqueKey: "key", AuthType: "x509"}
+	_, err11 := UpdateBinding(b1, b11, mockstore)
+
 	suite.Equal(b1_upd.Name, res1[0].Name)
 	suite.Equal(b1_upd.ServiceUUID, res1[0].ServiceUUID)
 	suite.Equal(b1_upd.Host, res1[0].Host)
@@ -253,6 +272,7 @@ func (suite *BindingTestSuite) TestUpdateBinding() {
 	suite.Equal("Host was not found", err8.Error())
 	suite.Equal("binding object with auth_identifier: test_dn_1 already exists", err9.Error())
 	suite.Equal("binding object contains empty fields. empty value for field: auth_type", err10.Error())
+	suite.Equal("binding object with name: b4 already exists", err11.Error())
 
 }
 

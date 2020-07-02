@@ -404,6 +404,45 @@ func (suite *BindingHandlersSuite) TestBindingCreateDNAlreadyExists() {
 	suite.Equal(expRespJSON, w.Body.String())
 }
 
+// TestBindingCreateNameAlreadyExists tests the case where the given name is already used by another binding
+func (suite *BindingHandlersSuite) TestBindingCreateNameAlreadyExists() {
+
+	postJSON := `{
+    "name": "b1",
+    "service_uuid": "uuid1",
+    "host": "host1",
+    "auth_identifier": "test_dn_4",
+    "unique_key":"key1",
+    "auth_type": "x509"
+}`
+
+	expRespJSON := `{
+ "error": {
+  "message": "binding object with name: b1 already exists",
+  "code": 409,
+  "status": "CONFLICT"
+ }
+}`
+
+	req, err := http.NewRequest("POST", "http://localhost:8080/bindings", bytes.NewBuffer([]byte(postJSON)))
+	if err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/bindings", WrapConfig(BindingCreate, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(409, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
 // TestBindingListAll tests the normal case
 func (suite *BindingHandlersSuite) TestBindingListAll() {
 
@@ -1161,6 +1200,39 @@ func (suite *BindingHandlersSuite) TestBindingUpdateAuthIDAlreadyExists() {
 	expRespJSON := `{
  "error": {
   "message": "binding object with auth_identifier: test_dn_2 already exists",
+  "code": 409,
+  "status": "CONFLICT"
+ }
+}`
+	req, err := http.NewRequest("PUT", "http://localhost:8080/bindings/b_uuid1", bytes.NewBuffer([]byte(postJSON)))
+	if err != nil {
+		LOGGER.Error(err.Error())
+	}
+
+	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
+	mockstore.SetUp()
+
+	cfg := &config.Config{}
+	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
+
+	router := mux.NewRouter().StrictSlash(true)
+	w := httptest.NewRecorder()
+	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingUpdate, mockstore, cfg))
+	router.ServeHTTP(w, req)
+	suite.Equal(409, w.Code)
+	suite.Equal(expRespJSON, w.Body.String())
+}
+
+// TestBindingUpdateNameAlreadyExists tests case of updating a binding's auth identifier into an already existing one
+func (suite *BindingHandlersSuite) TestBindingUpdateNameAlreadyExists() {
+
+	postJSON := `{
+	"name": "b4"
+}`
+
+	expRespJSON := `{
+ "error": {
+  "message": "binding object with name: b4 already exists",
   "code": 409,
   "status": "CONFLICT"
  }

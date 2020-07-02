@@ -161,13 +161,31 @@ func (mock *Mockstore) QueryBindingsByAuthID(authID string, serviceUUID string, 
 	return qBindings, nil
 }
 
-func (mock *Mockstore) QueryBindingsByUUID(uuid string) ([]QBinding, error) {
+func (mock *Mockstore) QueryBindingsByUUIDAndName(uuid, name string) ([]QBinding, error) {
 
 	var qBindings []QBinding
 
-	for _, qBinding := range mock.Bindings {
-		if qBinding.UUID == uuid {
-			qBindings = append(qBindings, qBinding)
+	if uuid != "" && name == "" {
+		for _, qBinding := range mock.Bindings {
+			if qBinding.UUID == uuid {
+				qBindings = append(qBindings, qBinding)
+			}
+		}
+	}
+
+	if uuid == "" && name != "" {
+		for _, qBinding := range mock.Bindings {
+			if qBinding.Name == name {
+				qBindings = append(qBindings, qBinding)
+			}
+		}
+	}
+
+	if uuid != "" && name != "" {
+		for _, qBinding := range mock.Bindings {
+			if qBinding.UUID == uuid && qBinding.Name == name {
+				qBindings = append(qBindings, qBinding)
+			}
 		}
 	}
 

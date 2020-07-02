@@ -9,7 +9,7 @@ type Store interface {
 	QueryApiKeyAuthMethods(serviceUUID string, host string) ([]QApiKeyAuthMethod, error)
 	QueryHeadersAuthMethods(serviceUUID string, host string) ([]QHeadersAuthMethod, error)
 	QueryBindingsByAuthID(authID string, serviceUUID string, host string, authType string) ([]QBinding, error)
-	QueryBindingsByUUID(uuid string) ([]QBinding, error)
+	QueryBindingsByUUIDAndName(uuid, name string) ([]QBinding, error)
 	QueryBindings(serviceUUID string, host string) ([]QBinding, error)
 	InsertServiceType(name string, hosts []string, authTypes []string, authMethod string, uuid string, createdOn string, sType string) (QServiceType, error)
 	DeleteServiceTypeByUUID(uuid string) error
