@@ -24,7 +24,6 @@ type BindingHandlersSuite struct {
 func (suite *BindingHandlersSuite) TestBindingCreate() {
 
 	postJSON := `{
-	"name": "new_binding",
 	"service_uuid": "uuid1",
     "host": "host1",
     "auth_identifier": "test_dn",
@@ -32,7 +31,7 @@ func (suite *BindingHandlersSuite) TestBindingCreate() {
     "auth_type": "x509"
 }`
 
-	req, err := http.NewRequest("POST", "http://localhost:8080/bindings", bytes.NewBuffer([]byte(postJSON)))
+	req, err := http.NewRequest("POST", "http://localhost:8080/bindings/new_binding", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
 		LOGGER.Error(err.Error())
 	}
@@ -45,7 +44,7 @@ func (suite *BindingHandlersSuite) TestBindingCreate() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/bindings", WrapConfig(BindingCreate, mockstore, cfg))
+	router.HandleFunc("/bindings/{name}", WrapConfig(BindingCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(201, w.Code)
 	createdBind := bindings.Binding{}
@@ -57,44 +56,6 @@ func (suite *BindingHandlersSuite) TestBindingCreate() {
 	suite.Equal("test_dn", createdBind.AuthIdentifier)
 	suite.Equal("uni_key", createdBind.UniqueKey)
 	suite.Equal("x509", createdBind.AuthType)
-}
-
-// TestBindingCreateMissingFieldName tests the case where the binding doesn't contain the  name field
-func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldName() {
-
-	postJSON := `{
-	"service_uuid": "uuid1",
-    "host": "host1",
-    "auth_identifier": "test_dn",
-    "unique_key": "uni_key"
-}`
-
-	expRespJSON := `{
- "error": {
-  "message": "binding object contains empty fields. empty value for field: name",
-  "code": 422,
-  "status": "UNPROCESSABLE ENTITY"
- }
-}`
-
-	req, err := http.NewRequest("POST", "http://localhost:8080/bindings", bytes.NewBuffer([]byte(postJSON)))
-	if err != nil {
-		LOGGER.Error(err.Error())
-	}
-
-	mockstore := &stores.Mockstore{Server: "localhost", Database: "test_db"}
-	mockstore.SetUp()
-
-	cfg := &config.Config{}
-	_ = cfg.ConfigSetUp("../config/configuration-test-files/test-conf.json")
-
-	router := mux.NewRouter().StrictSlash(true)
-	w := httptest.NewRecorder()
-	router.HandleFunc("/bindings", WrapConfig(BindingCreate, mockstore, cfg))
-	router.ServeHTTP(w, req)
-	suite.Equal(422, w.Code)
-	suite.Equal(expRespJSON, w.Body.String())
-
 }
 
 // TestBindingCreateInvalidJSON tests the case where the request body is not a vlaid json
@@ -115,7 +76,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateInvalidJSON() {
  }
 }`
 
-	req, err := http.NewRequest("POST", "http://localhost:8080/bindings", bytes.NewBuffer([]byte(postJSON)))
+	req, err := http.NewRequest("POST", "http://localhost:8080/bindings/b1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
 		LOGGER.Error(err.Error())
 	}
@@ -128,7 +89,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateInvalidJSON() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/bindings", WrapConfig(BindingCreate, mockstore, cfg))
+	router.HandleFunc("/bindings/{name}", WrapConfig(BindingCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(400, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -139,7 +100,6 @@ func (suite *BindingHandlersSuite) TestBindingCreateInvalidJSON() {
 func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldServiceUUID() {
 
 	postJSON := `{
-    "name": "b1",
     "host": "host1",
     "auth_identifier": "test_dn",
     "unique_key": "uni_key"
@@ -153,7 +113,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldServiceUUID() {
  }
 }`
 
-	req, err := http.NewRequest("POST", "http://localhost:8080/bindings", bytes.NewBuffer([]byte(postJSON)))
+	req, err := http.NewRequest("POST", "http://localhost:8080/bindings/b1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
 		LOGGER.Error(err.Error())
 	}
@@ -166,7 +126,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldServiceUUID() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/bindings", WrapConfig(BindingCreate, mockstore, cfg))
+	router.HandleFunc("/bindings/{name}", WrapConfig(BindingCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(422, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -177,7 +137,6 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldServiceUUID() {
 func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldHost() {
 
 	postJSON := `{
-    "name": "b1",
 	"service_uuid": "uuid1",
     "auth_identifier": "test_dn",
     "unique_key": "uni_key"
@@ -191,7 +150,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldHost() {
  }
 }`
 
-	req, err := http.NewRequest("POST", "http://localhost:8080/bindings", bytes.NewBuffer([]byte(postJSON)))
+	req, err := http.NewRequest("POST", "http://localhost:8080/bindings/b1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
 		LOGGER.Error(err.Error())
 	}
@@ -204,7 +163,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldHost() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/bindings", WrapConfig(BindingCreate, mockstore, cfg))
+	router.HandleFunc("/bindings/{name}", WrapConfig(BindingCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(422, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -215,7 +174,6 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldHost() {
 func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldAuthID() {
 
 	postJSON := `{
-    "name": "b1",
 	"service_uuid": "uuid1",
     "host": "host1",
     "unique_key": "uni_key"
@@ -229,7 +187,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldAuthID() {
  }
 }`
 
-	req, err := http.NewRequest("POST", "http://localhost:8080/bindings", bytes.NewBuffer([]byte(postJSON)))
+	req, err := http.NewRequest("POST", "http://localhost:8080/bindings/b1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
 		LOGGER.Error(err.Error())
 	}
@@ -242,7 +200,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldAuthID() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/bindings", WrapConfig(BindingCreate, mockstore, cfg))
+	router.HandleFunc("/bindings/{name}", WrapConfig(BindingCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(422, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -253,7 +211,6 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldAuthID() {
 func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldUniqueKey() {
 
 	postJSON := `{
-    "name": "b1",
     "service_uuid": "uuid1",
     "host": "host1",
     "auth_identifier": "test_dn",
@@ -268,7 +225,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldUniqueKey() {
  }
 }`
 
-	req, err := http.NewRequest("POST", "http://localhost:8080/bindings", bytes.NewBuffer([]byte(postJSON)))
+	req, err := http.NewRequest("POST", "http://localhost:8080/bindings/b1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
 		LOGGER.Error(err.Error())
 	}
@@ -281,7 +238,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldUniqueKey() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/bindings", WrapConfig(BindingCreate, mockstore, cfg))
+	router.HandleFunc("/bindings/{name}", WrapConfig(BindingCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(422, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -291,7 +248,6 @@ func (suite *BindingHandlersSuite) TestBindingCreateMissingFieldUniqueKey() {
 func (suite *BindingHandlersSuite) TestBindingCreateUnknownService() {
 
 	postJSON := `{
-    "name": "b1",
     "service_uuid": "unknown",
     "host": "host1",
     "auth_identifier": "test_dn",
@@ -307,7 +263,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateUnknownService() {
  }
 }`
 
-	req, err := http.NewRequest("POST", "http://localhost:8080/bindings", bytes.NewBuffer([]byte(postJSON)))
+	req, err := http.NewRequest("POST", "http://localhost:8080/bindings/b1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
 		LOGGER.Error(err.Error())
 	}
@@ -320,7 +276,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateUnknownService() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/bindings", WrapConfig(BindingCreate, mockstore, cfg))
+	router.HandleFunc("/bindings/{name}", WrapConfig(BindingCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(404, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -330,7 +286,6 @@ func (suite *BindingHandlersSuite) TestBindingCreateUnknownService() {
 func (suite *BindingHandlersSuite) TestBindingCreateUnknownHost() {
 
 	postJSON := `{
-    "name": "b1",
     "service_uuid": "uuid1",
     "host": "unknown",
     "auth_identifier": "test_dn",
@@ -346,7 +301,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateUnknownHost() {
  }
 }`
 
-	req, err := http.NewRequest("POST", "http://localhost:8080/bindings", bytes.NewBuffer([]byte(postJSON)))
+	req, err := http.NewRequest("POST", "http://localhost:8080/bindings/b1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
 		LOGGER.Error(err.Error())
 	}
@@ -359,7 +314,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateUnknownHost() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/bindings", WrapConfig(BindingCreate, mockstore, cfg))
+	router.HandleFunc("/bindings/{name}", WrapConfig(BindingCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(404, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -369,7 +324,6 @@ func (suite *BindingHandlersSuite) TestBindingCreateUnknownHost() {
 func (suite *BindingHandlersSuite) TestBindingCreateDNAlreadyExists() {
 
 	postJSON := `{
-    "name": "b1",
     "service_uuid": "uuid1",
     "host": "host1",
     "auth_identifier": "test_dn_1",
@@ -385,7 +339,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateDNAlreadyExists() {
  }
 }`
 
-	req, err := http.NewRequest("POST", "http://localhost:8080/bindings", bytes.NewBuffer([]byte(postJSON)))
+	req, err := http.NewRequest("POST", "http://localhost:8080/bindings/b1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
 		LOGGER.Error(err.Error())
 	}
@@ -398,7 +352,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateDNAlreadyExists() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/bindings", WrapConfig(BindingCreate, mockstore, cfg))
+	router.HandleFunc("/bindings/{name}", WrapConfig(BindingCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(409, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
@@ -408,7 +362,6 @@ func (suite *BindingHandlersSuite) TestBindingCreateDNAlreadyExists() {
 func (suite *BindingHandlersSuite) TestBindingCreateNameAlreadyExists() {
 
 	postJSON := `{
-    "name": "b1",
     "service_uuid": "uuid1",
     "host": "host1",
     "auth_identifier": "test_dn_4",
@@ -424,7 +377,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateNameAlreadyExists() {
  }
 }`
 
-	req, err := http.NewRequest("POST", "http://localhost:8080/bindings", bytes.NewBuffer([]byte(postJSON)))
+	req, err := http.NewRequest("POST", "http://localhost:8080/bindings/b1", bytes.NewBuffer([]byte(postJSON)))
 	if err != nil {
 		LOGGER.Error(err.Error())
 	}
@@ -437,7 +390,7 @@ func (suite *BindingHandlersSuite) TestBindingCreateNameAlreadyExists() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/bindings", WrapConfig(BindingCreate, mockstore, cfg))
+	router.HandleFunc("/bindings/{name}", WrapConfig(BindingCreate, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(409, w.Code)
 	suite.Equal(expRespJSON, w.Body.String())
