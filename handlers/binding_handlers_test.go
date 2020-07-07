@@ -1209,7 +1209,7 @@ func (suite *BindingHandlersSuite) TestBindingUpdateUnknownUUID() {
 // TestBindingDelete tests the normal case
 func (suite *BindingHandlersSuite) TestBindingDelete() {
 
-	req, err := http.NewRequest("DELETE", "http://localhost:8080/bindings/b_uuid1", nil)
+	req, err := http.NewRequest("DELETE", "http://localhost:8080/bindings/b1", nil)
 	if err != nil {
 		LOGGER.Error(err.Error())
 	}
@@ -1222,7 +1222,7 @@ func (suite *BindingHandlersSuite) TestBindingDelete() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	w := httptest.NewRecorder()
-	router.HandleFunc("/bindings/{uuid}", WrapConfig(BindingDelete, mockstore, cfg))
+	router.HandleFunc("/bindings/{name}", WrapConfig(BindingDelete, mockstore, cfg))
 	router.ServeHTTP(w, req)
 	suite.Equal(204, w.Code)
 }
