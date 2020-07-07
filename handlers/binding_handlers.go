@@ -163,7 +163,7 @@ func BindingUpdate(w http.ResponseWriter, r *http.Request) {
 	// url vars
 	vars := mux.Vars(r)
 
-	if originalBinding, err = bindings.FindBindingByUUIDAndName(vars["uuid"], "", store); err != nil {
+	if originalBinding, err = bindings.FindBindingByUUIDAndName("", vars["name"], store); err != nil {
 		utils.RespondError(w, err)
 		return
 	}
