@@ -20,14 +20,14 @@ This request creates a new binding.
 #### Request
 
 ```
-POST /v1/bindings`
+POST /v1/bindings/{name}`
 ```
 
 ### Example request
 
 ```
 curl -X POST -H "Content-Type: application/json"
-  "https://{URL}/v1/bindings?key={key_in_the_config}"
+  "https://{URL}/v1/bindings/b1?key={key_in_the_config}"
 ```
 
 ##### Post Body
@@ -178,7 +178,7 @@ This request retrieves the information of a binding associated with the provided
 ### Request
     
 ```
-GET /v1/bindings/{uuid}
+GET /v1/bindings/{name}
 ```    
 
 ### Response     
@@ -213,12 +213,12 @@ Please refer to section [Errors](api_errors.md) to see all possible Errors
 This request updates binding. You can specify one or more fields to update.
 The allowed to be updated fields are:
 
-`name, service_uuid, host, dn, oidc_token, unique_key`.
+`name, service_uuid, host, auth_identifier, auth_type, unique_key`.
 
 #### Request
 
 ```
-PUT /v1/bindings/{uuid}
+PUT /v1/bindings/{name}
 ```
 
 ##### Request Body
@@ -261,7 +261,7 @@ This request deletes a binding.
 #### Request
 
 ```
-DELETE /v1/bindings/{uuid}`
+DELETE /v1/bindings/{name}`
 ```
 
 ### Response

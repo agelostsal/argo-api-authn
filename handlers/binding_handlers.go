@@ -203,7 +203,7 @@ func BindingDelete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	// check if the binding exists
-	if resourceBinding, err = bindings.FindBindingByUUIDAndName(vars["uuid"], "", store); err != nil {
+	if resourceBinding, err = bindings.FindBindingByUUIDAndName("", vars["name"], store); err != nil {
 		utils.RespondError(w, err)
 		return
 	}
