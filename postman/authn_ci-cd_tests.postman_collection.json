@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "9486152a-2158-4b9f-8888-6e4c0619568a",
-		"name": "AuthN CI/CD tests",
+		"name": "authn_ci-cd_tests",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -187,17 +187,18 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"name\": \"authn-cicd\",\n\t\"service_uuid\": \"{{st-uuid}}\",\n\t\"host\": \"{{ams-host}}\",\n\t\"auth_identifier\": \"CN=jenkins.einfra.grnet.gr,OU=E-Infrastructures Department,O=National Infrastructures for Research and Technology (GRNET),L=Athens,C=GR\",\n\t\"unique_key\": \"3530bde2-a8bc-417b-9f8e-c36dedeedafb\",\n\t\"auth_type\": \"x509\"\n}\n"
+					"raw": "{\n\t\"service_uuid\": \"{{st-uuid}}\",\n\t\"host\": \"{{ams-host}}\",\n\t\"auth_identifier\": \"CN=jenkins.einfra.grnet.gr,OU=E-Infrastructures Department,O=National Infrastructures for Research and Technology (GRNET),L=Athens,C=GR\",\n\t\"unique_key\": \"3530bde2-a8bc-417b-9f8e-c36dedeedafb\",\n\t\"auth_type\": \"x509\"\n}\n"
 				},
 				"url": {
-					"raw": "https://{{authn-host}}/v1/bindings?key={{authn-token}}",
+					"raw": "https://{{authn-host}}/v1/bindings/authn-cicd?key={{authn-token}}",
 					"protocol": "https",
 					"host": [
 						"{{authn-host}}"
 					],
 					"path": [
 						"v1",
-						"bindings"
+						"bindings",
+						"authn-cicd"
 					],
 					"query": [
 						{

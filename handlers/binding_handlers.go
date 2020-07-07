@@ -20,12 +20,16 @@ func BindingCreate(w http.ResponseWriter, r *http.Request) {
 
 	var binding bindings.Binding
 
+	vars := mux.Vars(r)
+
 	// check the validity of the JSON
 	if err = json.NewDecoder(r.Body).Decode(&binding); err != nil {
 		err := utils.APIErrBadRequest(err.Error())
 		utils.RespondError(w, err)
 		return
 	}
+
+	binding.Name = vars["name"]
 
 	if binding, err = bindings.CreateBinding(binding, store); err != nil {
 		utils.RespondError(w, err)
