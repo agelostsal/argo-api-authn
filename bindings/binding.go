@@ -51,6 +51,11 @@ func CreateBinding(binding Binding, store stores.Store) (Binding, error) {
 		return binding, err
 	}
 
+	// check if a binding with the same name exists
+	if err := ExistsWithName(binding.Name, store); err != nil {
+		return binding, err
+	}
+
 	// generate uuid
 	uuid := uuid2.NewV4().String()
 
@@ -117,6 +122,27 @@ func ExistsWithAuthID(authID string, serviceUUID string, host string, authType s
 	// if the error is nil, it means the function found and returned a binding
 	if err == nil {
 		err = utils.APIErrConflict("binding", "auth_identifier", authID)
+		return err
+	}
+
+	return nil
+}
+
+// ExistsWithName checks if a binding with the provided name already exists
+func ExistsWithName(name string, store stores.Store) error {
+
+	var err error
+
+	// check if the given name is taken
+	if _, err = FindBindingByUUIDAndName("", name, store); err != nil {
+		if err.Error() != "Binding was not found" {
+			return err
+		}
+	}
+
+	// if the error is nil, it means the function found and returned a binding
+	if err == nil {
+		err = utils.APIErrConflict("binding", "name", name)
 		return err
 	}
 
@@ -200,20 +226,22 @@ func FindBindingsByServiceTypeAndHost(serviceUUID string, host string, store sto
 	return BindingList{Bindings: bindings}, err
 }
 
-// FindBindingByUUID returns the binding associated with the provided uuid
-func FindBindingByUUID(uuid string, store stores.Store) (Binding, error) {
+// FindBindingByUUIDAndName returns the binding associated with the provided uuid and/or name
+func FindBindingByUUIDAndName(uuid, name string, store stores.Store) (Binding, error) {
 
 	var qBindings []stores.QBinding
 	var err error
 	var binding Binding
 
-	if qBindings, err = store.QueryBindingsByUUID(uuid); err != nil {
+	if qBindings, err = store.QueryBindingsByUUIDAndName(uuid, name); err != nil {
 		return Binding{}, err
 	}
 
-	if len(qBindings) > 1 {
-		err = utils.APIErrDatabase("More than 1 Bindings found with the same UUID: " + uuid)
-		return Binding{}, err
+	if uuid != "" {
+		if len(qBindings) > 1 {
+			err = utils.APIErrDatabase("More than 1 Bindings found with the same UUID: " + uuid)
+			return Binding{}, err
+		}
 	}
 
 	if len(qBindings) == 0 {
@@ -255,9 +283,17 @@ func UpdateBinding(original Binding, tempBind TempUpdateBinding, store stores.St
 
 	// if there is a new auth identifier provided, check whether or not it already exists
 	if original.AuthIdentifier != updated.AuthIdentifier {
-
 		// check if a binding with same authID already exists under the same service type and host
 		if err := ExistsWithAuthID(updated.AuthIdentifier, updated.ServiceUUID, updated.Host, updated.AuthType, store); err != nil {
+			return Binding{}, err
+		}
+
+	}
+
+	// if there is a new name provided, check whether or not it already exists
+	if original.Name != updated.Name {
+		// check if a binding with same name already exists
+		if err := ExistsWithName(updated.Name, store); err != nil {
 			return Binding{}, err
 		}
 

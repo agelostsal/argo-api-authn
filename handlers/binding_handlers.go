@@ -136,7 +136,7 @@ func BindingListOneByUUID(w http.ResponseWriter, r *http.Request) {
 	// url vars
 	vars := mux.Vars(r)
 
-	if binding, err = bindings.FindBindingByUUID(vars["uuid"], store); err != nil {
+	if binding, err = bindings.FindBindingByUUIDAndName(vars["uuid"], "", store); err != nil {
 		utils.RespondError(w, err)
 		return
 	}
@@ -159,7 +159,7 @@ func BindingUpdate(w http.ResponseWriter, r *http.Request) {
 	// url vars
 	vars := mux.Vars(r)
 
-	if originalBinding, err = bindings.FindBindingByUUID(vars["uuid"], store); err != nil {
+	if originalBinding, err = bindings.FindBindingByUUIDAndName(vars["uuid"], "", store); err != nil {
 		utils.RespondError(w, err)
 		return
 	}
@@ -199,7 +199,7 @@ func BindingDelete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	// check if the binding exists
-	if resourceBinding, err = bindings.FindBindingByUUID(vars["uuid"], store); err != nil {
+	if resourceBinding, err = bindings.FindBindingByUUIDAndName(vars["uuid"], "", store); err != nil {
 		utils.RespondError(w, err)
 		return
 	}
