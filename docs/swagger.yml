@@ -429,11 +429,40 @@ paths:
           $ref: "#/responses/500"
 
   /bindings:
+    get:
+      summary: Retrieves all the bindings
+      description: |
+        Retrieves all the bindings
+      parameters:
+        - $ref: '#/parameters/ApiKey'
+      tags:
+        - Bindings
+      responses:
+        200:
+          description: Returns a list containing all the bindings
+          schema:
+            $ref: '#/definitions/Bindings'
+        400:
+          $ref: "#/responses/400"
+        401:
+          $ref: "#/responses/401"
+        403:
+          $ref: "#/responses/403"
+        500:
+          $ref: "#/responses/500"
+
+  /bindings/{NAME}:
+
     post:
       summary: Create a new binding
       description: |
         Create a new binding
       parameters:
+        - name: NAME
+          in: path
+          description: NAME of the binding
+          required: true
+          type: string
         - $ref: '#/parameters/ApiKey'
         - name: binding information
           in: body
@@ -442,8 +471,6 @@ paths:
           schema:
             type: object
             properties:
-              name:
-                type: string
               service_uuid:
                 type: string
               host:
@@ -477,36 +504,13 @@ paths:
           $ref: "#/responses/500"
 
     get:
-      summary: Retrieves all the bindings
-      description: |
-        Retrieves all the bindings
-      parameters:
-        - $ref: '#/parameters/ApiKey'
-      tags:
-        - Bindings
-      responses:
-        200:
-          description: Returns a list containing all the bindings
-          schema:
-            $ref: '#/definitions/Bindings'
-        400:
-          $ref: "#/responses/400"
-        401:
-          $ref: "#/responses/401"
-        403:
-          $ref: "#/responses/403"
-        500:
-          $ref: "#/responses/500"
-
-  /bindings/{UUID}:
-    get:
       summary: Retrieve information for a specific binding
       description: |
          Retrieve information for a specific binding
       parameters:
-        - name: UUID
+        - name: NAME
           in: path
-          description: UUID of the binding
+          description: NAME of the binding
           required: true
           type: string
         - $ref: '#/parameters/ApiKey'
@@ -532,9 +536,9 @@ paths:
       description: |
          Updates a binding
       parameters:
-        - name: UUID
+        - name: NAME
           in: path
-          description: UUID of the binding
+          description: NAME of the binding
           required: true
           type: string
         - $ref: '#/parameters/ApiKey'
@@ -583,9 +587,9 @@ paths:
       description: |
          Deletes a binding
       parameters:
-        - name: UUID
+        - name: NAME
           in: path
-          description: UUID of the binding
+          description: NAME of the binding
           required: true
           type: string
         - $ref: '#/parameters/ApiKey'

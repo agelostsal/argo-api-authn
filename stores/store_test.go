@@ -216,15 +216,18 @@ func (suite *StoreTestSuite) TestQueryBindingsByUUID() {
 
 	// normal case
 	expBinding1 := []QBinding{{Name: "b1", ServiceUUID: "uuid1", Host: "host1", UUID: "b_uuid1", AuthIdentifier: "test_dn_1", UniqueKey: "unique_key_1", AuthType: "x509", CreatedOn: "2018-05-05T15:04:05Z", LastAuth: ""}}
-	qBinding1, err1 := suite.Mockstore.QueryBindingsByUUID("b_uuid1")
+	qBinding1, err1 := suite.Mockstore.QueryBindingsByUUIDAndName("b_uuid1", "")
+	qBinding1_name, err1_name := suite.Mockstore.QueryBindingsByUUIDAndName("", "b1")
 
 	// not found case
 	var expBinding2 []QBinding
-	qBinding2, err2 := suite.Mockstore.QueryBindingsByUUID("wrong_uuid")
+	qBinding2, err2 := suite.Mockstore.QueryBindingsByUUIDAndName("wrong_uuid", "")
 
 	// tests the normal case
+	suite.Equal(expBinding1, qBinding1_name)
 	suite.Equal(expBinding1, qBinding1)
 	suite.Nil(err1)
+	suite.Nil(err1_name)
 
 	//tests the not found case
 	suite.Equal(expBinding2, qBinding2)

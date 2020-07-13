@@ -1,7 +1,7 @@
 pipeline {
     agent { 
         docker { 
-            image 'argo.registry:5000/epel-7-mgo' 
+            image 'argo.registry:5000/epel-7-mgo1.14'
             args '-u jenkins:jenkins'
         }
     }
@@ -63,6 +63,12 @@ pipeline {
         }
         success {
             script{
+                if ( env.BRANCH_NAME == 'devel' ) {
+                    build job: '/ARGO-utils/argo-swagger-docs', propagate: false
+                    build job: '/ARGO/argodoc/devel', propagate: false
+                } else if ( env.BRANCH_NAME == 'master' ) {
+                    build job: '/ARGO/argodoc/master', propagate: false
+                }
                 if ( env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'devel' ) {
                     slackSend( message: ":rocket: New version for <$BUILD_URL|$PROJECT_DIR>:$BRANCH_NAME Job: $JOB_NAME !")
                 }

@@ -1,0 +1,298 @@
+{
+	"info": {
+		"_postman_id": "9486152a-2158-4b9f-8888-6e4c0619568a",
+		"name": "authn_ci-cd_tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Check AMS user exists",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "fd7ea224-a5b3-4c6f-b118-0413e9d36bdd",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Check that the AMS user for the binding is present\", function(){",
+							"        pm.response.to.have.status(200) ",
+							"});",
+							"",
+							"pm.test(\"Check that the AMS user has the expected uuid\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.uuid).to.eql(\"3530bde2-a8bc-417b-9f8e-c36dedeedafb\");",
+							"});",
+							"",
+							"pm.test(\"Check that the AMS user has the expected token\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var ams_user_token = postman.getEnvironmentVariable(\"ams-user-token\");",
+							"    pm.expect(jsonData.token).to.eql(ams_user_token);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{}"
+				},
+				"url": {
+					"raw": "https://{{ams-host}}/v1/users/authn-cicd-user?key={{ams-token}}",
+					"protocol": "https",
+					"host": [
+						"{{ams-host}}"
+					],
+					"path": [
+						"v1",
+						"users",
+						"authn-cicd-user"
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "{{ams-token}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check service-type creation",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c95d2c5c-937d-4df0-873d-f6fd9e35de9b",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Check that the Servie-type was successfully created\", function(){",
+							"        pm.response.to.have.status(201) ",
+							"});",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"postman.setEnvironmentVariable(\"st-uuid\", jsonData.uuid);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"ams-devel-cicd\",\n\t\"hosts\": [\"{{ams-host}}\"],\n\t\"auth_types\": [\"x509\"],\n\t\"auth_method\": \"api-key\",\n\t\"type\": \"ams\"\n}"
+				},
+				"url": {
+					"raw": "https://{{authn-host}}/v1/service-types?key={{authn-token}}",
+					"protocol": "https",
+					"host": [
+						"{{authn-host}}"
+					],
+					"path": [
+						"v1",
+						"service-types"
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "{{authn-token}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check auth method creation",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "55bc80d5-c7c2-44e1-b6d3-a79581ba747d",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Check that the Auth method was successfully created\", function(){",
+							"        pm.response.to.have.status(201) ",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/javascript"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"port\": 443,\n\t\"host\": \"{{ams-host}}\",\n\t\"access_key\": \"{{ams-token}}\"\n}"
+				},
+				"url": {
+					"raw": "https://{{authn-host}}/v1/service-types/ams-devel-cicd/authm?key={{authn-token}}",
+					"protocol": "https",
+					"host": [
+						"{{authn-host}}"
+					],
+					"path": [
+						"v1",
+						"service-types",
+						"ams-devel-cicd",
+						"authm"
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "{{authn-token}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check binding creation",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "c6941150-3f3d-4110-b7db-c9e379ee727f",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Check that the Binding was successfully created\", function(){",
+							"        pm.response.to.have.status(201) ",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"service_uuid\": \"{{st-uuid}}\",\n\t\"host\": \"{{ams-host}}\",\n\t\"auth_identifier\": \"CN=jenkins.einfra.grnet.gr,OU=E-Infrastructures Department,O=National Infrastructures for Research and Technology (GRNET),L=Athens,C=GR\",\n\t\"unique_key\": \"3530bde2-a8bc-417b-9f8e-c36dedeedafb\",\n\t\"auth_type\": \"x509\"\n}\n"
+				},
+				"url": {
+					"raw": "https://{{authn-host}}/v1/bindings/authn-cicd?key={{authn-token}}",
+					"protocol": "https",
+					"host": [
+						"{{authn-host}}"
+					],
+					"path": [
+						"v1",
+						"bindings",
+						"authn-cicd"
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "{{authn-token}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check the authX509 mapping",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "51263f98-ecea-4953-b1cb-92cbe5328f4f",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Check that the x509 mapping was successfull\", function(){",
+							"        pm.response.to.have.status(200) ",
+							"});",
+							"",
+							"pm.test(\"Check that the AMS user token has been successfully retrieved\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var ams_user_token = postman.getEnvironmentVariable(\"ams-user-token\");",
+							"    pm.expect(jsonData.token).to.eql(ams_user_token);",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "https://{{authn-host}}/v1/service-types/ams-devel-cicd/hosts/{{ams-host}}:authx509",
+					"protocol": "https",
+					"host": [
+						"{{authn-host}}"
+					],
+					"path": [
+						"v1",
+						"service-types",
+						"ams-devel-cicd",
+						"hosts",
+						"{{ams-host}}:authx509"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check Service-type deletion",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "b0d2f72d-de69-49e3-aaae-771dc5aa8797",
+						"type": "text/javascript",
+						"exec": [
+							"pm.test(\"Check that the Service-type was successfully deleted\", function(){",
+							"        pm.response.to.have.status(204) ",
+							"});"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "https://{{authn-host}}/v1/service-types/ams-devel-cicd?key={{authn-token}}",
+					"protocol": "https",
+					"host": [
+						"{{authn-host}}"
+					],
+					"path": [
+						"v1",
+						"service-types",
+						"ams-devel-cicd"
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "{{authn-token}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

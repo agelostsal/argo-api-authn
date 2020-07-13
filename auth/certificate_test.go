@@ -154,8 +154,9 @@ lBlGGSW4gNfL1IYoakRwJiNiqZ+Gb7+6kHDSVneFeO/qJakXzlByjAA6quPbYzSf
 
 	// mismatch
 	crt = ParseCert(commonCert)
+	crt.Subject.CommonName = "example.com"
 	err2 := ValidateClientCertificate(crt, "127.0.0.1:8080")
-	suite.Equal("x509: certificate is valid for COMODO RSA Domain Validation Secure Server CA, not localhost", err2.Error())
+	suite.Equal("x509: certificate is valid for example.com, not localhost", err2.Error())
 
 	// mismatch
 	crt = ParseCert(commonCert)
