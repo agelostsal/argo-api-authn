@@ -6,7 +6,9 @@ import (
 	"errors"
 	"github.com/ARGOeu/argo-api-authn/utils"
 	LOGGER "github.com/sirupsen/logrus"
+	lSyslog "github.com/sirupsen/logrus/hooks/syslog"
 	"io/ioutil"
+	"log/syslog"
 	"reflect"
 )
 
@@ -26,6 +28,7 @@ type Config struct {
 	VerifyCertificate           bool              `json:"verify_certificate"`
 	ServiceTypesPaths           map[string]string `json:"service_types_paths" required:"true"`
 	ServiceTypesRetrievalFields map[string]string `json:"service_types_retrieval_fields" required:"true"`
+	SyslogEnabled               bool              `json:"syslog_enabled"`
 }
 
 // ConfigSetUp unmarshals a json file specified by the input parameter into the config object
@@ -40,6 +43,13 @@ func (cfg *Config) ConfigSetUp(path string) error {
 
 	if err = json.Unmarshal(data, &cfg); err != nil {
 		return errors.New("Something went wrong while marshaling the json data. Error: " + err.Error())
+	}
+
+	if cfg.SyslogEnabled {
+		hook, err := lSyslog.NewSyslogHook("", "", syslog.LOG_INFO, "")
+		if err == nil {
+			LOGGER.AddHook(hook)
+		}
 	}
 
 	if err = utils.ValidateRequired(*cfg); err != nil {
