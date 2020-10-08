@@ -3,6 +3,7 @@ package auth
 import (
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"fmt"
 	"github.com/ARGOeu/argo-api-authn/utils"
 	LOGGER "github.com/sirupsen/logrus"
 	"io/ioutil"
@@ -17,7 +18,7 @@ func CRLCheckRevokedCert(cert *x509.Certificate) error {
 
 	var err error
 	var goMaxP, psi, csi int
-	var crtList *pkix.TBSCertificateList
+	var crtList pkix.TBSCertificateList
 	var errChan = make(chan error)
 	var doneChan = make(chan bool, 1)
 
@@ -118,30 +119,37 @@ loop:
 }
 
 // FetchCRL fetches the CRL
-func FetchCRL(url string) (*pkix.TBSCertificateList, error) {
+func FetchCRL(url string) (pkix.TBSCertificateList, error) {
 
 	var err error
-	var crtList *pkix.CertificateList
 	var resp *http.Response
 	var crlBytes []byte
 
+	var crtList = &pkix.CertificateList{}
+
 	// initialize the client and perform a get request to grab the crl
-	client := &http.Client{Timeout: time.Duration(60 * time.Second)}
+	client := &http.Client{Timeout: time.Duration(30 * time.Second)}
 	if resp, err = client.Get(url); err != nil {
-		return &crtList.TBSCertList, err
+		LOGGER.Error(fmt.Errorf("Request to CRL: %v produced the following error, %v", url, err.Error()))
+		err := fmt.Errorf("Could not access CRL %v", url)
+		return pkix.TBSCertificateList{}, err
 	}
 
 	// read the response
 	if crlBytes, err = ioutil.ReadAll(resp.Body); err != nil {
-		return &crtList.TBSCertList, err
+		err := fmt.Errorf("Reading CRL data: %v produced the following error, %v", url, err.Error())
+		LOGGER.Error(err)
+		return pkix.TBSCertificateList{}, err
 	}
 
 	defer resp.Body.Close()
 
 	// create the crl from the byte slice
 	if crtList, err = x509.ParseCRL(crlBytes); err != nil {
-		return &crtList.TBSCertList, err
+		err := fmt.Errorf("Parsing CRL data: %v produced the following error, %v", url, err.Error())
+		LOGGER.Error(err)
+		return pkix.TBSCertificateList{}, err
 	}
 
-	return &crtList.TBSCertList, err
+	return crtList.TBSCertList, err
 }
