@@ -32,10 +32,8 @@ Before you start, you need to issue a valid certificate.
 
 4. Get dependencies(If you plan on contributing to the project else skip this step):
 
-   Argo-api-authN uses the dep tool for dependency handling.
+   Argo-api-authN uses the go modules tool for dependency handling.
     
-    - Install the dep tool. You can find instructions depending on your platform at [Dep](https://github.com/golang/dep).
-
 5. To build the service use the following command:
 
       `go build`
@@ -83,7 +81,8 @@ Before you start, you need to issue a valid certificate.
    "service_types_retrieval_fields": {
    "ams": "token",
    "web-api": "api_key"
-   }
+   },
+   "syslog_enabled": true
  }
  ```
  

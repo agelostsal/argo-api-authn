@@ -19,5 +19,6 @@
   "service_types_retrieval_fields": {
     "ams": "token",
     "web-api": "api_key"
-  }
+  },
+  "syslog_enabled": true
 }
