@@ -42,6 +42,7 @@ func (suite *ConfigTestSuite) TestConfigSetUp() {
 			"ams":     "token",
 			"web-api": "api_key",
 		},
+		SyslogEnabled: true,
 	}
 
 	//tests the case of a malformed json

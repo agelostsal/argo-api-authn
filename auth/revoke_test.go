@@ -3,7 +3,9 @@ package auth
 import (
 	"crypto/x509"
 	"encoding/pem"
+	LOGGER "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/suite"
+	"io/ioutil"
 	"testing"
 )
 
@@ -124,8 +126,16 @@ func (suite *RevokeTestSuite) TestCRLCheckRevokedCert() {
 	err3 := CRLCheckRevokedCert(crt)
 
 	suite.Equal("Your certificate is invalid. No CRLDistributionPoints found on the certificate", err3.Error())
+
+	// test the case of an invalid CRL URL
+	crt = ParseCert(goodComodoCA)
+	crt.CRLDistributionPoints = []string{"https://unknown/unknown"}
+	err4 := CRLCheckRevokedCert(crt)
+
+	suite.Equal("Could not access CRL https://unknown/unknown", err4.Error())
 }
 
 func TestRevokeTestSuite(t *testing.T) {
+	LOGGER.SetOutput(ioutil.Discard)
 	suite.Run(t, new(RevokeTestSuite))
 }

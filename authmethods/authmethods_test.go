@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/suite"
 	"io"
 	"io/ioutil"
-	"reflect"
 	"testing"
 )
 
@@ -149,7 +148,8 @@ func (suite *AuthMethodsTestSuite) TestAuthMethodFIndAll() {
 	mockstore.AuthMethods = []stores.QAuthMethod{}
 	aMList2, err2 := AuthMethodFindAll(mockstore)
 
-	suite.True(reflect.DeepEqual(expAmList, aMList))
+	suite.Equal(am1, aMList.AuthMethods[0])
+	suite.Equal(am2, aMList.AuthMethods[1])
 	suite.Equal(0, len(aMList2.AuthMethods))
 
 	suite.Nil(err1)
