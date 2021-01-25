@@ -133,26 +133,33 @@ func (suite *AuthMethodsTestSuite) TestAuthMethodFIndAll() {
 
 	// test the normal case
 	amb1 := BasicAuthMethod{ServiceUUID: "uuid1", Host: "host1", Port: 9000, Type: "api-key", UUID: "am_uuid_1", CreatedOn: ""}
-	am1 := &ApiKeyAuthMethod{AccessKey: "access_key"}
-	am1.BasicAuthMethod = amb1
+	apiKeyAm := &ApiKeyAuthMethod{AccessKey: "access_key"}
+	apiKeyAm.BasicAuthMethod = amb1
 
 	amb2 := BasicAuthMethod{ServiceUUID: "uuid2", Host: "host3", Port: 9000, Type: "headers", UUID: "am_uuid_2", CreatedOn: ""}
-	am2 := &HeadersAuthMethod{Headers: map[string]string{"x-api-key": "key-1", "Accept": "application/json"}}
-	am2.BasicAuthMethod = amb2
+	headersAm := &HeadersAuthMethod{Headers: map[string]string{"x-api-key": "key-1", "Accept": "application/json"}}
+	headersAm.BasicAuthMethod = amb2
 
-	expAmList.AuthMethods = append(expAmList.AuthMethods, am1, am2)
+	expAmList.AuthMethods = append(expAmList.AuthMethods, apiKeyAm, headersAm)
 
 	aMList, err1 := AuthMethodFindAll(mockstore)
+	suite.Equal(2, len(aMList.AuthMethods))
+
+	for _, _am := range aMList.AuthMethods {
+		_, ok := _am.(*ApiKeyAuthMethod)
+		if ok {
+			suite.Equal(apiKeyAm, _am)
+		} else {
+			suite.Equal(headersAm, _am)
+		}
+	}
+
+	suite.Nil(err1)
 
 	// empty list
 	mockstore.AuthMethods = []stores.QAuthMethod{}
 	aMList2, err2 := AuthMethodFindAll(mockstore)
-
-	suite.Equal(am1, aMList.AuthMethods[0])
-	suite.Equal(am2, aMList.AuthMethods[1])
 	suite.Equal(0, len(aMList2.AuthMethods))
-
-	suite.Nil(err1)
 	suite.Nil(err2)
 }
 
