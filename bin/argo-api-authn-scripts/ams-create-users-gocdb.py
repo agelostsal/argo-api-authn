@@ -385,6 +385,8 @@ def create_users(config, verify):
             if get_topic_acl_req.status_code == 200:
                 acl_users = json.loads(get_topic_acl_req.text)
                 authorized_users = authorized_users + acl_users["authorized_users"]
+                # remove duplicates
+                authorized_users = list(set(authorized_users))
                 modify_topic_acl_req = requests.post("https://"+ams_host+"/v1/projects/"+ams_project+"/topics/"+srv_type+":modifyAcl?key="+ams_token, data=json.dumps({'authorized_users': authorized_users}), verify=verify)
                 LOGGER.critical("Modified ACL for topic: {} with users {}. Response from AMS {}".format(srv_type, str(authorized_users), modify_topic_acl_req.text))
             else:
