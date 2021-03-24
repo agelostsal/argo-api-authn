@@ -108,40 +108,43 @@ func FormatRdnToString(rdn string, rdnValues []string) string {
 }
 
 // ValidateClientCertificate performs a number of different checks to ensure the provided certificate is valid
-func ValidateClientCertificate(cert *x509.Certificate, clientIP string) error {
+func ValidateClientCertificate(cert *x509.Certificate, clientIP string, clientCertHostVerification bool) error {
 
 	var err error
 	var hosts []string
 	var ip string
 
-	if ip, _, err = net.SplitHostPort(clientIP); err != nil {
-		err := &utils.APIError{Code: 403, Message: err.Error(), Status: "ACCESS_FORBIDDEN"}
-		return err
-	}
+	if clientCertHostVerification {
 
-	if hosts, err = net.LookupAddr(ip); err != nil {
-		err = &utils.APIError{Message: err.Error(), Code: 400, Status: "BAD REQUEST"}
-		return err
-	}
-
-	LOGGER.Infof("Certificate request: %v from Host: %v with IP: %v", ExtractEnhancedRDNSequenceToString(cert), hosts, clientIP)
-
-	// loop through hosts and check if any of them matches with the one specified in the certificate
-	var tmpErr error
-	for _, h := range hosts {
-		// if there is an error, hold a temporary error and move to next host
-		if err = cert.VerifyHostname(h); err != nil {
-			tmpErr = &utils.APIError{Code: 403, Message: err.Error(), Status: "ACCESS_FORBIDDEN"}
-			// if there is no error, clear the temporary error and break out of the check loop,
-			// if we don't break the loop, if there is another host declared, it will declare a temporary error
-		} else {
-			tmpErr = nil
-			break
+		if ip, _, err = net.SplitHostPort(clientIP); err != nil {
+			err := &utils.APIError{Code: 403, Message: err.Error(), Status: "ACCESS_FORBIDDEN"}
+			return err
 		}
-	}
 
-	if tmpErr != nil {
-		return tmpErr
+		if hosts, err = net.LookupAddr(ip); err != nil {
+			err = &utils.APIError{Message: err.Error(), Code: 400, Status: "BAD REQUEST"}
+			return err
+		}
+
+		LOGGER.Infof("Certificate request: %v from Host: %v with IP: %v", ExtractEnhancedRDNSequenceToString(cert), hosts, clientIP)
+
+		// loop through hosts and check if any of them matches with the one specified in the certificate
+		var tmpErr error
+		for _, h := range hosts {
+			// if there is an error, hold a temporary error and move to next host
+			if err = cert.VerifyHostname(h); err != nil {
+				tmpErr = &utils.APIError{Code: 403, Message: err.Error(), Status: "ACCESS_FORBIDDEN"}
+				// if there is no error, clear the temporary error and break out of the check loop,
+				// if we don't break the loop, if there is another host declared, it will declare a temporary error
+			} else {
+				tmpErr = nil
+				break
+			}
+		}
+
+		if tmpErr != nil {
+			return tmpErr
+		}
 	}
 
 	// check if the certificate has expired

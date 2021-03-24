@@ -82,14 +82,16 @@ Before you start, you need to issue a valid certificate.
    "ams": "token",
    "web-api": "api_key"
    },
-   "syslog_enabled": true
+   "syslog_enabled": true,
+   "client_cert_host_verification": true
  }
  ```
  
  ## Important Notes
 It is important to notice that since we need to verify the provided certificate’s hostname, 
 the client has to make sure that both Forward and  Reverse DNS lookup on the client is correctly setup 
-and that the hostname  corresponds to the certificate used.  For both IPv4 and IPv6  (if used) 
+and that the hostname  corresponds to the certificate used.  For both IPv4 and IPv6  (if used). 
+This functionality is controlled by the configuration ` client_cert_host_verification` value.
  
  ### Common errors
  - Executing a request using IPv6 without having a properly configured reverse DNS.
