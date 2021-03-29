@@ -14,5 +14,6 @@
   "verify_certificate": false,
   "service_types_paths": {"ams": "/v1/users:byUUID/{{identifier}}?key={{access_key}}"},
   "service_types_retrieval_fields": {"ams": "token"},
-  "syslog_enabled": false
+  "syslog_enabled": false,
+  "client_cert_host_verification" : false
 }

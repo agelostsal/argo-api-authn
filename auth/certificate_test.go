@@ -148,20 +148,20 @@ lBlGGSW4gNfL1IYoakRwJiNiqZ+Gb7+6kHDSVneFeO/qJakXzlByjAA6quPbYzSf
 	crt = ParseCert(commonCert)
 	crt.Subject.CommonName = "localhost"
 
-	err1 := ValidateClientCertificate(crt, "127.0.0.1:8080")
+	err1 := ValidateClientCertificate(crt, "127.0.0.1:8080", true)
 
 	suite.Nil(err1)
 
 	// mismatch
 	crt = ParseCert(commonCert)
 	crt.Subject.CommonName = "example.com"
-	err2 := ValidateClientCertificate(crt, "127.0.0.1:8080")
+	err2 := ValidateClientCertificate(crt, "127.0.0.1:8080", true)
 	suite.Equal("x509: certificate is valid for example.com, not localhost", err2.Error())
 
 	// mismatch
 	crt = ParseCert(commonCert)
 	crt.Subject.CommonName = ""
-	err3 := ValidateClientCertificate(crt, "127.0.0.1:8080")
+	err3 := ValidateClientCertificate(crt, "127.0.0.1:8080", true)
 	suite.Equal("x509: certificate is not valid for any names, but wanted to match localhost", err3.Error())
 
 	//mismatch
@@ -170,9 +170,12 @@ lBlGGSW4gNfL1IYoakRwJiNiqZ+Gb7+6kHDSVneFeO/qJakXzlByjAA6quPbYzSf
 	obj := asn1.ObjectIdentifier{2, 5, 29, 17}
 	e1 := pkix.Extension{Id: obj, Critical: false, Value: []byte("")}
 	crt.Extensions = append(crt.Extensions, e1)
-	err4 := ValidateClientCertificate(crt, "127.0.0.1:8080")
+	err4 := ValidateClientCertificate(crt, "127.0.0.1:8080", true)
 	suite.Equal("x509: certificate is valid for COMODO RSA Domain Validation Secure Server CA, not localhost", err4.Error())
 
+	// false should skip verification and no error should be produced
+	err5 := ValidateClientCertificate(crt, "127.0.0.1:8080", false)
+	suite.Nil(err5)
 }
 
 func (suite *CertificateTestSuite) TestFormatRdnToString() {
