@@ -51,8 +51,21 @@ SoPmZKiBeb+2OQ2n7+FI8ftkqxWw6zjh651brAoy/0zqLTRPh+c=
 	enhancedCert.Subject.Names = append(enhancedCert.Subject.Names, extraAttributeValue1, extraAttributeValue2)
 	ers2 := ExtractEnhancedRDNSequenceToString(enhancedCert)
 
+	// cert with all possible supported rdns
+	enhancedCert2 := ParseCert(commonCert)
+	enhancedCert2.Subject.CommonName = "service/example.com"
+	enhancedCert2.Subject.StreetAddress = []string{"7 Street Ave"}
+	enhancedCert2.Subject.OrganizationalUnit = []string{"organizational unit 2"}
+	enhancedCert2.Subject.PostalCode = []string{"17121"}
+	emailObj := asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 9, 1}
+	extraAttributeValuemail := pkix.AttributeTypeAndValue{Type: emailObj, Value: "email@example.com"}
+	enhancedCert2.Subject.Names = append(enhancedCert2.Subject.Names, extraAttributeValue1, extraAttributeValue2, extraAttributeValuemail)
+	ers3 := ExtractEnhancedRDNSequenceToString(enhancedCert2)
+
 	suite.Equal("O=COMPANY,L=CITY,ST=TN,C=TC", ers)
 	suite.Equal("O=COMPANY,L=CITY,ST=TN,C=TC,DC=v1+DC=v2", ers2)
+	suite.Equal("E=email@example.com,CN=service/example.com,OU=organizational unit 2,"+
+		"O=COMPANY,POSTALCODE=17121,STREET=7 Street Ave,L=CITY,ST=TN,C=TC,DC=v1+DC=v2", ers3)
 }
 
 func (suite *CertificateTestSuite) TestCertHasExpired() {

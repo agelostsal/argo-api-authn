@@ -14,8 +14,14 @@ import (
 	"time"
 )
 
-var ExtraAttributeNames = map[string]string{
-	"0.9.2342.19200300.100.1.25": "DC",
+const (
+	DomainComponentRDN = "DC"
+	EmailAddressRDN    = "E"
+)
+
+var NonStandardAttributeNames = map[string]string{
+	"0.9.2342.19200300.100.1.25": DomainComponentRDN,
+	"1.2.840.113549.1.9.1":       EmailAddressRDN,
 }
 
 // load_CAs reads the root certificates from a directory within the filesystem, and creates the trusted root CA chain
@@ -55,26 +61,35 @@ func ExtractEnhancedRDNSequenceToString(cert *x509.Certificate) string {
 	var sb strings.Builder
 
 	// create a map that will hold the values of the additional RDNs that we have defined
-	// make sure that the initialized keys match the values of the ExtraAttributeNames map defined in this package
+	// make sure that the initialized keys match the values of the NonStandardAttributeNames map defined in this package
 	extraRDNS := map[string][]string{}
-	extraRDNS["DC"] = []string{}
+	extraRDNS[DomainComponentRDN] = []string{}
+	extraRDNS[EmailAddressRDN] = []string{}
 
 	// loop through the attribute names of the cert
 	// if the type matches any of the predefined asn1.ObjectIdentifiers then append its value to the respective rdn
 	for i := 0; i < len(cert.Subject.Names); i++ {
 		atv := cert.Subject.Names[i]
-		if value, ok := ExtraAttributeNames[atv.Type.String()]; ok {
+		if value, ok := NonStandardAttributeNames[atv.Type.String()]; ok {
 			extraRDNS[value] = append(extraRDNS[value], atv.Value.(string))
 		}
 
 	}
 
+	// check if the Email RDN was present
+	// EMAIL RDN is more specific than CN so it should be at start of the DN string
+	if len(extraRDNS[EmailAddressRDN]) > 0 {
+		sb.WriteString(FormatRdnToString(EmailAddressRDN, extraRDNS[EmailAddressRDN]))
+		sb.WriteString(",")
+	}
+
 	sb.WriteString(cert.Subject.ToRDNSequence().String())
 
 	// check the extra RDNs if the have any registered values
-	if len(extraRDNS["DC"]) > 0 {
+	// DC RDN is the most generic one so it belongs at the end of the DN string
+	if len(extraRDNS[DomainComponentRDN]) > 0 {
 		sb.WriteString(",")
-		sb.WriteString(FormatRdnToString("DC", extraRDNS["DC"]))
+		sb.WriteString(FormatRdnToString("DC", extraRDNS[DomainComponentRDN]))
 	}
 
 	return sb.String()

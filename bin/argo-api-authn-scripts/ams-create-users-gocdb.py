@@ -15,15 +15,19 @@ import re
 # set up logging
 LOGGER = logging.getLogger("AMS User create script")
 
-ACCEPTED_RDNS = ["CN", "OU", "O", "L", "ST", "C", "DC"]
-
+ACCEPTED_RDNS = [
+    "emailAddress", "CN", "OU", "O", "postalCode", "street", "L", "ST", "C", "DC"
+]
 
 class RdnSequence(object):
     def __init__(self, rdn_string):
 
+        self.EmailAddress = []
         self.CommonName = []
         self.OrganizationalUnit = []
         self.Organization = []
+        self.PostalCode = []
+        self.Street = []
         self.Locality = []
         self.Province = []
         self.Country = []
@@ -55,7 +59,11 @@ class RdnSequence(object):
             Assign an RDN value to the correct field based on its type
         """
 
-        if rdn_type == "CN":
+
+        if rdn_type == "emailAddress":
+            self.EmailAddress.append(rdn_value)
+
+        elif rdn_type == "CN":
             self.CommonName.append(rdn_value)
 
         elif rdn_type == "OU":
@@ -63,6 +71,12 @@ class RdnSequence(object):
 
         elif rdn_type == "O":
             self.Organization.append(rdn_value)
+
+        elif rdn_type == "postalCode":
+            self.PostalCode.append(rdn_value)
+
+        elif rdn_type == "street":
+            self.Street.append(rdn_value)
 
         elif rdn_type == "L":
             self.Locality.append(rdn_value)
@@ -247,7 +261,16 @@ class RdnSequence(object):
         # we check if a specific RDN holds any values and we concatenate
         # it with the previous RDN using a comma ','
         # RDNs must follow the specific order of:
-        # CN - OU - O - L -ST - C - DC
+        # E - CN - OU - O - POSTALCODE - STREET - L - ST - C - DC
+
+        if len(self.EmailAddress) != 0:
+
+            if len(printable_string) != 0:
+                operator = ","
+
+            printable_string.append(operator)
+            printable_string.append(
+                self._format_rdn_to_string("E", self.EmailAddress))
 
         if len(self.CommonName) != 0:
 
@@ -275,6 +298,24 @@ class RdnSequence(object):
             printable_string.append(operator)
             printable_string.append(
                 self._format_rdn_to_string("O", self.Organization))
+
+        if len(self.PostalCode) != 0:
+
+            if len(printable_string) != 0:
+                operator = ","
+
+            printable_string.append(operator)
+            printable_string.append(
+                self._format_rdn_to_string("POSTALCODE", self.PostalCode))
+
+        if len(self.Street) != 0:
+
+            if len(printable_string) != 0:
+                operator = ","
+
+            printable_string.append(operator)
+            printable_string.append(
+                self._format_rdn_to_string("STREET", self.Street))
 
         if len(self.Locality) != 0:
 
