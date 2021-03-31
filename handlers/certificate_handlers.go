@@ -39,7 +39,8 @@ func AuthViaCert(w http.ResponseWriter, r *http.Request) {
 
 	// validate the certificate
 	if cfg.VerifyCertificate {
-		if err = auth.ValidateClientCertificate(r.TLS.PeerCertificates[0], r.RemoteAddr); err != nil {
+		if err = auth.ValidateClientCertificate(
+			r.TLS.PeerCertificates[0], r.RemoteAddr, cfg.ClientCertHostVerification); err != nil {
 			utils.RespondError(w, err)
 			return
 		}

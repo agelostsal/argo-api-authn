@@ -29,6 +29,7 @@ type Config struct {
 	ServiceTypesPaths           map[string]string `json:"service_types_paths" required:"true"`
 	ServiceTypesRetrievalFields map[string]string `json:"service_types_retrieval_fields" required:"true"`
 	SyslogEnabled               bool              `json:"syslog_enabled"`
+	ClientCertHostVerification  bool              `json:"client_cert_host_verification"`
 }
 
 // ConfigSetUp unmarshals a json file specified by the input parameter into the config object

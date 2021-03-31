@@ -1,6 +1,5 @@
 [Unit]
 Description=ARGO Authentication Service
-Requires=mongod.service
 
 [Service]
 SyslogIdentifier=argo_api_authn

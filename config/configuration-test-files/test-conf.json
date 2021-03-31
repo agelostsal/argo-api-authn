@@ -20,5 +20,6 @@
     "ams": "token",
     "web-api": "api_key"
   },
-  "syslog_enabled": true
+  "syslog_enabled": true,
+  "client_cert_host_verification": true
 }

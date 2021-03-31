@@ -14,8 +14,14 @@ import (
 	"time"
 )
 
-var ExtraAttributeNames = map[string]string{
-	"0.9.2342.19200300.100.1.25": "DC",
+const (
+	DomainComponentRDN = "DC"
+	EmailAddressRDN    = "E"
+)
+
+var NonStandardAttributeNames = map[string]string{
+	"0.9.2342.19200300.100.1.25": DomainComponentRDN,
+	"1.2.840.113549.1.9.1":       EmailAddressRDN,
 }
 
 // load_CAs reads the root certificates from a directory within the filesystem, and creates the trusted root CA chain
@@ -55,26 +61,35 @@ func ExtractEnhancedRDNSequenceToString(cert *x509.Certificate) string {
 	var sb strings.Builder
 
 	// create a map that will hold the values of the additional RDNs that we have defined
-	// make sure that the initialized keys match the values of the ExtraAttributeNames map defined in this package
+	// make sure that the initialized keys match the values of the NonStandardAttributeNames map defined in this package
 	extraRDNS := map[string][]string{}
-	extraRDNS["DC"] = []string{}
+	extraRDNS[DomainComponentRDN] = []string{}
+	extraRDNS[EmailAddressRDN] = []string{}
 
 	// loop through the attribute names of the cert
 	// if the type matches any of the predefined asn1.ObjectIdentifiers then append its value to the respective rdn
 	for i := 0; i < len(cert.Subject.Names); i++ {
 		atv := cert.Subject.Names[i]
-		if value, ok := ExtraAttributeNames[atv.Type.String()]; ok {
+		if value, ok := NonStandardAttributeNames[atv.Type.String()]; ok {
 			extraRDNS[value] = append(extraRDNS[value], atv.Value.(string))
 		}
 
 	}
 
+	// check if the Email RDN was present
+	// EMAIL RDN is more specific than CN so it should be at start of the DN string
+	if len(extraRDNS[EmailAddressRDN]) > 0 {
+		sb.WriteString(FormatRdnToString(EmailAddressRDN, extraRDNS[EmailAddressRDN]))
+		sb.WriteString(",")
+	}
+
 	sb.WriteString(cert.Subject.ToRDNSequence().String())
 
 	// check the extra RDNs if the have any registered values
-	if len(extraRDNS["DC"]) > 0 {
+	// DC RDN is the most generic one so it belongs at the end of the DN string
+	if len(extraRDNS[DomainComponentRDN]) > 0 {
 		sb.WriteString(",")
-		sb.WriteString(FormatRdnToString("DC", extraRDNS["DC"]))
+		sb.WriteString(FormatRdnToString("DC", extraRDNS[DomainComponentRDN]))
 	}
 
 	return sb.String()
@@ -108,40 +123,43 @@ func FormatRdnToString(rdn string, rdnValues []string) string {
 }
 
 // ValidateClientCertificate performs a number of different checks to ensure the provided certificate is valid
-func ValidateClientCertificate(cert *x509.Certificate, clientIP string) error {
+func ValidateClientCertificate(cert *x509.Certificate, clientIP string, clientCertHostVerification bool) error {
 
 	var err error
 	var hosts []string
 	var ip string
 
-	if ip, _, err = net.SplitHostPort(clientIP); err != nil {
-		err := &utils.APIError{Code: 403, Message: err.Error(), Status: "ACCESS_FORBIDDEN"}
-		return err
-	}
+	if clientCertHostVerification {
 
-	if hosts, err = net.LookupAddr(ip); err != nil {
-		err = &utils.APIError{Message: err.Error(), Code: 400, Status: "BAD REQUEST"}
-		return err
-	}
-
-	LOGGER.Infof("Certificate request: %v from Host: %v with IP: %v", ExtractEnhancedRDNSequenceToString(cert), hosts, clientIP)
-
-	// loop through hosts and check if any of them matches with the one specified in the certificate
-	var tmpErr error
-	for _, h := range hosts {
-		// if there is an error, hold a temporary error and move to next host
-		if err = cert.VerifyHostname(h); err != nil {
-			tmpErr = &utils.APIError{Code: 403, Message: err.Error(), Status: "ACCESS_FORBIDDEN"}
-			// if there is no error, clear the temporary error and break out of the check loop,
-			// if we don't break the loop, if there is another host declared, it will declare a temporary error
-		} else {
-			tmpErr = nil
-			break
+		if ip, _, err = net.SplitHostPort(clientIP); err != nil {
+			err := &utils.APIError{Code: 403, Message: err.Error(), Status: "ACCESS_FORBIDDEN"}
+			return err
 		}
-	}
 
-	if tmpErr != nil {
-		return tmpErr
+		if hosts, err = net.LookupAddr(ip); err != nil {
+			err = &utils.APIError{Message: err.Error(), Code: 400, Status: "BAD REQUEST"}
+			return err
+		}
+
+		LOGGER.Infof("Certificate request: %v from Host: %v with IP: %v", ExtractEnhancedRDNSequenceToString(cert), hosts, clientIP)
+
+		// loop through hosts and check if any of them matches with the one specified in the certificate
+		var tmpErr error
+		for _, h := range hosts {
+			// if there is an error, hold a temporary error and move to next host
+			if err = cert.VerifyHostname(h); err != nil {
+				tmpErr = &utils.APIError{Code: 403, Message: err.Error(), Status: "ACCESS_FORBIDDEN"}
+				// if there is no error, clear the temporary error and break out of the check loop,
+				// if we don't break the loop, if there is another host declared, it will declare a temporary error
+			} else {
+				tmpErr = nil
+				break
+			}
+		}
+
+		if tmpErr != nil {
+			return tmpErr
+		}
 	}
 
 	// check if the certificate has expired

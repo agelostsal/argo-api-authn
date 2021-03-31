@@ -51,8 +51,21 @@ SoPmZKiBeb+2OQ2n7+FI8ftkqxWw6zjh651brAoy/0zqLTRPh+c=
 	enhancedCert.Subject.Names = append(enhancedCert.Subject.Names, extraAttributeValue1, extraAttributeValue2)
 	ers2 := ExtractEnhancedRDNSequenceToString(enhancedCert)
 
+	// cert with all possible supported rdns
+	enhancedCert2 := ParseCert(commonCert)
+	enhancedCert2.Subject.CommonName = "service/example.com"
+	enhancedCert2.Subject.StreetAddress = []string{"7 Street Ave"}
+	enhancedCert2.Subject.OrganizationalUnit = []string{"organizational unit 2"}
+	enhancedCert2.Subject.PostalCode = []string{"17121"}
+	emailObj := asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 9, 1}
+	extraAttributeValuemail := pkix.AttributeTypeAndValue{Type: emailObj, Value: "email@example.com"}
+	enhancedCert2.Subject.Names = append(enhancedCert2.Subject.Names, extraAttributeValue1, extraAttributeValue2, extraAttributeValuemail)
+	ers3 := ExtractEnhancedRDNSequenceToString(enhancedCert2)
+
 	suite.Equal("O=COMPANY,L=CITY,ST=TN,C=TC", ers)
 	suite.Equal("O=COMPANY,L=CITY,ST=TN,C=TC,DC=v1+DC=v2", ers2)
+	suite.Equal("E=email@example.com,CN=service/example.com,OU=organizational unit 2,"+
+		"O=COMPANY,POSTALCODE=17121,STREET=7 Street Ave,L=CITY,ST=TN,C=TC,DC=v1+DC=v2", ers3)
 }
 
 func (suite *CertificateTestSuite) TestCertHasExpired() {
@@ -148,20 +161,20 @@ lBlGGSW4gNfL1IYoakRwJiNiqZ+Gb7+6kHDSVneFeO/qJakXzlByjAA6quPbYzSf
 	crt = ParseCert(commonCert)
 	crt.Subject.CommonName = "localhost"
 
-	err1 := ValidateClientCertificate(crt, "127.0.0.1:8080")
+	err1 := ValidateClientCertificate(crt, "127.0.0.1:8080", true)
 
 	suite.Nil(err1)
 
 	// mismatch
 	crt = ParseCert(commonCert)
 	crt.Subject.CommonName = "example.com"
-	err2 := ValidateClientCertificate(crt, "127.0.0.1:8080")
+	err2 := ValidateClientCertificate(crt, "127.0.0.1:8080", true)
 	suite.Equal("x509: certificate is valid for example.com, not localhost", err2.Error())
 
 	// mismatch
 	crt = ParseCert(commonCert)
 	crt.Subject.CommonName = ""
-	err3 := ValidateClientCertificate(crt, "127.0.0.1:8080")
+	err3 := ValidateClientCertificate(crt, "127.0.0.1:8080", true)
 	suite.Equal("x509: certificate is not valid for any names, but wanted to match localhost", err3.Error())
 
 	//mismatch
@@ -170,9 +183,12 @@ lBlGGSW4gNfL1IYoakRwJiNiqZ+Gb7+6kHDSVneFeO/qJakXzlByjAA6quPbYzSf
 	obj := asn1.ObjectIdentifier{2, 5, 29, 17}
 	e1 := pkix.Extension{Id: obj, Critical: false, Value: []byte("")}
 	crt.Extensions = append(crt.Extensions, e1)
-	err4 := ValidateClientCertificate(crt, "127.0.0.1:8080")
+	err4 := ValidateClientCertificate(crt, "127.0.0.1:8080", true)
 	suite.Equal("x509: certificate is valid for COMODO RSA Domain Validation Secure Server CA, not localhost", err4.Error())
 
+	// false should skip verification and no error should be produced
+	err5 := ValidateClientCertificate(crt, "127.0.0.1:8080", false)
+	suite.Nil(err5)
 }
 
 func (suite *CertificateTestSuite) TestFormatRdnToString() {
