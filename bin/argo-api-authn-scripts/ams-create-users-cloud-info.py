@@ -488,10 +488,12 @@ def create_users(config, verify):
             # else if the Dn isn't in use, go through the full process of creating or updating an existing binding
             elif binding_exists_req.status_code == 404:
 
-                usr_create = {'email': contact_email}
+                project = {'project': ams_project, 'roles': [users_role]}
+                usr_create = {'projects': [project], 'email': contact_email}
 
                 # create the user
-                ams_user_crt_url = 'https://{0}/v1/users/{1}?key={2}'.format(ams_host, user_binding_name, ams_token)
+                ams_user_crt_url = 'https://{0}/v1/projects/{1}/members/{2}?key={3}'.format(
+                    ams_host, ams_project, user_binding_name, ams_token)
                 ams_usr_crt_req = requests.post(url=ams_user_crt_url, data=json.dumps(usr_create), verify=verify)
                 LOGGER.info(ams_usr_crt_req.text)
 
