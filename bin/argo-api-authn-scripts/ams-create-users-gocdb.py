@@ -491,8 +491,8 @@ def create_users(config, verify):
                 usr_create = {'email': contact_email}
 
                 # create the user
-                api_url = 'https://{0}/v1/projects/{1}/members/{2}?key={3}'.format(ams_host, ams_project, user_binding_name, ams_token)
-                ams_usr_crt_req = requests.post(url=api_url, data=json.dumps(usr_create), verify=verify)
+                ams_user_crt_url = 'https://{0}/v1/users/{1}?key={2}'.format(ams_host, user_binding_name, ams_token)
+                ams_usr_crt_req = requests.post(url=ams_user_crt_url, data=json.dumps(usr_create), verify=verify)
                 LOGGER.info(ams_usr_crt_req.text)
 
                 ams_user_uuid = ""
